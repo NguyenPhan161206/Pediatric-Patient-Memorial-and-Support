@@ -5,14 +5,20 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const db = require('./shared/database/knex');
 
+// Feature Routers
+const authRoutes = require('./features/auth/auth.routes');
+const warriorRoutes = require('./features/warriors/warrior.routes');
+const tributeRoutes = require('./features/tributes/tribute.routes');
+const sponsorshipRoutes = require('./features/sponsorships/sponsorship.routes');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security & Utility Middlewares
 app.use(helmet());
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Static files for uploaded media
@@ -49,9 +55,21 @@ app.get('/api/v1', (req, res) => {
   res.json({
     message: 'Chào mừng đến với API Cổng Chiến Binh Nhí (Courageous Little Warriors Hub)',
     version: '1.0.0',
-    documentation: '/api/v1/health'
+    endpoints: {
+      health: '/api/v1/health',
+      auth: '/api/v1/auth',
+      warriors: '/api/v1/warriors',
+      tributes: '/api/v1/tributes',
+      sponsorships: '/api/v1/sponsorships'
+    }
   });
 });
+
+// Gắn kết các Router Tính Năng (Feature-based Routes)
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/warriors', warriorRoutes);
+app.use('/api/v1/tributes', tributeRoutes);
+app.use('/api/v1/sponsorships', sponsorshipRoutes);
 
 // 404 Handler
 app.use((req, res) => {
