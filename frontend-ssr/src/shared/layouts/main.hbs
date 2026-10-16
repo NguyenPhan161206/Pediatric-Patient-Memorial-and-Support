@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{#if title}}{{title}} | {{/if}}Chiến Binh Nhí - Cổng Ký Ức & Tri Ân</title>
+  
+  <!-- OpenGraph Dynamic Meta Tags cho chia sẻ MXH -->
+  <meta property="og:title" content="{{#if title}}{{title}}{{else}}Chiến Binh Nhí - Courageous Little Warriors Hub{{/if}}">
+  <meta property="og:description" content="{{#if description}}{{description}}{{else}}Cổng lưu trữ, tri ân và vinh danh hành trình kiên cường của các bệnh nhi ung thư/hiểm nghèo.{{/if}}">
+  <meta property="og:type" content="website">
+  {{#if ogImage}}<meta property="og:image" content="{{ogImage}}">{{/if}}
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- TailwindCSS via CDN (Cấu hình chuẩn màu sắc shadcn/ui) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            border: "hsl(214.3 31.8% 91.4%)",
+            background: "hsl(0 0% 100%)",
+            foreground: "hsl(222.2 84% 4.9%)",
+            muted: {
+              DEFAULT: "hsl(210 40% 96.1%)",
+              foreground: "hsl(215.4 16.3% 46.9%)",
+            },
+            accent: {
+              DEFAULT: "hsl(210 40% 96.1%)",
+              foreground: "hsl(222.2 47.4% 11.2%)",
+            },
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-rose-500 selection:text-white">
+  
+  <!-- Header / Navbar -->
+  {{> navbar }}
+
+  <!-- Main Content Area -->
+  <main class="flex-1">
+    {{{body}}}
+  </main>
+
+  <!-- Footer -->
+  {{> footer }}
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+name: CI/CD Pipeline - Courageous Warriors Hub
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # Job 1: Kiểm tra cú pháp và dependencies của mã nguồn
+  code-check:
+    name: Code & Dependency Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Backend - Cài đặt dependencies & Kiểm tra cú pháp
+        working-directory: ./backend-api
+        run: |
+          npm install
+          node --check src/server.js
+          node --check knexfile.js
+
+      - name: Frontend SSR - Cài đặt dependencies & Kiểm tra cú pháp
+        working-directory: ./frontend-ssr
+        run: |
+          npm install
+          node --check src/app.js
+
+  # Job 2: Đóng gói Docker, Chạy 3 Tầng, Kiểm tra Healthcheck, Migration & Seed
+  docker-integration-test:
+    name: Docker 3-Tier Integration & Health Test
+    runs-on: ubuntu-latest
+    needs: code-check
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Khởi tạo file .env từ .env.example
+        run: cp .env.example .env
+
+      - name: Kiểm tra tính hợp lệ của cấu hình docker-compose.yml
+        run: docker compose config
+
+      - name: Build và khởi động toàn bộ 4 container dịch vụ
+        run: docker compose up --build -d
+
+      - name: Đợi các container đạt trạng thái Healthy
+        run: |
+          echo "Đang chờ đợi container đạt trạng thái healthy..."
+          timeout 60s bash -c '
+            until [ "$(docker inspect --format="{{json .State.Health.Status}}" warrior_db)" == "\"healthy\"" ] && \
+                  [ "$(docker inspect --format="{{json .State.Health.Status}}" warrior_backend)" == "\"healthy\"" ]; do
+              echo "Đang chờ PostgreSQL và Backend API healthy..."
+              sleep 3
+            done
+          '
+          docker compose ps
+
+      - name: Kiểm tra Endpoint Backend API /health
+        run: |
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/api/v1/health)
+          echo "Backend Healthcheck HTTP Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Backend API healthcheck thất bại!"
+            docker compose logs backend_api
+            exit 1
+          fi
+          curl -s http://localhost:5000/api/v1/health
+
+      - name: Kiểm tra Endpoint Frontend SSR Web Server
+        run: |
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+          echo "Frontend SSR HTTP Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Frontend SSR thất bại!"
+            docker compose logs frontend_ssr
+            exit 1
+          fi
+
+      - name: Chạy Knex Migration (Khởi tạo 8 bảng CSDL chuẩn 3NF)
+        run: docker compose exec -T backend_api npm run migrate
+
+      - name: Chạy Knex Seed (Nạp dữ liệu mẫu 5 vai trò & hồ sơ các bé)
+        run: docker compose exec -T backend_api npm run seed
+
+      - name: Đối soát dữ liệu CSDL sau khi Seed
+        run: |
+          CHILD_COUNT=$(docker compose exec -T postgres_db psql -U db_admin -d warrior_hub_db -t -c "SELECT count(*) FROM children;")
+          echo "Tổng số hồ sơ chiến binh nhí đã tạo: $CHILD_COUNT"
+          if [ "$CHILD_COUNT" -lt 4 ]; then
+            echo "Số lượng bản ghi seed không đủ!"
+            exit 1
+          fi
+
+      - name: Tắt các container an toàn
+        if: always()
+        run: docker compose down -v
