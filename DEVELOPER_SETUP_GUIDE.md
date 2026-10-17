@@ -62,9 +62,6 @@ cp .env.example .env
 | `POSTGRES_PORT` | `5435` | **Cổng PostgreSQL map ra máy host.** Lý do chọn `5435`: Trên các máy tính phát triển thường đã cài sẵn PostgreSQL chạy cổng `5432`, `5433` hoặc `5434`. Việc map cổng `5435:5432` giúp tránh 100% nguy cơ xung đột cổng (*Port already allocated*). |
 | `BACKEND_PORT` | `5000` | Cổng dịch vụ Backend REST API trên máy host. |
 | `FRONTEND_PORT` | `3000` | Cổng dịch vụ Frontend Web SSR trên trình duyệt. |
-| `PGADMIN_PORT` | `5050` | Cổng giao diện trực quan quản trị CSDL pgAdmin 4. |
-| `PGADMIN_EMAIL` | `admin@warrior.org` | Tài khoản đăng nhập pgAdmin. |
-| `PGADMIN_PASSWORD` | `admin_secure_pass` | Mật khẩu đăng nhập pgAdmin. |
 | `JWT_SECRET` | *(chuỗi ngẫu nhiên)* | Khóa bí mật dùng để ký và giải mã JWT Token (Xác thực 5-Tier RBAC). |
 | `SESSION_SECRET` | *(chuỗi ngẫu nhiên)* | Khóa ký Session cookie trên Frontend SSR. |
 
@@ -79,7 +76,7 @@ cp .env.example .env
 > - Người chấm bài muốn chạy ngay mà không cần cài đặt thư viện Node.js thủ công.
 > - Đảm bảo tính nhất quán 100% giữa môi trường phát triển và môi trường triển khai thực tế.
 
-### Bước 3.1: Build và khởi động cả 4 container
+### Bước 3.1: Build và khởi động cả 3 container (Database, Backend, Frontend)
 ```bash
 docker compose up --build -d
 ```
@@ -88,7 +85,7 @@ docker compose up --build -d
 ```bash
 docker compose ps
 ```
-*Kết quả mong đợi:* Cả 4 container (`warrior_db`, `warrior_backend`, `warrior_frontend`, `warrior_pgadmin`) đều ở trạng thái `Up` hoặc `Up (healthy)`.
+*Kết quả mong đợi:* Cả 3 container (`warrior_db`, `warrior_backend`, `warrior_frontend`) đều ở trạng thái `Up` hoặc `Up (healthy)`.
 
 ### Bước 3.3: Khởi tạo bảng CSDL và nạp dữ liệu mẫu
 Sau khi cơ sở dữ liệu chuyển sang trạng thái `healthy` (khoảng 5-10 giây sau khi bật):
@@ -108,9 +105,9 @@ docker compose exec backend_api npm run seed
 > **Khi nào nên dùng chế độ này?**
 > Khi bạn đang trực tiếp chỉnh sửa code, thêm tính năng hoặc sửa lỗi giao diện. Chế độ này sử dụng **Nodemon Hot-reload**, code vừa lưu là máy chủ tự tải lại ngay trong 1 giây mà không phải chờ rebuild Docker!
 
-### Bước 4.1: Chỉ bật cơ sở dữ liệu PostgreSQL và pgAdmin trong Docker
+### Bước 4.1: Chỉ bật cơ sở dữ liệu PostgreSQL trong Docker
 ```bash
-docker compose up -d postgres_db pgadmin
+docker compose up -d postgres_db
 ```
 
 ### Bước 4.2: Khởi chạy Backend API trên máy Host (Terminal 1)
@@ -148,24 +145,31 @@ npm run dev
 
 ---
 
-## 5. Quản Trị Cơ Sở Dữ Liệu Qua pgAdmin 4 GUI
+## 5. Quản Trị Cơ Sở Dữ Liệu Qua pgAdmin 4 Desktop (Ứng Dụng Cài Đặt Trên Máy)
 
-Để xem trực tiếp bảng dữ liệu SQL, truy vấn hoặc kiểm tra các dòng dữ liệu mẫu:
+Dự án sử dụng trực tiếp ứng dụng **pgAdmin 4 Desktop** (hoặc các công cụ tương đương như DBeaver, DataGrip, VS Code Database Client) cài đặt trên máy tính của bạn để kết nối vào database trong Docker:
 
-1. Mở trình duyệt truy cập: [http://localhost:5050](http://localhost:5050)
-2. Đăng nhập với tài khoản:
-   - **Email:** `admin@warrior.org`
-   - **Password:** `admin_secure_pass`
+1. Tải và cài đặt **pgAdmin 4 Desktop** (nếu chưa có): [https://www.pgadmin.org/download/](https://www.pgadmin.org/download/)
+2. Mở ứng dụng pgAdmin 4 Desktop trên máy tính.
 3. **Thêm kết nối vào CSDL (Register Server):**
    - Bấm chuột phải vào `Servers` ➔ chọn `Register` ➔ `Server...`
-   - **Tab General:** Đặt Name là `Warrior Hub Database`.
+   - **Tab General:** Đặt Name là `Warrior Hub Local Database`.
    - **Tab Connection:**
-     - **Host name/address:** `postgres_db` *(Nếu kết nối từ pgAdmin trong mạng Docker)* hoặc `host.docker.internal` / `localhost` cổng `5435` *(Nếu chạy pgAdmin ngoài máy host)*.
-     - **Port:** `5432` *(cổng nội bộ container)*.
+     - **Host name/address:** `localhost` (hoặc `127.0.0.1`)
+     - **Port:** `5435` *(Lưu ý: Sử dụng cổng 5435 đã được map từ container ra máy host)*
      - **Maintenance database:** `warrior_hub_db`
      - **Username:** `db_admin`
      - **Password:** `secure_password_2026`
-   - Bấm **Save**. Bạn sẽ thấy đầy đủ 8 bảng trong schema `public`: `users`, `categories`, `children`, `guardianship_consents`, `gallery_items`, `tributes`, `audit_logs`, `session`.
+   - Bấm **Save**.
+4. Bạn sẽ thấy cây thư mục CSDL: `Databases` ➔ `warrior_hub_db` ➔ `Schemas` ➔ `public` ➔ `Tables`, bao gồm đầy đủ 8 bảng quan hệ:
+   - `users` (Danh sách tài khoản & phân quyền)
+   - `categories` (Nhóm bệnh lý)
+   - `children` (Hồ sơ chiến binh nhí, FTS vector, mã VietQR)
+   - `guardianship_consents` (Hồ sơ pháp lý giám hộ theo Luật Trẻ em 2016)
+   - `gallery_items` (Tranh vẽ, kỷ vật của bé)
+   - `tributes` (Lời chúc và nến hy vọng)
+   - `audit_logs` (Nhật ký kiểm toán)
+   - `session` (Phiên làm việc người dùng)
 
 ---
 
