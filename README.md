@@ -66,6 +66,9 @@
 
 ## 🚀 Hướng Dẫn Cài Đặt & Khởi Chạy Nhanh
 
+> 📖 **Xem cẩm nang hướng dẫn đầy đủ từ A-Z (kèm chế độ Local Dev với Hot-reload và Sổ tay xử lý sự cố):**  
+> 👉 **[DEVELOPER_SETUP_GUIDE.md](DEVELOPER_SETUP_GUIDE.md)**
+
 ### 1. Yêu cầu môi trường
 * Đã cài đặt [Docker](https://docs.docker.com/get-docker/) và [Docker Compose](https://docs.docker.com/compose/).
 
@@ -112,6 +115,8 @@ docker compose exec backend_api npm run seed
 ---
 
 ## 📁 Tài Liệu Kỹ Thuật Chi Tiết
+* [DEVELOPER_SETUP_GUIDE.md](DEVELOPER_SETUP_GUIDE.md): 🛠️ Cẩm nang cài đặt môi trường từ A-Z, chạy Local Dev và sổ tay xử lý sự cố.
+* [PROJECT_ROADMAP.md](PROJECT_ROADMAP.md): 🗺️ Bản đồ lộ trình các giai đoạn từ đầu đến kết thúc dự án.
 * [01_PROJECT_SPECIFICATION.md](01_PROJECT_SPECIFICATION.md): Bản Đặc tả Dự án & Tech Stack.
 * [02_SOFTWARE_REQUIREMENTS_SPECIFICATION.md](02_SOFTWARE_REQUIREMENTS_SPECIFICATION.md): Đặc tả 7 Module Yêu cầu Chức năng (FR) và Phi chức năng (NFR).
 * [03_SYSTEM_ARCHITECTURE.md](03_SYSTEM_ARCHITECTURE.md): Bản Thiết kế Kiến trúc Hệ thống, CSDL 3NF và Docker Compose.
