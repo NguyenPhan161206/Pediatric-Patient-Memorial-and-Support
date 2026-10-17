@@ -115,3 +115,6 @@ docker compose exec backend_api npm run seed
 * [01_PROJECT_SPECIFICATION.md](01_PROJECT_SPECIFICATION.md): Bản Đặc tả Dự án & Tech Stack.
 * [02_SOFTWARE_REQUIREMENTS_SPECIFICATION.md](02_SOFTWARE_REQUIREMENTS_SPECIFICATION.md): Đặc tả 7 Module Yêu cầu Chức năng (FR) và Phi chức năng (NFR).
 * [03_SYSTEM_ARCHITECTURE.md](03_SYSTEM_ARCHITECTURE.md): Bản Thiết kế Kiến trúc Hệ thống, CSDL 3NF và Docker Compose.
+* [docs/PROJECT_HISTORY_AND_LOGS.md](docs/PROJECT_HISTORY_AND_LOGS.md): 📜 Nhật ký tiến độ toàn diện và lịch sử phát triển dự án.
+* [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md): 📖 Tài liệu tham chiếu chi tiết 4 phân hệ Backend REST API.
+
