@@ -128,12 +128,35 @@ Toàn bộ các endpoint đã được kiểm thử trực tiếp bằng cURL tr
 
 ---
 
-## 5. Kế Hoạch Cho Bước Tiếp Theo (Giai Đoạn 4)
+## 5. Nhật Ký Hoàn Thành Giai Đoạn 4 (Frontend SSR UI & Phân Hệ Giao Diện)
 
-1. **Trang Danh Sách Chiến Binh Nhí (`/warriors`):**
-   * Hiển thị danh sách card các bé, thanh tìm kiếm FTS tiếng Việt, bộ lọc đa chiều (bệnh lý, quê quán), thanh phân trang Server-side Pagination.
-2. **Trang Chi Tiết Hồ Sơ Bé (`/warriors/:slug`):**
-   * Giao diện đọc nhật ký điều trị, bộ sưu tập tranh vẽ/kỷ vật, nút bấm "Thắp nến hy vọng" (hiệu ứng tăng số nến trực tiếp), khung hiển thị **Mã VietQR Napas247** kèm huy hiệu xác thực và form gửi lời chúc.
-3. **Cổng Dành Cho Gia Đình (`/family/portal`):**
-   * Không gian riêng để cha mẹ cập nhật nhật ký điều trị cho con và nút **"Rút hồ sơ khẩn cấp"**.
-4. **Trang Tường Tri Ân & Kiểm Duyệt Lời Nhắn (`/tributes`).**
+### Ngày hoàn thành: 17/10/2026
+Đã triển khai thành công trọn vẹn toàn bộ 6 bước của Giai đoạn 4 theo phong cách thiết kế **shadcn/ui** (Express Handlebars + TailwindCSS Slate/Zinc design tokens), tích hợp thông suốt với Backend REST API và PostgreSQL Database:
+
+1. **Bước 4.1: Cấu hình Session & Dynamic Navbar:**
+   * Tích hợp `express-session` lưu trạng thái đăng nhập 7 ngày.
+   * Navbar hiển thị dynamic: Trạng thái khách (Login/Register) và Trạng thái người dùng đã xác thực (Họ tên, Badge vai trò, Cổng Gia Đình, Duyệt Lời Chúc, Đăng xuất).
+2. **Bước 4.2: Module Auth (Đăng nhập / Đăng ký):**
+   * `/auth/login`: Form đăng nhập phong cách shadcn/ui kèm danh sách tài khoản mẫu click-to-fill phục vụ demo.
+   * `/auth/register`: Form đăng ký thành viên cộng đồng (`MEMBER`).
+   * `/auth/logout`: Xóa session an toàn và điều hướng về trang chủ.
+3. **Bước 4.3: Module Warriors Catalog & FTS:**
+   * `/warriors`: Thanh tìm kiếm toàn văn tiếng Việt qua PostgreSQL tsvector (`q`), bộ lọc đa chiều (Nhóm bệnh lý, Trạng thái `FIGHTER`, `URGENT`, `RECOVERED`, `ANGEL`), phân trang Server-side.
+4. **Bước 4.4: Module Chi Tiết Bé, Thắp Nến & VietQR:**
+   * `/warriors/:slug`: Hiển thị thông tin hồ sơ bé, câu chuyện `story_html`, bộ sưu tập kỷ vật tranh vẽ `gallery_items`.
+   * **Thắp Nến Hy Vọng:** Nút bấm tương tác AJAX trực tiếp `POST /warriors/:id/candle` tăng biến đếm tức thời.
+   * **Thẻ Bảo Trợ VietQR Napas247 (Zero-Touch):** Mã QR chính chủ hiển thị trực quan, cam kết không thu phí trung gian theo NĐ 93/2021.
+   * **Bức Tường Tri Ân:** Form gửi lời chúc tự động chuyển vào hàng chờ kiểm duyệt theo Luật Trẻ em 2016 & NĐ 147/2024.
+5. **Bước 4.5: Cổng Hộ Gia Đình & Bảng Kiểm Duyệt:**
+   * `/family/portal`: Dành cho phụ huynh cập nhật nhật ký điều trị cho con và nút **Rút Hồ Sơ Khẩn Cấp (Emergency Unpublish)** có hiệu lực tức thời.
+   * `/tributes/moderation`: Bảng quản trị tiền kiểm duyệt lời chúc (`APPROVE` / `REJECT`).
+6. **Bước 4.6: Rebuild Docker & Kiểm Thử Toàn Diện:**
+   * Rebuild `frontend_ssr` container, kiểm thử thành công 100% các endpoint qua curl và session cookies.
+
+---
+
+## 6. Kế Hoạch Cho Bước Tiếp Theo (Giai Đoạn 5)
+1. **Kiểm thử tích hợp đầu cuối (End-to-End Testing):**
+   * Viết kịch bản kiểm thử tự động e2e (hoặc integration test suites) xác minh chu trình từ tạo hồ sơ -> thắp nến -> quét QR -> gửi lời chúc -> duyệt lời chúc -> rút hồ sơ khẩn cấp.
+2. **Tối ưu hóa SEO, OpenGraph Meta Tags & Caching:**
+   * Bổ sung meta tags dynamic cho từng hồ sơ bé chia sẻ lên mạng xã hội Facebook/Zalo.

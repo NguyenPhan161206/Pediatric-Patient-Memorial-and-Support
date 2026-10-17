@@ -15,22 +15,56 @@
       </a>
     </div>
 
-    <!-- Navigation links (Style shadcn/ui) -->
+    <!-- Navigation links -->
     <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-      <a href="/" class="transition-colors hover:text-slate-900 text-slate-900">Trang chủ</a>
-      <a href="/warriors" class="transition-colors hover:text-slate-900">Danh sách bé</a>
-      <a href="/tributes" class="transition-colors hover:text-slate-900">Tường tri ân</a>
-      <a href="/about" class="transition-colors hover:text-slate-900">Sứ mệnh</a>
+      <a href="/" class="transition-colors hover:text-slate-900">Trang chủ</a>
+      <a href="/warriors" class="transition-colors hover:text-slate-900 font-semibold text-rose-600">Hồ sơ các bé</a>
+      
+      {{#if currentUser}}
+        {{#if (eq currentUser.role "FAMILY")}}
+          <a href="/family/portal" class="transition-colors hover:text-slate-900 flex items-center gap-1.5 text-amber-700 font-medium">
+            <span>👨‍👩‍👧</span> Cổng Gia Đình
+          </a>
+        {{/if}}
+        {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "COORDINATOR"))}}
+          <a href="/tributes/moderation" class="transition-colors hover:text-slate-900 flex items-center gap-1.5 text-indigo-700 font-medium">
+            <span>🛡️</span> Duyệt Lời Chúc
+          </a>
+        {{/if}}
+      {{/if}}
+      
+      <a href="/#system-health" class="transition-colors hover:text-slate-900">Kiến trúc 3-Tier</a>
     </nav>
 
-    <!-- Actions / Auth Buttons -->
+    <!-- Actions / Auth Buttons (Dynamic User State) -->
     <div class="flex items-center gap-3">
-      <a href="/login" class="inline-flex items-center justify-center text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 h-9 px-3.5 rounded-md transition-colors">
-        Đăng nhập
-      </a>
-      <a href="/register" class="inline-flex items-center justify-center text-sm font-medium bg-slate-900 text-slate-50 hover:bg-slate-800 h-9 px-4 rounded-md shadow-sm transition-all hover:shadow">
-        Đăng ký
-      </a>
+      {{#if currentUser}}
+        <!-- Đã đăng nhập: Hiện Avatar/Tên + Role Badge + Đăng xuất -->
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex flex-col text-right">
+            <span class="text-xs font-bold text-slate-900 leading-tight">{{currentUser.fullName}}</span>
+            <span class="text-[10px] uppercase font-semibold tracking-wider 
+              {{#if (eq currentUser.role "ADMIN")}}text-rose-600
+              {{else if (eq currentUser.role "FAMILY")}}text-amber-600
+              {{else if (eq currentUser.role "COORDINATOR")}}text-indigo-600
+              {{else}}text-slate-500{{/if}}">
+              {{currentUser.role}}
+            </span>
+          </div>
+
+          <a href="/auth/logout" class="inline-flex items-center justify-center text-xs font-medium text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 hover:bg-rose-50 h-9 px-3 rounded-md transition-colors">
+            Đăng xuất
+          </a>
+        </div>
+      {{else}}
+        <!-- Chưa đăng nhập: Hiện nút Login & Register -->
+        <a href="/auth/login" class="inline-flex items-center justify-center text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 h-9 px-3.5 rounded-md transition-colors">
+          Đăng nhập
+        </a>
+        <a href="/auth/register" class="inline-flex items-center justify-center text-sm font-medium bg-slate-900 text-slate-50 hover:bg-slate-800 h-9 px-4 rounded-md shadow-sm transition-all hover:shadow">
+          Đăng ký
+        </a>
+      {{/if}}
     </div>
   </div>
 </header>

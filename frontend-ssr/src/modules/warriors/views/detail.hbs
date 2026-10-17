@@ -1,0 +1,392 @@
+<div class="py-8 bg-slate-50 min-h-[calc(100vh-4rem)]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Breadcrumb & Back -->
+    <div class="mb-6">
+      <a href="/warriors" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Quay lại danh sách chiến binh
+      </a>
+    </div>
+
+    <!-- Hero Card Profile -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8 mb-8">
+      <div class="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+        
+        <!-- Avatar -->
+        <div class="relative shrink-0 w-32 h-32 sm:w-44 sm:h-44 rounded-2xl overflow-hidden bg-slate-100 border-2 border-white shadow-md">
+          <img
+            src="{{warrior.avatar_url}}"
+            alt="{{warrior.full_name}}"
+            class="w-full h-full object-cover"
+            onerror="this.src='https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80'"
+          />
+        </div>
+
+        <!-- Bio & Title -->
+        <div class="flex-1">
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <!-- Status Badge -->
+            {{#if (eq warrior.status "URGENT")}}
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm shadow-rose-500/30">
+                <span class="h-2 w-2 rounded-full bg-white animate-ping"></span>
+                Cần Hỗ Trợ Khẩn Cấp
+              </span>
+            {{else if (eq warrior.status "FIGHTER")}}
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
+                Đang Chiến Đấu Tích Cực
+              </span>
+            {{else if (eq warrior.status "RECOVERED")}}
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Đã Hồi Phục Kỳ Diệu
+              </span>
+            {{else if (eq warrior.status "ANGEL")}}
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+                Thiên Thần Nhỏ
+              </span>
+            {{/if}}
+
+            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+              {{warrior.category_name}}
+            </span>
+          </div>
+
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            {{warrior.full_name}}
+            {{#if warrior.nickname}}
+              <span class="text-rose-600 font-normal text-xl sm:text-2xl">({{warrior.nickname}})</span>
+            {{/if}}
+          </h1>
+
+          <!-- Meta Grid -->
+          <div class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-y-2 gap-x-4 text-xs text-slate-600">
+            <div>
+              <span class="text-slate-400 block">Quê quán:</span>
+              <strong class="text-slate-800">{{warrior.hometown}}</strong>
+            </div>
+            <div>
+              <span class="text-slate-400 block">Nơi điều trị:</span>
+              <strong class="text-slate-800">{{warrior.hospital_name}}</strong>
+            </div>
+            <div>
+              <span class="text-slate-400 block">Giai đoạn:</span>
+              <strong class="text-slate-800">{{warrior.treatment_stage}}</strong>
+            </div>
+          </div>
+
+          <!-- Candle lighting interactive box -->
+          <div class="mt-6 pt-5 border-t border-slate-100 flex flex-wrap items-center gap-4">
+            <button
+              id="btn-light-candle"
+              data-id="{{warrior.id}}"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-md shadow-rose-500/20 active:scale-95 transition-all"
+            >
+              <span class="text-base">🕯️</span>
+              <span>Thắp một ngọn nến hy vọng</span>
+            </button>
+
+            <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold">
+              <span class="text-base">✨</span>
+              <span>Đã có <span id="candle-count" class="font-extrabold text-rose-600 text-sm">{{warrior.candle_count}}</span> ngọn nến được thắp</span>
+            </div>
+
+            <span id="candle-feedback" class="text-xs text-emerald-600 font-medium hidden">
+              ✓ Đã thắp nến thành công!
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Main Content Layout (2 Columns) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Left Column (Story, Gallery, Tributes) -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Story Card -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+          
+          <!-- Dream Quote Box -->
+          {{#if warrior.dream_summary}}
+            <div class="p-4 rounded-xl bg-rose-50/60 border-l-4 border-rose-500 mb-6">
+              <span class="text-xs font-bold uppercase tracking-wider text-rose-700 block mb-1">Ước mơ của con</span>
+              <p class="text-sm font-medium text-slate-800 italic">
+                "{{warrior.dream_summary}}"
+              </p>
+            </div>
+          {{/if}}
+
+          <h2 class="text-xl font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+            <span>📖</span> Nhật Ký & Hành Trình Của Con
+          </h2>
+
+          <div class="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed">
+            {{{warrior.story_html}}}
+          </div>
+        </div>
+
+        <!-- Gallery / Tranh vẽ & Kỷ vật -->
+        {{#if gallery.length}}
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+            <h2 class="text-xl font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+              <span>🎨</span> Góc Kỷ Vật & Tranh Vẽ Của Bé
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {{#each gallery}}
+                <div class="group rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex flex-col">
+                  <div class="h-44 bg-slate-200 overflow-hidden">
+                    <img
+                      src="{{this.media_url}}"
+                      alt="{{this.caption}}"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onerror="this.src='https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&auto=format&fit=crop&q=80'"
+                    />
+                  </div>
+                  <div class="p-3.5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h4 class="text-xs font-bold text-slate-900">{{this.caption}}</h4>
+                    </div>
+                    <span class="mt-2 text-[10px] text-slate-400 block uppercase font-medium">{{this.media_type}}</span>
+                  </div>
+                </div>
+              {{/each}}
+            </div>
+          </div>
+        {{/if}}
+
+        <!-- Bức Tường Tri Ân & Lời Nhắn Gửi -->
+        <div id="tributes" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+          <h2 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+            <span>💌</span> Bức Tường Lời Chúc & Tri Ân
+          </h2>
+          <p class="text-xs text-slate-500 mb-6">
+            Mỗi lời nhắn là một đóa hoa thơm gửi trao năng lượng bình an đến con và gia đình.
+          </p>
+
+          <!-- Success Alert -->
+          {{#if successMessage}}
+            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-6 flex items-start gap-2">
+              <span class="text-base">🎉</span>
+              <div>{{successMessage}}</div>
+            </div>
+          {{/if}}
+
+          <!-- Approved Tributes List -->
+          <div class="space-y-4 mb-8">
+            {{#if tributes.length}}
+              {{#each tributes}}
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                  <div class="h-8 w-8 rounded-full bg-rose-100 text-rose-600 font-bold text-xs flex items-center justify-center shrink-0">
+                    {{this.sender_name.[0]}}
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-slate-900">{{this.sender_name}}</span>
+                      <span class="text-[10px] text-slate-400">{{formatDate this.created_at}}</span>
+                    </div>
+                    <p class="mt-1.5 text-xs text-slate-700 leading-relaxed">
+                      {{this.content}}
+                    </p>
+                  </div>
+                </div>
+              {{/each}}
+            {{else}}
+              <div class="text-center py-6 text-slate-400 text-xs bg-slate-50 rounded-xl">
+                Chưa có lời chúc nào được hiển thị. Hãy là người đầu tiên trao gửi yêu thương đến bé!
+              </div>
+            {{/if}}
+          </div>
+
+          <!-- New Tribute Form (Subject to Pre-moderation) -->
+          <div class="p-5 rounded-xl bg-slate-50/80 border border-slate-200">
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Gửi lời chúc đến bé</h3>
+            <p class="text-[11px] text-slate-500 mb-4">
+              Theo quy định bảo vệ trẻ em (Luật Trẻ em 2016 & Nghị định 147/2024/NĐ-CP), lời chúc sẽ được ban quản trị và phụ huynh kiểm duyệt trước khi hiển thị công khai.
+            </p>
+
+            <form action="/warriors/{{warrior.id}}/tribute" method="POST" class="space-y-3.5">
+              <input type="hidden" name="slug" value="{{warrior.slug}}" />
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">Họ và tên của bạn *</label>
+                  <input
+                    type="text"
+                    name="sender_name"
+                    required
+                    placeholder="Ví dụ: Nguyễn Văn A"
+                    class="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-700 mb-1">Email của bạn (Không công khai)</label>
+                  <input
+                    type="email"
+                    name="sender_email"
+                    placeholder="email@example.com"
+                    class="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Lời chúc yêu thương *</label>
+                <textarea
+                  name="content"
+                  rows="3"
+                  required
+                  placeholder="Viết những lời động viên chân thành nhất gửi đến bé và gia đình..."
+                  class="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm transition-all"
+              >
+                <span>Gửi lời chúc</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Right Column (VietQR Sponsorship & Legal Notice) -->
+      <div class="space-y-6">
+        
+        <!-- VietQR Napas247 Zero-Touch Card -->
+        <div class="bg-white rounded-2xl border-2 border-emerald-500/20 shadow-md p-6 overflow-hidden relative">
+          
+          <div class="flex items-center gap-2 text-emerald-800 font-bold text-xs uppercase tracking-wider mb-2">
+            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+            Bảo Trợ Trực Tiếp 100% (VietQR)
+          </div>
+
+          <h3 class="text-base font-extrabold text-slate-900 mb-1">
+            Mã QR Viện Phí & Điều Trị
+          </h3>
+          <p class="text-xs text-slate-600 mb-4">
+            Quét mã bằng bất kỳ ứng dụng ngân hàng nào (Vietcombank, BIDV, Techcombank, MBBank...).
+          </p>
+
+          <!-- QR Code Preview Image -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-center mb-4">
+            <img
+              src="{{vietqrUrl}}"
+              alt="Mã VietQR Bảo Trợ Trực Tiếp"
+              class="w-full max-w-[260px] h-auto object-contain rounded-lg shadow-sm"
+              onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=UNG+HO+CHIEN+BINH+NHI'"
+            />
+          </div>
+
+          <!-- Account Details -->
+          <div class="space-y-2 text-xs bg-emerald-50/60 p-3.5 rounded-xl border border-emerald-100 mb-4">
+            <div>
+              <span class="text-slate-500 block">Ngân hàng thụ hưởng:</span>
+              <strong class="text-slate-900">{{warrior.bank_code}}</strong>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Số tài khoản chính chủ:</span>
+              <strong class="text-emerald-700 font-mono text-sm tracking-wider">{{warrior.bank_account_number}}</strong>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Chủ tài khoản (Người thụ hưởng/giám hộ):</span>
+              <strong class="text-slate-900">{{warrior.bank_account_name}}</strong>
+            </div>
+            {{#if warrior.hospital_patient_code}}
+              <div>
+                <span class="text-slate-500 block">Mã bệnh nhân viện phí:</span>
+                <strong class="text-slate-900 font-mono">{{warrior.hospital_patient_code}}</strong>
+              </div>
+            {{/if}}
+          </div>
+
+          <!-- Zero-Touch Cashflow Legal Disclaimer -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5 leading-relaxed">
+            <div class="font-bold text-slate-800 flex items-center gap-1">
+              <span>⚖️</span> Cam kết minh bạch & Không trung gian:
+            </div>
+            <p>
+              Tuân thủ nghiêm ngặt <strong>Nghị định 93/2021/NĐ-CP</strong>: Toàn bộ tiền ủng hộ được chuyển khoản thẳng trực tiếp tới tài khoản người giám hộ/viện phí của bé.
+            </p>
+            <p class="text-emerald-700 font-semibold">
+              ✓ Nền tảng không thu phí - Không giữ tiền trung gian - 0% hoa hồng.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Child Protection Act Law Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 text-xs text-slate-600 space-y-2">
+          <div class="font-bold text-slate-900 flex items-center gap-1.5">
+            <span>🛡️</span> Quyền Riêng Tư Của Trẻ Em
+          </div>
+          <p class="leading-relaxed">
+            Hồ sơ được đăng tải dựa trên văn bản ủy quyền đồng thuận giám hộ hợp pháp theo <strong>Luật Trẻ em 2016</strong> và <strong>Nghị định 13/2023/NĐ-CP</strong>.
+          </p>
+          <p class="text-[11px] text-slate-500">
+            Gia đình có quyền yêu cầu ẩn hoặc xóa vĩnh viễn hồ sơ bất kỳ lúc nào thông qua Cổng Phụ Huynh.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Interactive Client-side Script for Live Candle Lighting -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const candleBtn = document.getElementById('btn-light-candle');
+    const candleCountSpan = document.getElementById('candle-count');
+    const candleFeedback = document.getElementById('candle-feedback');
+
+    if (candleBtn) {
+      candleBtn.addEventListener('click', async function() {
+        const warriorId = candleBtn.getAttribute('data-id');
+        candleBtn.disabled = true;
+        candleBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+        try {
+          const response = await fetch(`/warriors/${warriorId}/candle`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          });
+
+          const resData = await response.json();
+          if (resData && (resData.status === 'success' || resData.success)) {
+            const count = resData.data ? resData.data.candleCount : (resData.candles_count || resData.candle_count);
+            if (count !== undefined) {
+              candleCountSpan.textContent = count;
+            }
+            candleFeedback.classList.remove('hidden');
+            setTimeout(() => {
+              candleFeedback.classList.add('hidden');
+            }, 3000);
+          }
+        } catch (err) {
+          console.error('Lỗi khi thắp nến:', err);
+        } finally {
+          candleBtn.disabled = false;
+          candleBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+      });
+    }
+  });
+</script>
