@@ -407,9 +407,84 @@ const provisionFamily = async (req, res) => {
   }
 };
 
+/**
+ * Cập nhật thông tin hồ sơ danh tính và tùy chọn hiển thị cá nhân
+ */
+const updateProfile = async (req, res) => {
+  try {
+    const {
+      last_name,
+      middle_name,
+      first_name,
+      gender,
+      title_prefix,
+      family_relation,
+      job_title,
+      department,
+      display_mode,
+      include_prefix_in_display,
+      include_title_in_display,
+      include_relation_in_display,
+      phone_number
+    } = req.body;
+
+    const existing = await db('users').where({ id: req.user.id }).first();
+    if (!existing) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Không tìm thấy thông tin tài khoản.'
+      });
+    }
+
+    const updatedLastName = last_name !== undefined ? (last_name ? last_name.trim() : null) : existing.last_name;
+    const updatedMiddleName = middle_name !== undefined ? (middle_name ? middle_name.trim() : null) : existing.middle_name;
+    const updatedFirstName = first_name !== undefined ? (first_name ? first_name.trim() : null) : existing.first_name;
+
+    const computedFullName = [updatedLastName, updatedMiddleName, updatedFirstName].filter(Boolean).join(' ');
+
+    const updates = {
+      full_name: computedFullName || existing.full_name,
+      last_name: updatedLastName,
+      middle_name: updatedMiddleName,
+      first_name: updatedFirstName,
+      gender: gender !== undefined ? gender : existing.gender,
+      title_prefix: title_prefix !== undefined ? (title_prefix ? title_prefix.trim() : null) : existing.title_prefix,
+      family_relation: family_relation !== undefined ? (family_relation ? family_relation.trim() : null) : existing.family_relation,
+      job_title: job_title !== undefined ? (job_title ? job_title.trim() : null) : existing.job_title,
+      department: department !== undefined ? (department ? department.trim() : null) : existing.department,
+      display_mode: display_mode !== undefined ? display_mode : existing.display_mode,
+      include_prefix_in_display: include_prefix_in_display !== undefined ? (include_prefix_in_display === true || include_prefix_in_display === 'true' || include_prefix_in_display === '1') : existing.include_prefix_in_display,
+      include_title_in_display: include_title_in_display !== undefined ? (include_title_in_display === true || include_title_in_display === 'true' || include_title_in_display === '1') : existing.include_title_in_display,
+      include_relation_in_display: include_relation_in_display !== undefined ? (include_relation_in_display === true || include_relation_in_display === 'true' || include_relation_in_display === '1') : existing.include_relation_in_display,
+      phone_number: phone_number !== undefined ? (phone_number ? phone_number.trim() : null) : existing.phone_number
+    };
+
+    const [updatedUser] = await db('users').where({ id: req.user.id }).update(updates).returning('*');
+    const displayName = formatDisplayName(updatedUser);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Cập nhật thông tin danh tính thành công.',
+      data: {
+        user: {
+          ...updatedUser,
+          displayName
+        }
+      }
+    });
+  } catch (error) {
+    console.error('[UPDATE PROFILE ERROR]', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Lỗi cập nhật hồ sơ cá nhân.'
+    });
+  }
+};
+
 module.exports = {
   login,
   register,
   getMe,
-  provisionFamily
+  provisionFamily,
+  updateProfile
 };

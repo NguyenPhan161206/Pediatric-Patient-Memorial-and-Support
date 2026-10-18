@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const db = require('../../shared/database/knex');
 const { sanitizeContent } = require('../../shared/security/xssSanitizer');
 const { logAudit } = require('../../shared/audit/auditLogger');
@@ -41,17 +43,18 @@ const lightCandle = async (req, res) => {
 };
 
 /**
- * Gửi một lời nhắn tri ân / động viên (Mặc định trạng thái PENDING)
+ * Gửi một lời nhắn tri ân / động viên (kèm văn bản hoặc tin nhắn thoại / voice message)
  */
 const sendTribute = async (req, res) => {
   try {
     const { id } = req.params;
-    const { sender_name, sender_email, content } = req.body;
+    const { sender_name, sender_email, content, base64Audio, duration_seconds } = req.body;
+    let audio_url = req.body.audio_url || null;
 
-    if (!sender_name || !content) {
+    if (!sender_name || (!content && !base64Audio && !audio_url)) {
       return res.status(400).json({
         status: 'fail',
-        message: 'Vui lòng nhập tên người gửi và nội dung lời chúc.'
+        message: 'Vui lòng nhập tên người gửi và nội dung lời chúc hoặc thu âm lời nhắn.'
       });
     }
 
@@ -63,14 +66,33 @@ const sendTribute = async (req, res) => {
       });
     }
 
-    const cleanContent = sanitizeContent(content.trim());
+    // Xử lý lưu file âm thanh nếu gửi base64 data URL
+    if (base64Audio) {
+      const match = base64Audio.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (match) {
+        const ext = match[1].includes('wav') ? 'wav' : (match[1].includes('mp3') ? 'mp3' : 'webm');
+        const buffer = Buffer.from(match[2], 'base64');
+        const uploadDir = path.join(__dirname, '../../../uploads/voice_notes');
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        const filename = `voice_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const filePath = path.join(uploadDir, filename);
+        fs.writeFileSync(filePath, buffer);
+        audio_url = `/uploads/voice_notes/${filename}`;
+      }
+    }
+
+    const cleanContent = content ? sanitizeContent(content.trim()) : '🎙️ [Lời nhắn thoại được đính kèm]';
 
     const [newTribute] = await db('tributes').insert({
       child_id: id,
       sender_name: sender_name.trim(),
       sender_email: sender_email ? sender_email.trim() : null,
       content: cleanContent,
-      status: 'PENDING' // Bắt buộc qua kiểm duyệt theo Nghị định 147/2024
+      audio_url,
+      duration_seconds: duration_seconds ? parseInt(duration_seconds, 10) : null,
+      status: 'PENDING' // Bắt buộc qua kiểm duyệt
     }).returning('*');
 
     return res.status(201).json({
@@ -79,6 +101,7 @@ const sendTribute = async (req, res) => {
       data: {
         id: newTribute.id,
         status: newTribute.status,
+        audioUrl: newTribute.audio_url,
         createdAt: newTribute.created_at
       }
     });
@@ -93,7 +116,6 @@ const sendTribute = async (req, res) => {
 
 /**
  * Lấy danh sách lời chúc chờ duyệt (Pending Tributes)
- * Admin xem toàn bộ, Gia đình chỉ xem lời chúc gửi tới con mình
  */
 const getPendingTributes = async (req, res) => {
   try {
@@ -107,6 +129,8 @@ const getPendingTributes = async (req, res) => {
         't.sender_name',
         't.sender_email',
         't.content',
+        't.audio_url',
+        't.duration_seconds',
         't.status',
         't.created_at',
         'c.id as child_id',
@@ -117,7 +141,6 @@ const getPendingTributes = async (req, res) => {
       .orderBy('t.created_at', 'desc');
 
     if (currentUser.role === 'FAMILY') {
-      // Chỉ xem lời chúc gửi tới bé của gia đình mình
       query = query.andWhere('c.family_user_id', currentUser.id);
     }
 

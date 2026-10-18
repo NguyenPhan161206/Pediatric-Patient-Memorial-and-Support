@@ -1,47 +1,153 @@
 <div class="py-8 bg-slate-50 min-h-[calc(100vh-4rem)]">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
     <!-- Header & Welcome Banner -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8 mb-8">
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 mb-2">
             <span>👨‍👩‍👧</span> Cổng Hộ Gia Đình & Người Giám Hộ
           </div>
           <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Quản Lý Hồ Sơ Chiến Binh Nhí
+            Quản Lý Hồ Sơ Chiến Binh Nhí & Kho Kỷ Niệm
           </h1>
           <p class="mt-1 text-xs sm:text-sm text-slate-600">
-            Xin chào phụ huynh <strong>{{user.full_name}}</strong> ({{user.email}}). Nơi gia đình cập nhật nhật ký cho con và kiểm soát quyền riêng tư.
+            Xin chào phụ huynh <strong>{{formatDisplayName user}}</strong> ({{user.email}}). Nơi gia đình cập nhật nhật ký, gửi lời ru yêu thương và quản lý ảnh/video cho con.
           </p>
         </div>
 
-        <a href="/warriors" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
-          <span>🌐</span> Xem trang công khai
-        </a>
+        <div class="flex items-center gap-2">
+          <button 
+            type="button" 
+            onclick="document.getElementById('profile-settings-card').classList.toggle('hidden')"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+          >
+            <span>⚙️</span> Cài đặt danh xưng
+          </button>
+          <a href="/warriors" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+            <span>🌐</span> Xem trang công khai
+          </a>
+        </div>
       </div>
     </div>
 
     <!-- Flash Notifications -->
     {{#if flashMessage}}
-      <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-6 flex items-start gap-2 shadow-sm">
+      <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-start gap-2 shadow-sm">
         <span class="text-base">✓</span>
         <div>{{flashMessage}}</div>
       </div>
     {{/if}}
 
     {{#if errorMessage}}
-      <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold mb-6 flex items-start gap-2 shadow-sm">
+      <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-start gap-2 shadow-sm">
         <span class="text-base">✕</span>
         <div>{{errorMessage}}</div>
       </div>
     {{/if}}
 
+    <!-- Profile & Identity Preferences Card (Tùy chọn danh xưng, giới tính & hiển thị) -->
+    <div id="profile-settings-card" class="hidden bg-white rounded-2xl border border-amber-200/80 shadow-sm p-6 sm:p-8 space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span>⚙️</span> Cài Đặt Danh Xưng & Tùy Chọn Hiển Thị Phụ Huynh
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Phân định danh tính rõ ràng giữa Họ, Tên đệm, Tên gọi, Giới tính xưng hô và quan hệ đối với con.
+          </p>
+        </div>
+        <button type="button" onclick="document.getElementById('profile-settings-card').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕ Đóng</button>
+      </div>
+
+      <form action="/family/profile/update" method="POST" class="space-y-4">
+        <!-- Live Preview Banner -->
+        <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs">
+          <div class="text-[11px] font-semibold text-amber-800 uppercase tracking-wider mb-1">Xem trước cách hiển thị danh xưng thực tế:</div>
+          <div class="flex flex-wrap items-center gap-4 text-xs font-medium">
+            <div>🇻🇳 Tiếng Việt: <span id="family_preview_vi" class="font-bold text-slate-900">{{formatDisplayName user}}</span></div>
+            <div>🇬🇧 English: <span id="family_preview_en" class="font-bold text-slate-900">{{formatDisplayName user}}</span></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <!-- Gender -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Giới tính & Tiền tố</label>
+            <select id="f_gender" name="gender" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+              <option value="MALE" {{#if (eq user.gender "MALE")}}selected{{/if}}>Nam (Ông / Anh - Mr.)</option>
+              <option value="FEMALE" {{#if (eq user.gender "FEMALE")}}selected{{/if}}>Nữ (Bà / Chị - Mrs./Ms.)</option>
+              <option value="OTHER" {{#if (eq user.gender "OTHER")}}selected{{/if}}>Khác (Mx.)</option>
+              <option value="UNSPECIFIED" {{#if (eq user.gender "UNSPECIFIED")}}selected{{/if}}>Không xác định</option>
+            </select>
+          </div>
+
+          <!-- Title Prefix -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Học hàm / Danh xưng phụ</label>
+            <input type="text" id="f_title_prefix" name="title_prefix" value="{{user.title_prefix}}" placeholder="VD: ThS., BS., KS." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+
+          <!-- Family Relation -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1">Quan hệ với bé *</label>
+            <input type="text" id="f_family_relation" name="family_relation" value="{{user.family_relation}}" placeholder="VD: Bố, Mẹ, Ông nội, Bà ngoại, Người giám hộ..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Last Name -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Họ *</label>
+            <input type="text" id="f_last_name" name="last_name" required value="{{user.last_name}}" placeholder="Nguyễn" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+
+          <!-- Middle Name -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Tên đệm</label>
+            <input type="text" id="f_middle_name" name="middle_name" value="{{user.middle_name}}" placeholder="Văn" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+
+          <!-- First Name -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Tên gọi *</label>
+            <input type="text" id="f_first_name" name="first_name" required value="{{user.first_name}}" placeholder="An" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Display Mode -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Chế độ hiển thị tên</label>
+            <select id="f_display_mode" name="display_mode" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+              <option value="FULL_NAME" {{#if (eq user.display_mode "FULL_NAME")}}selected{{/if}}>Họ và tên đầy đủ (VD: Nguyễn Văn An)</option>
+              <option value="FIRST_ONLY" {{#if (eq user.display_mode "FIRST_ONLY")}}selected{{/if}}>Chỉ tên gọi thân mật (VD: An)</option>
+              <option value="LAST_FIRST" {{#if (eq user.display_mode "LAST_FIRST")}}selected{{/if}}>Họ và Tên rút gọn (VD: Nguyễn An)</option>
+              <option value="INITIALS" {{#if (eq user.display_mode "INITIALS")}}selected{{/if}}>Tên viết tắt (VD: N. V. A)</option>
+              <option value="ANONYMOUS" {{#if (eq user.display_mode "ANONYMOUS")}}selected{{/if}}>Ẩn danh (Phụ huynh bé)</option>
+            </select>
+          </div>
+
+          <!-- Phone Number -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Số điện thoại phụ huynh</label>
+            <input type="tel" name="phone_number" value="{{user.phone_number}}" placeholder="0988xxxxxx" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm transition-all">
+            <span>💾 Lưu Thông Tin Xưng Hô</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
     <!-- Legal Framework Banner -->
-    <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 text-sky-900 text-xs mb-8 flex items-start gap-3">
+    <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 text-sky-900 text-xs flex items-start gap-3">
       <span class="text-lg">⚖️</span>
       <div class="leading-relaxed">
-        <strong>Bảo đảm quyền riêng tư trẻ em theo Pháp luật Việt Nam:</strong> Căn cứ <em>Điều 33 Luật Trẻ em 2016</em> và <em>Nghị định 13/2023/NĐ-CP</em>, phụ huynh có toàn quyền sửa đổi thông tin và thực thi <strong>quyền rút hồ sơ khẩn cấp (Emergency Unpublish)</strong> bất kỳ thời điểm nào mà không cần chờ Admin xét duyệt.
+        <strong>Bảo đảm quyền riêng tư trẻ em theo Pháp luật Việt Nam:</strong> Căn cứ <em>Điều 33 Luật Trẻ em 2016</em> và <em>Nghị định 13/2023/NĐ-CP</em>, phụ huynh có toàn quyền sửa đổi thông tin, tải khoảnh khắc gia đình và thực thi <strong>quyền rút hồ sơ khẩn cấp (Emergency Unpublish)</strong> bất kỳ thời điểm nào.
       </div>
     </div>
 
@@ -148,14 +254,197 @@
                     type="submit"
                     class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm transition-all"
                   >
-                    <span>Lưu cập nhật</span>
+                    <span>Lưu cập nhật nhật ký</span>
                   </button>
                 </div>
               </form>
             </div>
 
-            <!-- Cây Điều Ước Của Con -->
-            <div class="pt-4 border-t border-slate-100 space-y-4">
+            <!-- ========================================== -->
+            <!-- 📸 KHO KỶ NIỆM CỦA CON (MEMORIAL MEDIA VAULT) -->
+            <!-- ========================================== -->
+            <div class="pt-5 border-t border-slate-100 space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span>📸</span> Kho Kỷ Niệm Của Con (Ảnh, Video & Kỷ Vật)
+                  </h4>
+                  <p class="text-[11px] text-slate-500">Lưu giữ những khoảnh khắc nụ cười, clip kỷ niệm và tranh vẽ đáng yêu của con.</p>
+                </div>
+                <button
+                  type="button"
+                  onclick="openMediaModal('{{this.id}}', '{{this.full_name}}')"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-all shadow-sm"
+                >
+                  <span>+ Thêm Ảnh / Video Kỷ Niệm</span>
+                </button>
+              </div>
+
+              <!-- Media Items Grid -->
+              {{#if this.gallery.length}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {{#each this.gallery}}
+                    <div class="group relative rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex flex-col shadow-sm">
+                      <!-- Media Content Area -->
+                      <div class="relative h-44 bg-slate-900 overflow-hidden flex items-center justify-center">
+                        {{#if (eq this.media_type 'VIDEO')}}
+                          {{#if (contains this.media_url 'youtube.com/embed')}}
+                            <iframe 
+                              src="{{this.media_url}}" 
+                              title="{{this.caption}}" 
+                              class="w-full h-full border-0" 
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                              allowfullscreen
+                            ></iframe>
+                          {{else}}
+                            <video controls class="w-full h-full object-cover">
+                              <source src="{{this.media_url}}" type="video/mp4">
+                              Trình duyệt không hỗ trợ thẻ video.
+                            </video>
+                          {{/if}}
+                        {{else if (eq this.media_type 'AUDIO')}}
+                          <div class="p-4 w-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-900 to-slate-900 text-white">
+                            <span class="text-3xl mb-2">🎵</span>
+                            <audio controls class="w-full mt-2" src="{{this.media_url}}"></audio>
+                          </div>
+                        {{else}}
+                          <img
+                            src="{{this.media_url}}"
+                            alt="{{this.caption}}"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onerror="this.src='https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&auto=format&fit=crop&q=80'"
+                          />
+                        {{/if}}
+
+                        <!-- Badge Type -->
+                        <span class="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-black/60 text-white backdrop-blur-sm uppercase">
+                          {{#if (eq this.media_type 'VIDEO')}}🎬 Clip Video{{else if (eq this.media_type 'AUDIO')}}🎵 Âm thanh{{else if (eq this.media_type 'DRAWING')}}🎨 Tranh vẽ{{else}}🖼️ Hình ảnh{{/if}}
+                        </span>
+                      </div>
+
+                      <!-- Caption & Actions -->
+                      <div class="p-3 flex-1 flex flex-col justify-between bg-white">
+                        <div class="text-xs font-semibold text-slate-800 line-clamp-2">
+                          {{#if this.caption}}{{this.caption}}{{else}}Khoảnh khắc yêu thương{{/if}}
+                        </div>
+
+                        <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                          <span class="text-slate-400">{{formatDate this.created_at}}</span>
+                          <form 
+                            action="/family/gallery/{{../this.id}}/{{this.id}}/delete" 
+                            method="POST" 
+                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa kỷ vật này khỏi kho lưu trữ?');"
+                          >
+                            <button type="submit" class="text-rose-600 hover:text-rose-800 font-semibold transition-colors">
+                              🗑️ Xóa
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  {{/each}}
+                </div>
+              {{else}}
+                <div class="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300 text-xs text-slate-500">
+                  <span>📷</span> Bé chưa có ảnh hay video nào trong kho kỷ niệm. Phụ huynh hãy bấm <strong>"Thêm Ảnh / Video Kỷ Niệm"</strong> để lưu giữ từng khoảnh khắc tươi đẹp của con nhé!
+                </div>
+              {{/if}}
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 🎙️ LỜI RU & TIN NHẮN THOẠI YÊU THƯƠNG GỬI CON -->
+            <!-- ========================================== -->
+            <div class="pt-5 border-t border-slate-100 space-y-4">
+              <div class="bg-gradient-to-r from-rose-50 via-amber-50 to-pink-50 p-5 rounded-2xl border border-rose-200/80 space-y-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl">🎙️</span>
+                  <div>
+                    <h4 class="text-sm font-bold text-rose-900">
+                      Ghi Âm Lời Ru & Tin Nhắn Thoại Yêu Thương Gửi Con
+                    </h4>
+                    <p class="text-[11px] text-rose-700">
+                      Thu âm giọng nói, lời hát ru hoặc lời tâm sự ấm áp của cha mẹ để lưu giữ mãi mãi bên trang tưởng niệm của bé.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Web Audio Voice Recorder Widget -->
+                <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm space-y-3">
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        id="rec_btn_{{this.id}}"
+                        onclick="toggleRecording('{{this.id}}')"
+                        class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl text-white bg-rose-600 hover:bg-rose-700 transition-all shadow-sm"
+                      >
+                        <span id="rec_icon_{{this.id}}" class="h-2.5 w-2.5 rounded-full bg-white"></span>
+                        <span id="rec_label_{{this.id}}">Bắt đầu thu âm</span>
+                      </button>
+
+                      <div id="rec_timer_{{this.id}}" class="hidden font-mono text-xs font-bold text-rose-600 px-2.5 py-1 rounded bg-rose-50 border border-rose-200">
+                        00:00
+                      </div>
+
+                      <div id="rec_wave_{{this.id}}" class="hidden items-center gap-0.5 h-4">
+                        <span class="w-1 bg-rose-500 h-full animate-bounce"></span>
+                        <span class="w-1 bg-rose-500 h-2/3 animate-bounce [animation-delay:0.1s]"></span>
+                        <span class="w-1 bg-rose-500 h-4/5 animate-bounce [animation-delay:0.2s]"></span>
+                        <span class="w-1 bg-rose-500 h-1/2 animate-bounce [animation-delay:0.3s]"></span>
+                      </div>
+                    </div>
+
+                    <div id="rec_status_{{this.id}}" class="text-[11px] text-slate-500 italic">
+                      Nhấn nút để bắt đầu thu âm qua Micro máy tính/điện thoại
+                    </div>
+                  </div>
+
+                  <!-- Audio Preview Container -->
+                  <div id="rec_preview_box_{{this.id}}" class="hidden pt-3 border-t border-slate-100 space-y-3">
+                    <div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                      <span>🎧</span> Nghe lại bản thu âm:
+                    </div>
+                    <audio id="rec_audio_{{this.id}}" controls class="w-full"></audio>
+
+                    <form action="/family/tributes/voice" method="POST" class="space-y-3">
+                      <input type="hidden" name="child_id" value="{{this.id}}" />
+                      <input type="hidden" id="rec_base64_{{this.id}}" name="base64Audio" value="" />
+                      <input type="hidden" id="rec_duration_{{this.id}}" name="duration_seconds" value="0" />
+
+                      <div>
+                        <input
+                          type="text"
+                          name="content"
+                          placeholder="Tiêu đề lời ru hoặc vài dòng tâm sự gửi con (VD: Lời ru ngọt ngào mẹ hát ru con ngủ...)"
+                          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                        />
+                      </div>
+
+                      <div class="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onclick="resetRecorder('{{this.id}}')"
+                          class="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
+                        >
+                          Thu âm lại
+                        </button>
+                        <button
+                          type="submit"
+                          class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 rounded-xl shadow-sm transition-all"
+                        >
+                          <span>💌 Lưu Lời Ru Gửi Con</span>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 🌟 CÂY ĐIỀU ƯỚC CỦA CON -->
+            <!-- ========================================== -->
+            <div class="pt-5 border-t border-slate-100 space-y-4">
               <div class="flex items-center justify-between">
                 <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <span>🌟</span> Cây Điều Ước Của Con
@@ -274,7 +563,9 @@
               </form>
             </div>
 
-            <!-- Emergency Unpublish Zone (Điều 33 Luật Trẻ em 2016) -->
+            <!-- ========================================== -->
+            <!-- 🚨 RÚT HỒ SƠ KHẨN CẤP (ĐIỀU 33 LUẬT TRẺ EM 2016) -->
+            <!-- ========================================== -->
             {{#if this.is_published}}
               <div class="p-5 rounded-2xl bg-rose-50/60 border-2 border-rose-200 space-y-3">
                 <div class="flex items-center gap-2 text-rose-800 font-bold text-sm">
@@ -330,3 +621,296 @@
 
   </div>
 </div>
+
+<!-- ======================================================== -->
+<!-- MODAL THÊM ẢNH / VIDEO KỶ NIỆM CHO CON -->
+<!-- ======================================================== -->
+<div id="media-upload-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <button
+      type="button"
+      onclick="closeMediaModal()"
+      class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
+    >
+      ✕
+    </button>
+
+    <div class="mb-4">
+      <span class="text-2xl">📸</span>
+      <h3 class="text-lg font-extrabold text-slate-900 mt-1">Thêm Kỷ Niệm Cho Bé</h3>
+      <p id="media-modal-subtitle" class="text-xs text-slate-500">
+        Tải ảnh hoặc dán liên kết video YouTube kỷ niệm của bé.
+      </p>
+    </div>
+
+    <form id="media-upload-form" action="/family/gallery/add" method="POST" class="space-y-4">
+      <input type="hidden" id="modal_child_id" name="child_id" value="" />
+      <input type="hidden" id="modal_base64" name="base64Data" value="" />
+
+      <!-- Loại kỷ vật -->
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Loại kỷ vật *</label>
+        <select 
+          id="modal_media_type" 
+          name="media_type" 
+          onchange="handleMediaTypeChange()"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 font-medium"
+        >
+          <option value="IMAGE">🖼️ Hình ảnh kỷ niệm</option>
+          <option value="DRAWING">🎨 Bức tranh vẽ của con</option>
+          <option value="VIDEO">🎬 Video / Clip kỷ niệm (YouTube hoặc link MP4)</option>
+        </select>
+      </div>
+
+      <!-- File upload cho IMAGE / DRAWING -->
+      <div id="file-upload-section">
+        <label class="block text-xs font-medium text-slate-700 mb-1">Chọn ảnh từ thiết bị</label>
+        <input 
+          type="file" 
+          id="modal_file_input" 
+          accept="image/*" 
+          onchange="handleFileInputChange(event)"
+          class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 cursor-pointer"
+        />
+        <div id="image-preview-box" class="hidden mt-3 h-36 w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+          <img id="image-preview" src="" alt="Xem trước ảnh" class="w-full h-full object-contain" />
+        </div>
+      </div>
+
+      <!-- URL media input -->
+      <div>
+        <label id="url-input-label" class="block text-xs font-medium text-slate-700 mb-1">Hoặc nhập liên kết URL ảnh</label>
+        <input
+          type="text"
+          id="modal_media_url"
+          name="media_url"
+          placeholder="https://... hoặc https://www.youtube.com/watch?v=..."
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+        />
+        <span id="url-hint" class="text-[10px] text-slate-400 mt-1 block">Hỗ trợ đường dẫn ảnh trực tiếp hoặc ảnh tải từ máy.</span>
+      </div>
+
+      <!-- Caption -->
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Tiêu đề / Lời tựa kỷ niệm *</label>
+        <input
+          type="text"
+          name="caption"
+          required
+          placeholder="VD: Nụ cười ngày sinh nhật tròn 5 tuổi của con, Bức tranh ngôi nhà hạnh phúc..."
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+        />
+      </div>
+
+      <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+        <button
+          type="button"
+          onclick="closeMediaModal()"
+          class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl"
+        >
+          Hủy bỏ
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm transition-all"
+        >
+          Lưu Vào Kho Kỷ Niệm
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- CLIENT-SIDE SCRIPTS: LIVE PREVIEW & HTML5 AUDIO RECORDER -->
+<!-- ======================================================== -->
+<script>
+  // Live Preview Cài đặt danh xưng
+  function updateFamilyLivePreview() {
+    const gender = document.getElementById('f_gender')?.value || 'UNSPECIFIED';
+    const titlePrefix = document.getElementById('f_title_prefix')?.value?.trim() || '';
+    const familyRelation = document.getElementById('f_family_relation')?.value?.trim() || '';
+    const lastName = document.getElementById('f_last_name')?.value?.trim() || '';
+    const middleName = document.getElementById('f_middle_name')?.value?.trim() || '';
+    const firstName = document.getElementById('f_first_name')?.value?.trim() || '';
+    const displayMode = document.getElementById('f_display_mode')?.value || 'FULL_NAME';
+
+    let coreName = [lastName, middleName, firstName].filter(Boolean).join(' ');
+    if (displayMode === 'FIRST_ONLY' && firstName) coreName = firstName;
+    else if (displayMode === 'LAST_FIRST' && (lastName || firstName)) coreName = [lastName, firstName].filter(Boolean).join(' ');
+    else if (displayMode === 'INITIALS') {
+      const parts = [lastName, middleName, firstName].filter(Boolean);
+      coreName = parts.map(p => p[0].toUpperCase() + '.').join(' ');
+    } else if (displayMode === 'ANONYMOUS') {
+      coreName = familyRelation || 'Phụ huynh bé';
+    }
+
+    // Salutations
+    let salutationVi = '';
+    let salutationEn = '';
+    if (gender === 'MALE') {
+      salutationVi = 'Ông';
+      salutationEn = 'Mr.';
+    } else if (gender === 'FEMALE') {
+      salutationVi = 'Bà';
+      salutationEn = 'Mrs.';
+    } else if (gender === 'OTHER') {
+      salutationEn = 'Mx.';
+    }
+
+    const viParts = [salutationVi, titlePrefix, coreName].filter(Boolean).join(' ');
+    const enParts = [salutationEn, titlePrefix, coreName].filter(Boolean).join(' ');
+
+    const previewViEl = document.getElementById('family_preview_vi');
+    const previewEnEl = document.getElementById('family_preview_en');
+    if (previewViEl) previewViEl.textContent = viParts || 'Chưa nhập tên';
+    if (previewEnEl) previewEnEl.textContent = enParts || 'Chưa nhập tên';
+  }
+
+  ['f_gender', 'f_title_prefix', 'f_family_relation', 'f_last_name', 'f_middle_name', 'f_first_name', 'f_display_mode'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updateFamilyLivePreview);
+    document.getElementById(id)?.addEventListener('change', updateFamilyLivePreview);
+  });
+
+  // Modal Thêm Ảnh/Video
+  function openMediaModal(childId, childName) {
+    document.getElementById('modal_child_id').value = childId;
+    document.getElementById('media-modal-subtitle').textContent = `Tải kỷ niệm cho bé ${childName}`;
+    document.getElementById('media-upload-modal').classList.remove('hidden');
+  }
+
+  function closeMediaModal() {
+    document.getElementById('media-upload-modal').classList.add('hidden');
+    document.getElementById('media-upload-form').reset();
+    document.getElementById('image-preview-box').classList.add('hidden');
+    document.getElementById('modal_base64').value = '';
+  }
+
+  function handleMediaTypeChange() {
+    const type = document.getElementById('modal_media_type').value;
+    const fileSec = document.getElementById('file-upload-section');
+    const urlLabel = document.getElementById('url-input-label');
+    const urlHint = document.getElementById('url-hint');
+
+    if (type === 'VIDEO') {
+      fileSec.classList.add('hidden');
+      urlLabel.textContent = 'Đường dẫn video YouTube hoặc link MP4 *';
+      urlHint.textContent = 'Dán liên kết YouTube (VD: https://www.youtube.com/watch?v=... hoặc https://youtu.be/...) để hệ thống tự động nhúng video player.';
+      document.getElementById('modal_media_url').setAttribute('required', 'required');
+    } else {
+      fileSec.classList.remove('hidden');
+      urlLabel.textContent = 'Hoặc nhập liên kết URL ảnh';
+      urlHint.textContent = 'Hỗ trợ định dạng PNG, JPG, WEBP trực tiếp hoặc ảnh tải từ máy tính/điện thoại.';
+      document.getElementById('modal_media_url').removeAttribute('required');
+    }
+  }
+
+  function handleFileInputChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const base64 = evt.target.result;
+      document.getElementById('modal_base64').value = base64;
+      document.getElementById('image-preview').src = base64;
+      document.getElementById('image-preview-box').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // HTML5 Web Audio Voice Recorder
+  const activeRecorders = {};
+
+  async function toggleRecording(childId) {
+    const btn = document.getElementById(`rec_btn_${childId}`);
+    const label = document.getElementById(`rec_label_${childId}`);
+    const timer = document.getElementById(`rec_timer_${childId}`);
+    const wave = document.getElementById(`rec_wave_${childId}`);
+    const status = document.getElementById(`rec_status_${childId}`);
+
+    if (activeRecorders[childId] && activeRecorders[childId].state === 'recording') {
+      // Dừng thu âm
+      activeRecorders[childId].mediaRecorder.stop();
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
+      let seconds = 0;
+
+      mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstart = () => {
+        btn.classList.remove('bg-rose-600', 'hover:bg-rose-700');
+        btn.classList.add('bg-slate-900', 'hover:bg-slate-800');
+        label.textContent = 'Dừng thu âm ⏹️';
+        timer.classList.remove('hidden');
+        wave.classList.remove('hidden');
+        wave.classList.add('flex');
+        status.textContent = 'Đang thu âm... Hãy nói hoặc hát ru bé một cách tự nhiên nhất.';
+
+        const interval = setInterval(() => {
+          seconds++;
+          const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+          const secs = String(seconds % 60).padStart(2, '0');
+          timer.textContent = `${mins}:${secs}`;
+        }, 1000);
+
+        activeRecorders[childId].timerInterval = interval;
+      };
+
+      mediaRecorder.onstop = () => {
+        clearInterval(activeRecorders[childId].timerInterval);
+        stream.getTracks().forEach(track => track.stop());
+
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        const audioElement = document.getElementById(`rec_audio_${childId}`);
+        audioElement.src = audioUrl;
+
+        // Chuyển blob sang base64 data URL
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          document.getElementById(`rec_base64_${childId}`).value = reader.result;
+          document.getElementById(`rec_duration_${childId}`).value = seconds;
+        };
+        reader.readAsDataURL(audioBlob);
+
+        // Hiển thị preview box
+        document.getElementById(`rec_preview_box_${childId}`).classList.remove('hidden');
+
+        btn.classList.remove('bg-slate-900', 'hover:bg-slate-800');
+        btn.classList.add('bg-rose-600', 'hover:bg-rose-700');
+        label.textContent = 'Thu âm lại 🎙️';
+        wave.classList.add('hidden');
+        wave.classList.remove('flex');
+        status.textContent = 'Đã thu âm xong! Hãy nghe lại bản thu trước khi gửi lưu.';
+        activeRecorders[childId].state = 'idle';
+      };
+
+      mediaRecorder.start();
+      activeRecorders[childId] = {
+        state: 'recording',
+        mediaRecorder
+      };
+    } catch (err) {
+      console.error('Lỗi truy cập micro:', err);
+      alert('Không thể truy cập Microphone trên thiết bị của bạn. Vui lòng cấp quyền micro cho trình duyệt.');
+    }
+  }
+
+  function resetRecorder(childId) {
+    document.getElementById(`rec_preview_box_${childId}`).classList.add('hidden');
+    document.getElementById(`rec_base64_${childId}`).value = '';
+    document.getElementById(`rec_duration_${childId}`).value = 0;
+    document.getElementById(`rec_timer_${childId}`).textContent = '00:00';
+    document.getElementById(`rec_label_${childId}`).textContent = 'Bắt đầu thu âm';
+    document.getElementById(`rec_status_${childId}`).textContent = 'Nhấn nút để bắt đầu thu âm lại.';
+  }
+</script>

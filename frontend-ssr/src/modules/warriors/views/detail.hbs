@@ -332,29 +332,53 @@
           {{/if}}
         </div>
 
-        <!-- Gallery / Tranh vẽ & Kỷ vật -->
+        <!-- Gallery / Tranh vẽ & Kỷ vật Đa Phương Tiện -->
         {{#if gallery.length}}
           <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
             <h2 class="text-xl font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
-              <span>🎨</span> Góc Kỷ Vật & Tranh Vẽ Của Bé
+              <span>🎨</span> Kho Kỷ Niệm & Tranh Vẽ Của Bé
             </h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {{#each gallery}}
-                <div class="group rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex flex-col">
-                  <div class="h-44 bg-slate-200 overflow-hidden">
-                    <img
-                      src="{{this.media_url}}"
-                      alt="{{this.caption}}"
-                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      onerror="this.src='https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&auto=format&fit=crop&q=80'"
-                    />
+                <div class="group rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex flex-col shadow-sm">
+                  <div class="h-48 bg-slate-900 overflow-hidden flex items-center justify-center relative">
+                    {{#if (eq this.media_type 'VIDEO')}}
+                      {{#if (contains this.media_url 'youtube.com/embed')}}
+                        <iframe 
+                          src="{{this.media_url}}" 
+                          title="{{this.caption}}" 
+                          class="w-full h-full border-0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowfullscreen
+                        ></iframe>
+                      {{else}}
+                        <video controls class="w-full h-full object-cover">
+                          <source src="{{this.media_url}}" type="video/mp4">
+                          Trình duyệt không hỗ trợ video.
+                        </video>
+                      {{/if}}
+                    {{else if (eq this.media_type 'AUDIO')}}
+                      <div class="p-4 w-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950 to-slate-900 text-white">
+                        <span class="text-3xl mb-2">🎵</span>
+                        <audio controls class="w-full mt-2" src="{{this.media_url}}"></audio>
+                      </div>
+                    {{else}}
+                      <img
+                        src="{{this.media_url}}"
+                        alt="{{this.caption}}"
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onerror="this.src='https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&auto=format&fit=crop&q=80'"
+                      />
+                    {{/if}}
+
+                    <span class="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-black/60 text-white backdrop-blur-sm uppercase">
+                      {{#if (eq this.media_type 'VIDEO')}}🎬 Clip Video{{else if (eq this.media_type 'AUDIO')}}🎵 Âm thanh{{else if (eq this.media_type 'DRAWING')}}🎨 Tranh vẽ{{else}}🖼️ Hình ảnh{{/if}}
+                    </span>
                   </div>
-                  <div class="p-3.5 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h4 class="text-xs font-bold text-slate-900">{{this.caption}}</h4>
-                    </div>
-                    <span class="mt-2 text-[10px] text-slate-400 block uppercase font-medium">{{this.media_type}}</span>
+                  <div class="p-3.5 flex-1 flex flex-col justify-between bg-white">
+                    <h4 class="text-xs font-bold text-slate-900">{{this.caption}}</h4>
+                    <span class="mt-2 text-[10px] text-slate-400 block uppercase font-medium">{{formatDate this.created_at}}</span>
                   </div>
                 </div>
               {{/each}}
@@ -387,6 +411,16 @@
                     <p class="mt-1.5 text-xs text-slate-700 leading-relaxed">
                       {{this.content}}
                     </p>
+
+                    <!-- Voice Note Audio Player if present -->
+                    {{#if this.audio_url}}
+                      <div class="mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200/80 space-y-1.5">
+                        <div class="flex items-center gap-1.5 text-[11px] font-bold text-rose-700">
+                          <span>🎙️</span> Lời ru / Tin nhắn thoại yêu thương {{#if this.duration_seconds}}({{this.duration_seconds}}s){{/if}}
+                        </div>
+                        <audio controls class="w-full h-8" src="{{this.audio_url}}"></audio>
+                      </div>
+                    {{/if}}
                   </div>
                 </div>
               {{/each}}
@@ -399,13 +433,15 @@
 
           <!-- New Tribute Form (Subject to Pre-moderation) -->
           <div class="p-5 rounded-xl bg-slate-50/80 border border-slate-200">
-            <h3 class="text-sm font-bold text-slate-900 mb-1">Gửi lời chúc đến bé</h3>
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Gửi lời chúc & tin nhắn thoại đến bé</h3>
             <p class="text-[11px] text-slate-500 mb-4">
               Theo quy định bảo vệ trẻ em (Luật Trẻ em 2016 & Nghị định 147/2024/NĐ-CP), lời chúc sẽ được ban quản trị và phụ huynh kiểm duyệt trước khi hiển thị công khai.
             </p>
 
             <form action="/warriors/{{warrior.id}}/tribute" method="POST" class="space-y-3.5">
               <input type="hidden" name="slug" value="{{warrior.slug}}" />
+              <input type="hidden" id="visitor_base64_audio" name="base64Audio" value="" />
+              <input type="hidden" id="visitor_duration_seconds" name="duration_seconds" value="0" />
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -438,6 +474,29 @@
                   placeholder="Viết những lời động viên chân thành nhất gửi đến bé và gia đình..."
                   class="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
                 ></textarea>
+              </div>
+
+              <!-- Voice Recording Attachment Option -->
+              <div class="p-3 bg-white rounded-xl border border-slate-200 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-slate-700 flex items-center gap-1.5">
+                    <span>🎙️</span> Đính kèm tin nhắn thoại (Tùy chọn)
+                  </span>
+                  <button
+                    type="button"
+                    id="visitor_rec_btn"
+                    onclick="toggleVisitorRecording()"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition-colors"
+                  >
+                    <span id="visitor_rec_dot" class="h-2 w-2 rounded-full bg-rose-500"></span>
+                    <span id="visitor_rec_label">Thu âm giọng nói</span>
+                  </button>
+                </div>
+
+                <div id="visitor_audio_preview_container" class="hidden pt-2 border-t border-slate-100 space-y-1">
+                  <div class="text-[11px] text-slate-500 font-medium">Bản ghi âm đã sẵn sàng để gửi kèm:</div>
+                  <audio id="visitor_audio_preview" controls class="w-full h-8"></audio>
+                </div>
               </div>
 
               <button
@@ -897,4 +956,73 @@
       });
     }
   });
+
+  // Visitor audio recording
+  let visitorRecorder = null;
+  let visitorStream = null;
+  let visitorChunks = [];
+  let visitorSeconds = 0;
+  let visitorTimer = null;
+
+  async function toggleVisitorRecording() {
+    const btn = document.getElementById('visitor_rec_btn');
+    const label = document.getElementById('visitor_rec_label');
+    const dot = document.getElementById('visitor_rec_dot');
+
+    if (visitorRecorder && visitorRecorder.state === 'recording') {
+      visitorRecorder.stop();
+      return;
+    }
+
+    try {
+      visitorStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      visitorRecorder = new MediaRecorder(visitorStream);
+      visitorChunks = [];
+      visitorSeconds = 0;
+
+      visitorRecorder.ondataavailable = e => {
+        if (e.data.size > 0) visitorChunks.push(e.data);
+      };
+
+      visitorRecorder.onstart = () => {
+        btn.classList.add('bg-rose-600', 'text-white');
+        btn.classList.remove('bg-rose-50', 'text-rose-700');
+        label.textContent = 'Dừng thu âm ⏹️';
+        dot.classList.add('animate-ping');
+
+        visitorTimer = setInterval(() => {
+          visitorSeconds++;
+        }, 1000);
+      };
+
+      visitorRecorder.onstop = () => {
+        clearInterval(visitorTimer);
+        visitorStream.getTracks().forEach(t => t.stop());
+
+        const audioBlob = new Blob(visitorChunks, { type: 'audio/webm' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        const previewEl = document.getElementById('visitor_audio_preview');
+        previewEl.src = audioUrl;
+        document.getElementById('visitor_audio_preview_container').classList.remove('hidden');
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          document.getElementById('visitor_base64_audio').value = reader.result;
+          document.getElementById('visitor_duration_seconds').value = visitorSeconds;
+        };
+        reader.readAsDataURL(audioBlob);
+
+        btn.classList.remove('bg-rose-600', 'text-white');
+        btn.classList.add('bg-rose-50', 'text-rose-700');
+        label.textContent = 'Thu âm lại 🎙️';
+        dot.classList.remove('animate-ping');
+      };
+
+      visitorRecorder.start();
+    } catch (err) {
+      console.error('Không thể truy cập microphone:', err);
+      alert('Không thể truy cập Micro trên trình duyệt để ghi âm. Vui lòng cấp quyền micro.');
+    }
+  }
 </script>

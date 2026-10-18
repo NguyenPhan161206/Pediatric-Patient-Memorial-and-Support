@@ -46,6 +46,8 @@ app.engine('.hbs', engine({
     },
     add: (a, b) => Number(a || 0) + Number(b || 0),
     sub: (a, b) => Number(a || 0) - Number(b || 0),
+    contains: (str, substr) => typeof str === 'string' && str.includes(substr),
+    includes: (str, substr) => typeof str === 'string' && str.includes(substr),
     formatDisplayName: (user, viewerRole) => formatDisplayName(user, typeof viewerRole === 'string' ? viewerRole : null)
   }
 }));
@@ -58,6 +60,26 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
+
+// Proxy uploaded media files from backend
+const axios = require('axios');
+app.use('/uploads', async (req, res) => {
+  try {
+    const backendBase = (process.env.BACKEND_API_URL || 'http://localhost:5000/api/v1').replace(/\/api\/v1\/?$/, '');
+    const targetUrl = `${backendBase}/uploads${req.url}`;
+    const response = await axios({
+      method: 'get',
+      url: targetUrl,
+      responseType: 'stream'
+    });
+    if (response.headers['content-type']) {
+      res.setHeader('content-type', response.headers['content-type']);
+    }
+    response.data.pipe(res);
+  } catch (err) {
+    res.status(404).send('File not found');
+  }
+});
 
 // Session Configuration
 app.use(session({

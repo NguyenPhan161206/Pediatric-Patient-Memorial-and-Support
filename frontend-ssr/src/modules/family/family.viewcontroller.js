@@ -40,16 +40,22 @@ const showPortal = async (req, res) => {
       }));
     }
 
-    // Lấy danh sách điều ước cho từng bé
-    const childrenWithWishes = await Promise.all(
+    // Lấy danh sách điều ước và kỷ vật/đa phương tiện cho từng bé
+    const childrenWithDetails = await Promise.all(
       myChildren.map(async (child) => {
+        let wishes = [];
+        let gallery = [];
         try {
-          const wishesRes = await apiClient.get(`/wishes/warrior/${child.slug || child.id}`);
-          const wishes = (wishesRes.data && wishesRes.data.wishes) || [];
-          return { ...child, wishes };
+          const [wishesRes, detailRes] = await Promise.all([
+            apiClient.get(`/wishes/warrior/${child.slug || child.id}`).catch(() => ({ data: { wishes: [] } })),
+            apiClient.get(`/warriors/${child.slug || child.id}`).catch(() => ({ data: { gallery: [] } }))
+          ]);
+          wishes = (wishesRes.data && wishesRes.data.wishes) || [];
+          gallery = (detailRes.data && detailRes.data.gallery) || [];
         } catch (e) {
-          return { ...child, wishes: [] };
+          // fallback
         }
+        return { ...child, wishes, gallery };
       })
     );
 
@@ -61,7 +67,7 @@ const showPortal = async (req, res) => {
     res.render('family/views/portal', {
       title: 'Cổng Quản Lý Gia Đình',
       user,
-      myChildren: childrenWithWishes,
+      myChildren: childrenWithDetails,
       flashMessage,
       errorMessage
     });
@@ -163,9 +169,158 @@ const createChildWish = async (req, res) => {
   res.redirect('/family/portal');
 };
 
+/**
+ * Thêm kỷ vật / Đa phương tiện vào kho kỷ niệm của bé (POST /family/gallery/add)
+ */
+const addMediaItem = async (req, res) => {
+  if (!req.session.user || !req.session.token) {
+    return res.redirect('/auth/login');
+  }
+
+  const { child_id, media_url, media_type, caption, base64Data } = req.body;
+
+  try {
+    await apiClient.post(
+      `/warriors/${child_id}/gallery`,
+      {
+        media_url,
+        media_type,
+        caption,
+        base64Data
+      },
+      {
+        headers: { Authorization: `Bearer ${req.session.token}` }
+      }
+    );
+
+    req.session.flashMessage = 'Đã thêm kỷ niệm mới vào kho lưu trữ của con thành công!';
+  } catch (error) {
+    console.error('[ADD MEDIA ERROR]', error);
+    req.session.errorMessage = error.message || 'Lỗi khi lưu kỷ vật của bé.';
+  }
+
+  res.redirect('/family/portal');
+};
+
+/**
+ * Xóa một kỷ vật khỏi kho lưu trữ (POST /family/gallery/:childId/:itemId/delete)
+ */
+const deleteMediaItem = async (req, res) => {
+  if (!req.session.user || !req.session.token) {
+    return res.redirect('/auth/login');
+  }
+
+  const { childId, itemId } = req.params;
+
+  try {
+    await apiClient.delete(
+      `/warriors/${childId}/gallery/${itemId}`,
+      {
+        headers: { Authorization: `Bearer ${req.session.token}` }
+      }
+    );
+
+    req.session.flashMessage = 'Đã xóa kỷ vật thành công.';
+  } catch (error) {
+    console.error('[DELETE MEDIA ERROR]', error);
+    req.session.errorMessage = error.message || 'Lỗi khi xóa kỷ vật.';
+  }
+
+  res.redirect('/family/portal');
+};
+
+/**
+ * Phụ huynh gửi tin nhắn thoại / lời nhắn ấm áp gửi con (POST /family/tributes/voice)
+ */
+const sendFamilyVoiceNote = async (req, res) => {
+  if (!req.session.user || !req.session.token) {
+    return res.redirect('/auth/login');
+  }
+
+  const { child_id, content, base64Audio, duration_seconds } = req.body;
+
+  try {
+    const parentName = req.session.user.displayName || req.session.user.fullName || 'Phụ huynh của bé';
+    await apiClient.post(
+      `/tributes/${child_id}/tributes`,
+      {
+        sender_name: parentName,
+        sender_email: req.session.user.email,
+        content: content || 'Lời ru và tâm sự yêu thương của cha mẹ gửi con',
+        base64Audio,
+        duration_seconds
+      }
+    );
+
+    req.session.flashMessage = 'Đã lưu tin nhắn thoại yêu thương gửi con thành công!';
+  } catch (error) {
+    console.error('[FAMILY VOICE NOTE ERROR]', error);
+    req.session.errorMessage = error.message || 'Lỗi khi gửi tin nhắn thoại.';
+  }
+
+  res.redirect('/family/portal');
+};
+
+/**
+ * Cập nhật thông tin danh tính và cách xưng hô của phụ huynh
+ */
+const updateFamilyProfile = async (req, res) => {
+  if (!req.session.user || !req.session.token) {
+    return res.redirect('/auth/login');
+  }
+
+  const {
+    last_name,
+    middle_name,
+    first_name,
+    gender,
+    title_prefix,
+    family_relation,
+    display_mode,
+    phone_number
+  } = req.body;
+
+  try {
+    const resProfile = await apiClient.patch(
+      '/auth/profile',
+      {
+        last_name,
+        middle_name,
+        first_name,
+        gender,
+        title_prefix,
+        family_relation,
+        display_mode,
+        phone_number
+      },
+      {
+        headers: { Authorization: `Bearer ${req.session.token}` }
+      }
+    );
+
+    if (resProfile.data && resProfile.data.data && resProfile.data.data.user) {
+      req.session.user = {
+        ...req.session.user,
+        ...resProfile.data.data.user
+      };
+    }
+
+    req.session.flashMessage = 'Đã cập nhật thông tin xưng hô và danh tính phụ huynh thành công!';
+  } catch (error) {
+    console.error('[UPDATE FAMILY PROFILE ERROR]', error);
+    req.session.errorMessage = error.message || 'Lỗi khi cập nhật danh tính phụ huynh.';
+  }
+
+  res.redirect('/family/portal');
+};
+
 module.exports = {
   showPortal,
   unpublishChild,
   updateDiary,
-  createChildWish
+  createChildWish,
+  addMediaItem,
+  deleteMediaItem,
+  sendFamilyVoiceNote,
+  updateFamilyProfile
 };

@@ -35,4 +35,17 @@ router.patch(
   warriorController.unpublishWarrior
 );
 
+// Thêm và xóa kỷ vật / đa phương tiện (Ảnh, Video YouTube, Lời ru / Âm thanh)
+router.post(
+  '/:id/gallery',
+  authenticateToken,
+  warriorController.addGalleryItem
+);
+
+router.delete(
+  '/:id/gallery/:itemId',
+  authenticateToken,
+  warriorController.deleteGalleryItem
+);
+
 module.exports = router;

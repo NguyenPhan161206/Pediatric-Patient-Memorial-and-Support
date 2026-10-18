@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const db = require('../../shared/database/knex');
 const { sanitizeContent } = require('../../shared/security/xssSanitizer');
 const { logAudit } = require('../../shared/audit/auditLogger');
@@ -126,12 +128,20 @@ const getWarriors = async (req, res) => {
 const getWarriorBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
 
-    const warrior = await db('children as c')
+    const warriorQuery = db('children as c')
       .leftJoin('categories as cat', 'c.category_id', 'cat.id')
       .leftJoin('organizations as org', 'c.organization_id', 'org.id')
-      .where('c.slug', slug)
-      .whereNull('c.deleted_at')
+      .whereNull('c.deleted_at');
+
+    if (isUuid) {
+      warriorQuery.andWhere(b => b.where('c.id', slug).orWhere('c.slug', slug));
+    } else {
+      warriorQuery.andWhere('c.slug', slug);
+    }
+
+    const warrior = await warriorQuery
       .select(
         'c.*',
         'cat.name as category_name',
@@ -396,11 +406,166 @@ const getCategories = async (req, res) => {
   }
 };
 
+/**
+ * Thêm kỷ vật / đa phương tiện vào thư viện của bé (Ảnh, Video YouTube, Âm thanh)
+ */
+const addGalleryItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let {
+      media_url,
+      media_type,
+      caption,
+      media_source,
+      duration_seconds,
+      thumbnail_url,
+      is_featured,
+      base64Data
+    } = req.body;
+
+    const child = await db('children').where({ id }).whereNull('deleted_at').first();
+    if (!child) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Không tìm thấy hồ sơ bé.'
+      });
+    }
+
+    // Kiểm tra quyền: Chỉ phụ huynh sở hữu bé, Admin hoặc Coordinator
+    const isOwner = req.user && req.user.id === child.family_user_id;
+    const isStaff = req.user && ['ADMIN', 'SUPER_ADMIN', 'COORDINATOR'].includes(req.user.role);
+    if (!isOwner && !isStaff) {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Bạn không có quyền thêm kỷ vật cho hồ sơ này.'
+      });
+    }
+
+    // Xử lý nếu gửi base64 file ảnh hoặc âm thanh
+    if (base64Data) {
+      const match = base64Data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (match) {
+        const mime = match[1];
+        const isAudio = mime.includes('audio') || mime.includes('webm') || mime.includes('wav') || mime.includes('mp3');
+        const folder = isAudio ? 'audio' : 'images';
+        const ext = isAudio ? (mime.includes('wav') ? 'wav' : (mime.includes('mp3') ? 'mp3' : 'webm')) : 'jpg';
+        const buffer = Buffer.from(match[2], 'base64');
+        const uploadDir = path.join(__dirname, `../../../uploads/gallery/${folder}`);
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        const filename = `media_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        fs.writeFileSync(path.join(uploadDir, filename), buffer);
+        media_url = `/uploads/gallery/${folder}/${filename}`;
+        media_source = 'UPLOAD';
+        if (!media_type) media_type = isAudio ? 'AUDIO' : 'IMAGE';
+      }
+    }
+
+    // Xử lý link YouTube nếu media_type là VIDEO hoặc link chứa youtube
+    if (media_url && (media_type === 'VIDEO' || media_url.includes('youtube.com') || media_url.includes('youtu.be'))) {
+      media_type = 'VIDEO';
+      media_source = 'EXTERNAL_URL';
+
+      let ytId = null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = media_url.match(regExp);
+      if (match && match[2].length === 11) {
+        ytId = match[2];
+      }
+
+      if (ytId) {
+        media_url = `https://www.youtube.com/embed/${ytId}`;
+        thumbnail_url = thumbnail_url || `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      }
+    }
+
+    if (!media_url) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Vui lòng cung cấp link hình ảnh, video YouTube hoặc file tải lên.'
+      });
+    }
+
+    const [newItem] = await db('gallery_items').insert({
+      child_id: id,
+      media_url: media_url.trim(),
+      media_type: media_type || 'IMAGE',
+      caption: caption ? caption.trim() : null,
+      media_source: media_source || 'UPLOAD',
+      duration_seconds: duration_seconds ? parseInt(duration_seconds, 10) : null,
+      thumbnail_url: thumbnail_url ? thumbnail_url.trim() : null,
+      is_featured: !!is_featured
+    }).returning('*');
+
+    return res.status(201).json({
+      status: 'success',
+      message: 'Đã lưu kỷ niệm vào kho lưu trữ của bé thành công.',
+      data: newItem
+    });
+  } catch (error) {
+    console.error('[ADD GALLERY ERROR]', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Lỗi thêm kỷ niệm vào thư viện.'
+    });
+  }
+};
+
+/**
+ * Xóa một kỷ vật / media khỏi thư viện của bé
+ */
+const deleteGalleryItem = async (req, res) => {
+  try {
+    const { id, itemId } = req.params;
+
+    const child = await db('children').where({ id }).whereNull('deleted_at').first();
+    if (!child) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Không tìm thấy hồ sơ bé.'
+      });
+    }
+
+    const isOwner = req.user && req.user.id === child.family_user_id;
+    const isStaff = req.user && ['ADMIN', 'SUPER_ADMIN', 'COORDINATOR'].includes(req.user.role);
+    if (!isOwner && !isStaff) {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Bạn không có quyền xóa kỷ vật này.'
+      });
+    }
+
+    const item = await db('gallery_items').where({ id: itemId, child_id: id }).first();
+    if (!item) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Không tìm thấy kỷ vật để xóa.'
+      });
+    }
+
+    await db('gallery_items').where({ id: itemId }).del();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Đã xóa kỷ vật thành công.'
+    });
+  } catch (error) {
+    console.error('[DELETE GALLERY ERROR]', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Lỗi xóa kỷ vật.'
+    });
+  }
+};
+
 module.exports = {
   getWarriors,
   getWarriorBySlug,
   createWarrior,
   updateWarrior,
   unpublishWarrior,
-  getCategories
+  getCategories,
+  addGalleryItem,
+  deleteGalleryItem
 };

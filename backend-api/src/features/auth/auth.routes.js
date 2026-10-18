@@ -11,6 +11,7 @@ router.post('/register', authController.register);
 
 // Protected routes
 router.get('/me', authenticateToken, authController.getMe);
+router.patch('/profile', authenticateToken, authController.updateProfile);
 
 // Admin / Coordinator only routes: Cấp tài khoản đóng cho Gia đình
 router.post(

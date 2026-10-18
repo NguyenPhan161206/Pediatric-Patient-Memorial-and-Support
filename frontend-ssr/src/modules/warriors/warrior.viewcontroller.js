@@ -102,15 +102,17 @@ const warriorDetail = async (req, res) => {
 const submitTribute = async (req, res) => {
   try {
     const { id } = req.params;
-    const { sender_name, sender_email, content, slug } = req.body;
+    const { sender_name, sender_email, content, base64Audio, duration_seconds, slug } = req.body;
 
     await apiClient.post(`/tributes/${id}/tributes`, {
       sender_name,
       sender_email,
-      content
+      content,
+      base64Audio,
+      duration_seconds
     });
 
-    req.session.tributeSuccess = 'Cảm ơn bạn! Lời nhắn tri ân đã được gửi và đang chờ kiểm duyệt trước khi hiển thị công khai.';
+    req.session.tributeSuccess = 'Cảm ơn bạn! Lời nhắn tri ân / tin nhắn thoại đã được gửi và đang chờ kiểm duyệt trước khi hiển thị công khai.';
     res.redirect(`/warriors/${slug || ''}#tributes`);
   } catch (error) {
     console.error('[SUBMIT TRIBUTE ERROR]', error);
