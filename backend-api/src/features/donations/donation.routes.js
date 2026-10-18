@@ -39,7 +39,10 @@ router.post('/submit-proof', upload.single('proof_image'), donationController.su
 // 2. Cổng Ngân Hàng Mô Phỏng Sandbox (Public demo)
 router.post('/mock-sandbox-pay', donationController.mockSandboxPay);
 
-// 3. Lấy Bức Tường Vinh Danh của một bé (Public)
+// 3. Lấy Bức Tường Vinh Danh Toàn Quốc (Public)
+router.get('/wall', donationController.getNationalWallOfHonor);
+
+// 4. Lấy Bức Tường Vinh Danh của một bé (Public)
 router.get('/warrior/:slugOrId', donationController.getWallOfHonorByChild);
 
 // 4. Lấy danh sách biên lai chờ duyệt (Yêu cầu đăng nhập: ORG_ADMIN, FAMILY, ADMIN)

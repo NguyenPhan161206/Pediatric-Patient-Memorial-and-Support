@@ -13,7 +13,7 @@ const familyRoutes = require('./modules/family/family.routes');
 const tributeRoutes = require('./modules/tributes/tribute.routes');
 const donationRoutes = require('./modules/donations/donation.routes');
 const wishRoutes = require('./modules/wishes/wish.routes');
-const { viewCertificate } = require('./modules/donations/donation.viewcontroller');
+const { viewCertificate, renderWallOfHonor } = require('./modules/donations/donation.viewcontroller');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -112,6 +112,9 @@ app.get('/logout', (req, res) => res.redirect('/auth/logout'));
 
 // Public Certificate Verification Route (Quét QR Code từ điện thoại)
 app.get('/verify/cert/:qrToken', viewCertificate);
+
+// Bức Tường Vinh Danh Toàn Quốc
+app.get('/wall-of-honor', renderWallOfHonor);
 
 // Feature Routes
 app.use('/auth', authRoutes);

@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const donationViewController = require('./donation.viewcontroller');
 
+// Bức Tường Vinh Danh Toàn Quốc
+router.get('/wall', donationViewController.renderWallOfHonor);
+
 // Cổng xét duyệt biên lai (Dành cho ORG_ADMIN, FAMILY, ADMIN)
 router.get('/moderation', donationViewController.viewModeration);
 

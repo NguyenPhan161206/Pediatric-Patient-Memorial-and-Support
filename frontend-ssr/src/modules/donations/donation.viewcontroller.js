@@ -193,6 +193,53 @@ const sponsorWish = async (req, res) => {
   }
 };
 
+/**
+ * Hiển thị Bức Tường Vinh Danh Toàn Quốc
+ */
+const renderWallOfHonor = async (req, res) => {
+  try {
+    const { organization_id } = req.query;
+
+    const [wallRes, orgsRes] = await Promise.all([
+      apiClient.get('/donations/wall', {
+        params: { organization_id }
+      }).catch(err => {
+        console.error('[WALL ERROR]', err);
+        return { data: { totalAmount: 0, totalDonations: 0, totalChildrenSupported: 0, donations: [], hospitalStats: [] } };
+      }),
+      apiClient.get('/organizations').catch(() => ({ data: { organizations: [] } }))
+    ]);
+
+    const wallData = wallRes.data || { totalAmount: 0, totalDonations: 0, totalChildrenSupported: 0, donations: [], hospitalStats: [] };
+    const organizations = orgsRes.data ? (orgsRes.data.organizations || []) : [];
+
+    res.render('donations/views/wall', {
+      title: 'Bức Tường Vinh Danh & Tri Ân Toàn Quốc',
+      description: 'Vinh danh những tấm lòng vàng đã chung tay tiếp thêm hy vọng cho các chiến binh nhí',
+      totalAmount: wallData.totalAmount,
+      totalDonations: wallData.totalDonations,
+      totalChildrenSupported: wallData.totalChildrenSupported,
+      donations: wallData.donations,
+      hospitalStats: wallData.hospitalStats,
+      organizations,
+      currentOrgId: organization_id || '',
+      activeMenu: 'wall-of-honor'
+    });
+  } catch (error) {
+    console.error('[RENDER WALL ERROR]', error);
+    res.status(500).render('donations/views/wall', {
+      title: 'Bức Tường Vinh Danh',
+      totalAmount: 0,
+      totalDonations: 0,
+      totalChildrenSupported: 0,
+      donations: [],
+      hospitalStats: [],
+      organizations: [],
+      errorMsg: 'Không thể tải Bức Tường Vinh Danh. Vui lòng thử lại sau.'
+    });
+  }
+};
+
 module.exports = {
   viewCertificate,
   viewModeration,
@@ -200,5 +247,6 @@ module.exports = {
   mockSandboxPay,
   verifyDonation,
   rejectDonation,
-  sponsorWish
+  sponsorWish,
+  renderWallOfHonor
 };

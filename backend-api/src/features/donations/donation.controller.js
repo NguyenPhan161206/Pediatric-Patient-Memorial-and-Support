@@ -258,6 +258,96 @@ const getWallOfHonorByChild = async (req, res) => {
 };
 
 /**
+ * Lấy Bức Tường Vinh Danh Toàn Quốc (Toàn bộ khoản quyên góp VERIFIED trên cả nước)
+ */
+const getNationalWallOfHonor = async (req, res) => {
+  try {
+    const { organization_id, page = 1, limit = 30 } = req.query;
+
+    let query = db('donations_transactions as dt')
+      .join('children as c', 'dt.child_id', 'c.id')
+      .leftJoin('organizations as org', 'dt.organization_id', 'org.id')
+      .where('dt.status', 'VERIFIED');
+
+    if (organization_id) {
+      query = query.where('dt.organization_id', organization_id);
+    }
+
+    const totalRes = await db('donations_transactions')
+      .where('status', 'VERIFIED')
+      .select(
+        db.raw('COUNT(*) as total_donations'),
+        db.raw('COALESCE(SUM(amount), 0) as total_amount'),
+        db.raw('COUNT(DISTINCT child_id) as total_children')
+      )
+      .first();
+
+    const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+
+    const donations = await query
+      .select(
+        'dt.id',
+        'dt.transaction_code',
+        'dt.donor_name',
+        'dt.amount',
+        'dt.transfer_message',
+        'dt.is_anonymous',
+        'dt.certificate_code',
+        'dt.certificate_qr_token',
+        'dt.verified_at',
+        'dt.created_at',
+        'c.id as child_id',
+        'c.full_name as child_name',
+        'c.nickname as child_nickname',
+        'c.slug as child_slug',
+        'c.avatar_url as child_avatar_url',
+        'org.id as org_id',
+        'org.name as org_name',
+        'org.province as org_province'
+      )
+      .orderBy('dt.verified_at', 'desc')
+      .limit(parseInt(limit, 10))
+      .offset(offset);
+
+    const sanitizedDonations = donations.map((d) => ({
+      ...d,
+      donor_name: d.is_anonymous ? 'Nhà Hảo Tâm Ẩn Danh' : d.donor_name
+    }));
+
+    // Phân bổ theo bệnh viện
+    const hospitalStats = await db('donations_transactions as dt')
+      .join('organizations as org', 'dt.organization_id', 'org.id')
+      .where('dt.status', 'VERIFIED')
+      .groupBy('org.id', 'org.name', 'org.province')
+      .select(
+        'org.id',
+        'org.name',
+        'org.province',
+        db.raw('COUNT(dt.id) as donation_count'),
+        db.raw('COALESCE(SUM(dt.amount), 0) as total_amount')
+      )
+      .orderBy('total_amount', 'desc');
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        totalAmount: parseFloat(totalRes.total_amount) || 0,
+        totalDonations: parseInt(totalRes.total_donations, 10) || 0,
+        totalChildrenSupported: parseInt(totalRes.total_children, 10) || 0,
+        donations: sanitizedDonations,
+        hospitalStats
+      }
+    });
+  } catch (error) {
+    console.error('[GET NATIONAL WALL ERROR]', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Lỗi tải Bức Tường Vinh Danh toàn quốc.'
+    });
+  }
+};
+
+/**
  * Lấy danh sách biên lai chờ duyệt (Dành cho ORG_ADMIN, FAMILY, SUPER_ADMIN)
  */
 const getPendingDonations = async (req, res) => {
@@ -512,6 +602,7 @@ module.exports = {
   submitProof,
   mockSandboxPay,
   getWallOfHonorByChild,
+  getNationalWallOfHonor,
   getPendingDonations,
   verifyDonation,
   rejectDonation,

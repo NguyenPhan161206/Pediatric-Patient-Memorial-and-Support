@@ -83,8 +83,8 @@
 
         <!-- Bức Tường Vinh Danh -->
         <a
-          href="/warriors#wall-of-honor"
-          class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-700 hover:text-emerald-900 hover:bg-emerald-50/80 font-medium transition-all group"
+          href="/wall-of-honor"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl font-medium transition-all group {{#if (eq currentPath '/wall-of-honor')}}bg-emerald-100/80 text-emerald-900 font-bold border-l-4 border-emerald-500{{else}}text-slate-700 hover:text-emerald-900 hover:bg-emerald-50/80{{/if}}"
           title="Bức Tường Vinh Danh"
         >
           <span class="text-base shrink-0 group-hover:scale-110 transition-transform">🏆</span>
