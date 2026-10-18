@@ -1,0 +1,428 @@
+<!-- Backdrop for mobile drawer -->
+<div
+  id="sidebar-backdrop"
+  onclick="toggleSidebar(false)"
+  class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-300"
+></div>
+
+<!-- Main Left Sidebar Toolbar -->
+<aside
+  id="app-sidebar"
+  class="fixed lg:sticky top-0 inset-y-0 left-0 z-50 w-72 h-screen flex flex-col bg-white border-r border-slate-200/80 shadow-sm lg:shadow-none transition-all duration-300 ease-in-out -translate-x-full lg:translate-x-0"
+>
+  
+  <!-- 1. Header: Brand Logo & Slogan -->
+  <div class="h-16 px-4 flex items-center justify-between border-b border-slate-100 shrink-0">
+    <a href="/" class="flex items-center gap-2.5 group overflow-hidden">
+      <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-rose-500 via-amber-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20 group-hover:scale-105 transition-transform shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      </div>
+      <div class="sidebar-text truncate">
+        <span class="font-extrabold text-slate-900 tracking-tight text-base block leading-tight">Chiến Binh Nhí</span>
+        <span class="text-[10px] uppercase font-bold text-rose-600 tracking-wider">Courageous Hub</span>
+      </div>
+    </a>
+
+    <!-- Mobile Close Button -->
+    <button
+      type="button"
+      onclick="toggleSidebar(false)"
+      class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+      title="Đóng thanh công cụ"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- 2. Scrollable Navigation List -->
+  <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6 custom-scrollbar text-xs">
+
+    <!-- ⚡ SHOWCASE DAZZLER QUICK ACTION: 1-Click Sandbox Demo Trigger -->
+    <div>
+      <button
+        type="button"
+        onclick="openGlobalSandboxModal()"
+        class="w-full group relative overflow-hidden rounded-xl p-3 bg-gradient-to-r from-amber-500 via-rose-500 to-amber-600 text-white shadow-md shadow-rose-500/25 hover:shadow-lg hover:shadow-rose-500/35 active:scale-95 transition-all text-left cursor-pointer"
+      >
+        <div class="flex items-center gap-2.5">
+          <div class="h-7 w-7 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center text-sm shrink-0">
+            ⚡
+          </div>
+          <div class="sidebar-text flex-1 min-w-0">
+            <span class="text-[10px] font-black uppercase tracking-wider text-amber-200 block leading-tight">Demo Giám Khảo</span>
+            <strong class="text-xs font-bold block truncate">Mô Phỏng Sandbox 1-Click</strong>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <!-- 🌟 NHÓM 1: BỘ TỨ ĐỘT PHÁ (Showcase Dazzlers) -->
+    <div>
+      <div class="sidebar-text px-3 mb-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
+        <span>Tiêu Điểm Đột Phá</span>
+        <span class="h-1.5 w-1.5 rounded-full bg-rose-500 animate-ping"></span>
+      </div>
+      <nav class="space-y-1">
+        
+        <!-- Cây Điều Ước Trực Tuyến -->
+        <a
+          href="/warriors#wishes"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-700 hover:text-amber-900 hover:bg-amber-50/80 font-medium transition-all group"
+          title="Cây Điều Ước Trực Tuyến"
+        >
+          <span class="text-base shrink-0 group-hover:scale-110 transition-transform">🌟</span>
+          <div class="sidebar-text flex-1 flex items-center justify-between truncate">
+            <span>Cây Điều Ước Của Bé</span>
+            <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Wishlist</span>
+          </div>
+        </a>
+
+        <!-- Bức Tường Vinh Danh -->
+        <a
+          href="/warriors#wall-of-honor"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-700 hover:text-emerald-900 hover:bg-emerald-50/80 font-medium transition-all group"
+          title="Bức Tường Vinh Danh"
+        >
+          <span class="text-base shrink-0 group-hover:scale-110 transition-transform">🏆</span>
+          <div class="sidebar-text flex-1 flex items-center justify-between truncate">
+            <span>Bức Tường Vinh Danh</span>
+            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Tri Ân</span>
+          </div>
+        </a>
+
+        <!-- Bản Đồ Hy Vọng Toàn Quốc -->
+        <a
+          href="/#map-of-hope"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-700 hover:text-teal-900 hover:bg-teal-50/80 font-medium transition-all group"
+          title="Bản Đồ Hy Vọng Toàn Quốc"
+        >
+          <span class="text-base shrink-0 group-hover:scale-110 transition-transform">🗺️</span>
+          <div class="sidebar-text flex-1 flex items-center justify-between truncate">
+            <span>Bản Đồ Hy Vọng</span>
+            <span class="text-[10px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full">Leaflet</span>
+          </div>
+        </a>
+
+        <!-- Tra Cứu Chứng Nhận Số & QR Code -->
+        <a
+          href="/donations/cert/qr-demo-mvdxv3oo-6955"
+          target="_blank"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-700 hover:text-indigo-900 hover:bg-indigo-50/80 font-medium transition-all group"
+          title="Xem Chứng Nhận Tri Ân Số Mẫu"
+        >
+          <span class="text-base shrink-0 group-hover:scale-110 transition-transform">📜</span>
+          <div class="sidebar-text flex-1 flex items-center justify-between truncate">
+            <span>Chứng Nhận Số & QR</span>
+            <span class="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">Mã Gốc</span>
+          </div>
+        </a>
+
+      </nav>
+    </div>
+
+    <!-- 🧭 NHÓM 2: KHÁM PHÁ CỐT LÕI (Core Public Navigation) -->
+    <div>
+      <div class="sidebar-text px-3 mb-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
+        Khám Phá
+      </div>
+      <nav class="space-y-1">
+        
+        <!-- Trang Chủ -->
+        <a
+          href="/"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl font-medium transition-all group {{#if (eq currentPath '/')}}bg-rose-50 text-rose-700 font-bold border-l-4 border-rose-600{{else}}text-slate-600 hover:bg-slate-100 hover:text-slate-900{{/if}}"
+        >
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span class="sidebar-text truncate">Trang Chủ</span>
+        </a>
+
+        <!-- Danh Mục Chiến Binh Nhí -->
+        <a
+          href="/warriors"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl font-medium transition-all group {{#if (eq currentPath '/warriors')}}bg-rose-50 text-rose-700 font-bold border-l-4 border-rose-600{{else}}text-slate-600 hover:bg-slate-100 hover:text-slate-900{{/if}}"
+        >
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span class="sidebar-text truncate">Hồ Sơ Các Bé (FTS)</span>
+        </a>
+
+        <!-- Thắp Nến Hy Vọng -->
+        <a
+          href="/warriors#candles"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium transition-all group"
+        >
+          <span class="text-base shrink-0 group-hover:scale-110 transition-transform">🕯️</span>
+          <span class="sidebar-text truncate">Ngọn Nến Hy Vọng</span>
+        </a>
+
+      </nav>
+    </div>
+
+    <!-- 🛡️ NHÓM 3: CỔNG ĐIỀU HÀNH & ĐỐI SOÁT (Role-Based Workspace) -->
+    <div>
+      <div class="sidebar-text px-3 mb-2 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
+        <span>Cổng Nghiệp Vụ</span>
+        <span class="text-[9px] text-slate-400 font-normal">RBAC 6 Cấp</span>
+      </div>
+      <nav class="space-y-1">
+        
+        <!-- Duyệt Biên Lai Viện Phí Napas247 (ORG_ADMIN, FAMILY, ADMIN) -->
+        {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "SUPER_ADMIN") (eq currentUser.role "ORG_ADMIN") (eq currentUser.role "FAMILY"))}}
+          <a
+            href="/donations/moderation"
+            class="flex items-center gap-3 px-3 py-2 rounded-xl font-medium transition-all group {{#if (eq currentPath '/donations/moderation')}}bg-emerald-50 text-emerald-800 font-bold border-l-4 border-emerald-600{{else}}text-slate-600 hover:bg-emerald-50/60 hover:text-emerald-800{{/if}}"
+          >
+            <span class="text-base shrink-0">💎</span>
+            <div class="sidebar-text flex-1 flex items-center justify-between truncate">
+              <span>Duyệt Biên Lai</span>
+              <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">NĐ 93</span>
+            </div>
+          </a>
+        {{/if}}
+
+        <!-- Duyệt Lời Chúc (ADMIN, SUPER_ADMIN, COORDINATOR, ORG_ADMIN) -->
+        {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "SUPER_ADMIN") (eq currentUser.role "COORDINATOR") (eq currentUser.role "ORG_ADMIN"))}}
+          <a
+            href="/tributes/moderation"
+            class="flex items-center gap-3 px-3 py-2 rounded-xl font-medium transition-all group {{#if (eq currentPath '/tributes/moderation')}}bg-indigo-50 text-indigo-800 font-bold border-l-4 border-indigo-600{{else}}text-slate-600 hover:bg-indigo-50/60 hover:text-indigo-800{{/if}}"
+          >
+            <span class="text-base shrink-0">🛡️</span>
+            <div class="sidebar-text flex-1 flex items-center justify-between truncate">
+              <span>Duyệt Lời Chúc</span>
+              <span class="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">Tiền Kiểm</span>
+            </div>
+          </a>
+        {{/if}}
+
+        <!-- Cổng Gia Đình (FAMILY) -->
+        {{#if (eq currentUser.role "FAMILY")}}
+          <a
+            href="/family/portal"
+            class="flex items-center gap-3 px-3 py-2 rounded-xl font-medium transition-all group {{#if (eq currentPath '/family/portal')}}bg-amber-50 text-amber-900 font-bold border-l-4 border-amber-600{{else}}text-slate-600 hover:bg-amber-50/60 hover:text-amber-900{{/if}}"
+          >
+            <span class="text-base shrink-0">👨‍👩‍👧</span>
+            <div class="sidebar-text flex-1 flex items-center justify-between truncate">
+              <span>Cổng Phụ Huynh</span>
+              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">Gia Đình</span>
+            </div>
+          </a>
+        {{/if}}
+
+        <!-- Trạng Thái Hệ Thống 3 Tầng -->
+        <a
+          href="/#system-health"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium transition-all group"
+        >
+          <span class="text-base shrink-0">⚙️</span>
+          <div class="sidebar-text flex-1 flex items-center justify-between truncate">
+            <span>Kiến Trúc 3-Tier</span>
+            <span class="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span> UP
+            </span>
+          </div>
+        </a>
+
+      </nav>
+    </div>
+
+  </div>
+
+  <!-- 3. Footer: User Profile & Quick Action -->
+  <div class="p-3 border-t border-slate-100 shrink-0 bg-slate-50/60">
+    {{#if currentUser}}
+      <div class="p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="h-8 w-8 rounded-lg bg-gradient-to-tr from-slate-800 to-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
+            {{currentUser.fullName.[0]}}
+          </div>
+          <div class="sidebar-text min-w-0">
+            <strong class="text-xs font-bold text-slate-900 block truncate">{{currentUser.fullName}}</strong>
+            <span class="text-[9px] font-extrabold uppercase tracking-wider block
+              {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "SUPER_ADMIN"))}}text-rose-600
+              {{else if (eq currentUser.role "ORG_ADMIN")}}text-teal-600
+              {{else if (eq currentUser.role "FAMILY")}}text-amber-600
+              {{else if (eq currentUser.role "COORDINATOR")}}text-indigo-600
+              {{else}}text-slate-500{{/if}}">
+              {{#if (eq currentUser.role "ORG_ADMIN")}}ADMIN BỆNH VIỆN{{else}}{{currentUser.role}}{{/if}}
+            </span>
+          </div>
+        </div>
+
+        <a
+          href="/auth/logout"
+          title="Đăng xuất"
+          class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </a>
+      </div>
+    {{else}}
+      <div class="grid grid-cols-2 gap-2">
+        <a
+          href="/auth/login"
+          class="inline-flex items-center justify-center py-2 px-3 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg shadow-sm transition-all"
+        >
+          Đăng nhập
+        </a>
+        <a
+          href="/auth/register"
+          class="inline-flex items-center justify-center py-2 px-3 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm transition-all"
+        >
+          Đăng ký
+        </a>
+      </div>
+    {{/if}}
+
+    <!-- Collapse / Expand Toolbar Button (Desktop) -->
+    <div class="hidden lg:flex items-center justify-between pt-2.5 mt-2 border-t border-slate-200/60 text-[11px] text-slate-400">
+      <span class="sidebar-text text-[10px]">Phiên bản đồ án v1.0</span>
+      <button
+        type="button"
+        onclick="toggleSidebarCollapse()"
+        class="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 transition-colors"
+        title="Thu gọn / Mở rộng Sidebar"
+      >
+        <svg id="collapse-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+</aside>
+
+<!-- ================= GLOBAL SANDBOX MODAL (CALLABLE FROM ANY PAGE) ================= -->
+<div id="modal-global-sandbox" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative border-2 border-amber-400 animate-scale-up">
+    <button
+      type="button"
+      onclick="document.getElementById('modal-global-sandbox').classList.add('hidden')"
+      class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1 cursor-pointer"
+    >
+      ✕
+    </button>
+
+    <div class="mb-4">
+      <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 mb-1">
+        <span>⚡</span> CHẾ ĐỘ THỬ NGHIỆM SANDBOX (LIVE DEMO)
+      </div>
+      <h3 class="text-lg font-extrabold text-slate-900">Mô Phỏng Chuyển Khoản 1-Click</h3>
+      <p class="text-xs text-slate-500 mt-1">
+        Cho phép Hội đồng Giám khảo thử nghiệm ngay tính năng cấp Chứng Nhận Số & Vinh Danh mà không mất tiền thật!
+      </p>
+    </div>
+
+    <form action="/donations/mock-sandbox-pay" method="POST" class="space-y-3.5">
+      <input type="hidden" name="child_id" value="28a6d5d9-59d4-4663-999f-004ec02eca54" />
+      <input type="hidden" name="slug" value="nguyen-minh-an-bo" />
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Tên nhà hảo tâm mô phỏng *</label>
+        <input
+          type="text"
+          name="donor_name"
+          required
+          value="Hội Đồng Giám Khảo BIT208V1"
+          class="w-full px-3 py-2 text-xs bg-amber-50/50 border border-amber-300 rounded-lg text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Số tiền thử nghiệm (VNĐ) *</label>
+        <select
+          name="amount"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+        >
+          <option value="200000">200.000 đ</option>
+          <option value="500000" selected>500.000 đ</option>
+          <option value="1000000">1.000.000 đ</option>
+          <option value="5000000">5.000.000 đ</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Lời chúc yêu thương gửi đến bé Minh An</label>
+        <input
+          type="text"
+          name="message"
+          value="Chúc bé mau bình phục và luôn kiên cường!"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+        />
+      </div>
+
+      <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+        <button
+          type="button"
+          onclick="document.getElementById('modal-global-sandbox').classList.add('hidden')"
+          class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
+        >
+          Hủy bỏ
+        </button>
+        <button
+          type="submit"
+          class="px-5 py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-amber-500 via-rose-500 to-amber-600 hover:from-amber-600 hover:to-rose-600 rounded-xl shadow-md transition-all cursor-pointer"
+        >
+          Kích Hoạt Thanh Toán 1-Click 🚀
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Client Script for Sidebar Interaction -->
+<script>
+  function toggleSidebar(open) {
+    const sidebar = document.getElementById('app-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebar || !backdrop) return;
+
+    if (open) {
+      sidebar.classList.remove('-translate-x-full');
+      backdrop.classList.remove('hidden');
+    } else {
+      sidebar.classList.add('-translate-x-full');
+      backdrop.classList.add('hidden');
+    }
+  }
+
+  function toggleSidebarCollapse() {
+    const sidebar = document.getElementById('app-sidebar');
+    const icon = document.getElementById('collapse-icon');
+    if (!sidebar) return;
+
+    const isCollapsed = sidebar.classList.contains('w-20');
+    if (isCollapsed) {
+      sidebar.classList.remove('w-20');
+      sidebar.classList.add('w-72');
+      if (icon) icon.classList.remove('rotate-180');
+      document.querySelectorAll('.sidebar-text').forEach(el => el.classList.remove('hidden'));
+      localStorage.setItem('sidebar_collapsed', 'false');
+    } else {
+      sidebar.classList.remove('w-72');
+      sidebar.classList.add('w-20');
+      if (icon) icon.classList.add('rotate-180');
+      document.querySelectorAll('.sidebar-text').forEach(el => el.classList.add('hidden'));
+      localStorage.setItem('sidebar_collapsed', 'true');
+    }
+  }
+
+  function openGlobalSandboxModal() {
+    const modal = document.getElementById('modal-global-sandbox');
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('sidebar_collapsed') === 'true' && window.innerWidth >= 1024) {
+      toggleSidebarCollapse();
+    }
+  });
+</script>
