@@ -1,0 +1,257 @@
+<div class="space-y-6">
+  
+  <!-- 1. Header & Actions -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
+          <span class="h-1.5 w-1.5 rounded-full bg-rose-600 animate-pulse"></span> Trung Tâm Chỉ Huy
+        </span>
+        <span class="text-xs text-slate-400">|</span>
+        <span class="text-xs font-semibold text-slate-500">Giám Sát Toàn Diện 6-Tier RBAC</span>
+      </div>
+      <h1 class="text-2xl font-black tracking-tight text-slate-900">Bảng Điều Hành Quản Trị</h1>
+      <p class="text-xs text-slate-500 mt-1">Tổng quan chỉ số người dùng, cơ sở y tế, dòng tiền minh bạch và nhật ký kiểm toán</p>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <a
+        href="/admin/users"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-sm hover:bg-slate-800 transition-all hover:scale-[1.01]"
+      >
+        <span>👥</span>
+        <span>Quản Lý & Cấp Tài Khoản</span>
+      </a>
+      <a
+        href="/donations/moderation"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold shadow-sm hover:bg-slate-50 transition-all"
+      >
+        <span>💎</span>
+        <span>Duyệt Sao Kê Viện Phí</span>
+      </a>
+    </div>
+  </div>
+
+  {{#if successMsg}}
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+      <span>✅</span>
+      <span>{{successMsg}}</span>
+    </div>
+  {{/if}}
+
+  {{#if errorMsg}}
+    <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-800 flex items-center gap-2">
+      <span>⚠️</span>
+      <span>{{errorMsg}}</span>
+    </div>
+  {{/if}}
+
+  <!-- 2. Top Metric Cards (4 Bảng chỉ số trọng tâm) -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    
+    <!-- CARD 1: TỔNG NGƯỜI DÙNG & PHÂN BỔ ROLE -->
+    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Người Dùng Hệ Thống</span>
+        <div class="h-8 w-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">
+          👥
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl font-black text-slate-900">{{metrics.users.total}} <span class="text-xs font-normal text-slate-400">tài khoản</span></div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Phân bổ theo vai trò & giới tính:</div>
+      </div>
+      <div class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100 text-[10px]">
+        <span class="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold border border-purple-100">Super: {{lookup metrics.users.byRole 'SUPER_ADMIN'}}</span>
+        <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-100">Admin: {{lookup metrics.users.byRole 'ADMIN'}}</span>
+        <span class="px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 font-bold border border-teal-100">Hospital: {{lookup metrics.users.byRole 'ORG_ADMIN'}}</span>
+        <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-bold border border-amber-100">Family: {{lookup metrics.users.byRole 'FAMILY'}}</span>
+      </div>
+      <div class="text-[10px] text-slate-400 flex items-center gap-2">
+        <span>Nam: <strong>{{lookup metrics.users.byGender 'MALE'}}</strong></span>
+        <span>•</span>
+        <span>Nữ: <strong>{{lookup metrics.users.byGender 'FEMALE'}}</strong></span>
+      </div>
+    </div>
+
+    <!-- CARD 2: CHIẾN BINH NHÍ -->
+    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Hồ Sơ Chiến Binh</span>
+        <div class="h-8 w-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm font-bold">
+          👶
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl font-black text-slate-900">{{metrics.children.total}} <span class="text-xs font-normal text-slate-400">bệnh nhi</span></div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Trạng thái điều trị & chăm sóc:</div>
+      </div>
+      <div class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100 text-[10px]">
+        <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-100">Chiến binh: {{lookup metrics.children.byStatus 'FIGHTER'}}</span>
+        <span class="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 font-bold border border-rose-100 animate-pulse">Khẩn cấp: {{lookup metrics.children.byStatus 'URGENT'}}</span>
+        <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold border border-slate-200">Thiên thần: {{lookup metrics.children.byStatus 'ANGEL'}}</span>
+      </div>
+    </div>
+
+    <!-- CARD 3: DÒNG TIỀN MINH BẠCH NAPAS247 -->
+    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Quỹ Viện Phí Minh Bạch</span>
+        <div class="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">
+          💎
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl font-black text-emerald-600">{{formatMoney metrics.finances.totalAmount}}</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Tổng số giao dịch đã đối soát:</div>
+      </div>
+      <div class="pt-1 border-t border-slate-100 text-xs font-bold text-slate-700 flex items-center justify-between">
+        <span>Giao dịch thành công:</span>
+        <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[11px]">{{metrics.finances.totalTransactions}} lệnh</span>
+      </div>
+      <div class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+        <span>🛡️ Nghị định 93/2021/NĐ-CP (Zero-touch)</span>
+      </div>
+    </div>
+
+    <!-- CARD 4: HÀNG ĐỢI KIỂM DUYỆT PENDING -->
+    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Hàng Đợi Chờ Duyệt</span>
+        <div class="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold">
+          ⏳
+        </div>
+      </div>
+      <div>
+        <div class="text-2xl font-black text-amber-600">
+          {{add metrics.pendingQueues.tributes (add metrics.pendingQueues.donations metrics.pendingQueues.wishes)}}
+          <span class="text-xs font-normal text-slate-400">yêu cầu</span>
+        </div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Tiền kiểm an toàn & đối soát:</div>
+      </div>
+      <div class="space-y-1 pt-1 border-t border-slate-100 text-xs">
+        <div class="flex items-center justify-between text-slate-600">
+          <span>Lời chúc & Voice Note:</span>
+          <strong class="text-amber-700 font-bold">{{metrics.pendingQueues.tributes}}</strong>
+        </div>
+        <div class="flex items-center justify-between text-slate-600">
+          <span>Biên lai viện phí Napas:</span>
+          <strong class="text-amber-700 font-bold">{{metrics.pendingQueues.donations}}</strong>
+        </div>
+        <div class="flex items-center justify-between text-slate-600">
+          <span>Điều ước mới đăng ký:</span>
+          <strong class="text-amber-700 font-bold">{{metrics.pendingQueues.wishes}}</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 3. BẢNG PHÂN BỔ BỆNH NHI THEO BỆNH VIỆN -->
+  <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm space-y-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>🏥</span>
+          <span>Mạng Lưới Bệnh Viện & Cơ Sở Điều Trị Liên Kết</span>
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5">Số lượng bệnh nhi và tài khoản viện thụ hưởng trực tiếp</p>
+      </div>
+      <a href="/organizations/portal" class="text-xs font-bold text-blue-600 hover:text-blue-700 underline">
+        Xem Cổng Bệnh Viện →
+      </a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-50/60 text-slate-600">
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Mã Viện</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Tên Bệnh Viện / Đơn Vị</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Tỉnh / Thành</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Số Bệnh Nhi</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Tài Khoản Viện (Napas247)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {{#each metrics.hospitalDistribution}}
+            <tr class="hover:bg-slate-50/80 transition-colors">
+              <td class="py-3 px-3 font-bold font-mono text-slate-800">
+                <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">{{this.code}}</span>
+              </td>
+              <td class="py-3 px-3 font-bold text-slate-900">{{this.name}}</td>
+              <td class="py-3 px-3 text-slate-600">{{this.province}}</td>
+              <td class="py-3 px-3">
+                <span class="px-2.5 py-1 rounded-full font-bold bg-rose-50 text-rose-700 border border-rose-100">
+                  {{this.child_count}} bé
+                </span>
+              </td>
+              <td class="py-3 px-3 font-mono text-slate-600">
+                <strong>{{this.bank_name}}</strong>: {{this.bank_account_number}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4. NHẬT KÝ KIỂM TOÁN HỆ THỐNG GẦN NHẤT (AUDIT TRAIL) -->
+  <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm space-y-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>📜</span>
+          <span>Nhật Ký Kiểm Toán Thời Gian Thực (Audit Trail)</span>
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5">Truy vết mọi hành động quản trị, cấp quyền và xác minh dữ liệu</p>
+      </div>
+      <span class="text-[10px] text-slate-400 font-mono">Top 10 sự kiện mới nhất</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-50/60 text-slate-600">
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Thời Gian</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Người Thực Hiện</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Hành Động</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Tài Nguyên</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Chi Tiết</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {{#each metrics.recentAuditLogs}}
+            <tr class="hover:bg-slate-50/80 transition-colors">
+              <td class="py-2.5 px-3 text-slate-500 whitespace-nowrap font-mono text-[11px]">
+                {{formatDate this.created_at}}
+              </td>
+              <td class="py-2.5 px-3">
+                <strong class="block text-slate-800">{{this.actor_name}}</strong>
+                <span class="text-[10px] text-slate-400 font-mono">{{this.actor_email}}</span>
+              </td>
+              <td class="py-2.5 px-3 font-mono font-bold text-slate-800">
+                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px]">{{this.action}}</span>
+              </td>
+              <td class="py-2.5 px-3 text-slate-600 font-mono text-[11px]">
+                {{this.resource_type}}
+              </td>
+              <td class="py-2.5 px-3 text-slate-500 font-mono text-[10px] truncate max-w-xs">
+                {{#if this.metadata}}
+                  {{lookup this.metadata 'childName'}} {{lookup this.metadata 'targetEmail'}} {{lookup this.metadata 'role'}}
+                {{else}}
+                  -
+                {{/if}}
+              </td>
+            </tr>
+          {{else}}
+            <tr>
+              <td colspan="5" class="py-6 text-center text-slate-400">Chưa có nhật ký kiểm toán nào được ghi nhận.</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

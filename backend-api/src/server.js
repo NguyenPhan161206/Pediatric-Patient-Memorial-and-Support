@@ -13,6 +13,7 @@ const sponsorshipRoutes = require('./features/sponsorships/sponsorship.routes');
 const organizationRoutes = require('./features/organizations/organization.routes');
 const donationRoutes = require('./features/donations/donation.routes');
 const wishRoutes = require('./features/wishes/wish.routes');
+const adminRoutes = require('./features/admin/admin.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -76,6 +77,7 @@ app.use('/api/v1/sponsorships', sponsorshipRoutes);
 app.use('/api/v1/organizations', organizationRoutes);
 app.use('/api/v1/donations', donationRoutes);
 app.use('/api/v1/wishes', wishRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // 404 Handler
 app.use((req, res) => {

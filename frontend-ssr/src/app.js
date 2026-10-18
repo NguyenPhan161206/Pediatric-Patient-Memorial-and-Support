@@ -14,6 +14,7 @@ const tributeRoutes = require('./modules/tributes/tribute.routes');
 const donationRoutes = require('./modules/donations/donation.routes');
 const wishRoutes = require('./modules/wishes/wish.routes');
 const orgRoutes = require('./modules/organizations/org.routes');
+const adminRoutes = require('./modules/admin/admin.routes');
 const { viewCertificate, renderWallOfHonor } = require('./modules/donations/donation.viewcontroller');
 
 const { formatDisplayName } = require('./shared/utils/nameFormatter');
@@ -43,6 +44,8 @@ app.engine('.hbs', engine({
       if (num === null || num === undefined) return '0 đ';
       return Number(num).toLocaleString('vi-VN') + ' đ';
     },
+    add: (a, b) => Number(a || 0) + Number(b || 0),
+    sub: (a, b) => Number(a || 0) - Number(b || 0),
     formatDisplayName: (user, viewerRole) => formatDisplayName(user, typeof viewerRole === 'string' ? viewerRole : null)
   }
 }));
@@ -128,6 +131,7 @@ app.use('/tributes', tributeRoutes);
 app.use('/donations', donationRoutes);
 app.use('/wishes', wishRoutes);
 app.use('/organizations', orgRoutes);
+app.use('/admin', adminRoutes);
 
 // 404 Handler
 app.use((req, res) => {

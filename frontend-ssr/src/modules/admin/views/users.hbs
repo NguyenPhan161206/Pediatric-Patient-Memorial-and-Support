@@ -1,0 +1,616 @@
+<div class="space-y-6">
+  
+  <!-- 1. Header & Actions -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
+          👥 Phân Quyền 6 Cấp
+        </span>
+        <span class="text-xs text-slate-400">|</span>
+        <span class="text-xs font-semibold text-slate-500">Chuẩn Hóa Danh Tính Đa Thành Tố</span>
+      </div>
+      <h1 class="text-2xl font-black tracking-tight text-slate-900">Quản Lý Người Dùng & Cấp Tài Khoản</h1>
+      <p class="text-xs text-slate-500 mt-1">Phân tách độc lập: Giới tính, Học vị, Họ tên, Chức vụ, Đơn vị và Mối quan hệ với bé</p>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <button
+        type="button"
+        onclick="openProvisionModal()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 text-white text-xs font-bold shadow-md shadow-rose-600/20 hover:from-rose-700 hover:to-rose-800 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+      >
+        <span>➕</span>
+        <span>Cấp Tài Khoản Mới</span>
+      </button>
+      <a
+        href="/admin/dashboard"
+        class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold shadow-sm hover:bg-slate-50 transition-all"
+      >
+        <span>📊</span>
+        <span>Dashboard</span>
+      </a>
+    </div>
+  </div>
+
+  {{#if successMsg}}
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+      <span>✅</span>
+      <span>{{successMsg}}</span>
+    </div>
+  {{/if}}
+
+  {{#if errorMsg}}
+    <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-800 flex items-center gap-2">
+      <span>⚠️</span>
+      <span>{{errorMsg}}</span>
+    </div>
+  {{/if}}
+
+  <!-- 2. Filter Bar -->
+  <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
+    <form method="GET" action="/admin/users" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <!-- Search Keyword -->
+      <div class="lg:col-span-2">
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tìm kiếm</label>
+        <input
+          type="text"
+          name="q"
+          placeholder="Tên, Email, SĐT, Chức vụ..."
+          value="{{currentFilter.q}}"
+          class="flex h-9 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-1 text-xs placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+        />
+      </div>
+
+      <!-- Filter Role -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Vai trò</label>
+        <select
+          name="role"
+          class="flex h-9 w-full rounded-xl border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+        >
+          <option value="">Tất cả vai trò</option>
+          <option value="SUPER_ADMIN" {{#if (eq currentFilter.role "SUPER_ADMIN")}}selected{{/if}}>SUPER_ADMIN</option>
+          <option value="ADMIN" {{#if (eq currentFilter.role "ADMIN")}}selected{{/if}}>ADMIN</option>
+          <option value="ORG_ADMIN" {{#if (eq currentFilter.role "ORG_ADMIN")}}selected{{/if}}>ORG_ADMIN (Bệnh viện)</option>
+          <option value="COORDINATOR" {{#if (eq currentFilter.role "COORDINATOR")}}selected{{/if}}>COORDINATOR</option>
+          <option value="FAMILY" {{#if (eq currentFilter.role "FAMILY")}}selected{{/if}}>FAMILY (Gia đình)</option>
+          <option value="MEMBER" {{#if (eq currentFilter.role "MEMBER")}}selected{{/if}}>MEMBER (Nhà hảo tâm)</option>
+        </select>
+      </div>
+
+      <!-- Filter Giới tính -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Giới tính</label>
+        <select
+          name="gender"
+          class="flex h-9 w-full rounded-xl border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+        >
+          <option value="">Tất cả</option>
+          <option value="MALE" {{#if (eq currentFilter.gender "MALE")}}selected{{/if}}>Nam (Ông/Anh/Mr.)</option>
+          <option value="FEMALE" {{#if (eq currentFilter.gender "FEMALE")}}selected{{/if}}>Nữ (Bà/Chị/Mrs.)</option>
+          <option value="OTHER" {{#if (eq currentFilter.gender "OTHER")}}selected{{/if}}>Khác</option>
+        </select>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-end gap-2">
+        <button
+          type="submit"
+          class="flex-1 h-9 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          <span>🔍</span>
+          <span>Lọc</span>
+        </button>
+        <a
+          href="/admin/users"
+          class="h-9 px-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 text-xs font-bold hover:bg-slate-200 transition-all flex items-center justify-center"
+          title="Đặt lại bộ lọc"
+        >
+          ✕
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- 3. Bảng Người Dùng Toàn Diện -->
+  <div class="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-600">
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Xưng Hô</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Họ & Tên Thật</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Vai Trò</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Chức Vụ / Đơn Vị / Bé</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Tên Hiển Thị Công Khai</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider">Liên Hệ</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider text-center">Trạng Thái</th>
+            <th class="py-3 px-3 font-bold uppercase tracking-wider text-right">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {{#each users}}
+            <tr class="hover:bg-slate-50/80 transition-colors {{#unless this.is_active}}bg-slate-50 opacity-60{{/unless}}">
+              
+              <!-- 1. Xưng hô & Giới tính -->
+              <td class="py-3 px-3 whitespace-nowrap">
+                <div class="flex items-center gap-1.5">
+                  {{#if (eq this.gender "MALE")}}
+                    <span class="text-blue-600 font-bold" title="Nam">♂</span>
+                  {{else if (eq this.gender "FEMALE")}}
+                    <span class="text-rose-500 font-bold" title="Nữ">♀</span>
+                  {{else}}
+                    <span class="text-slate-400" title="Khác">⚪</span>
+                  {{/if}}
+                  {{#if this.title_prefix}}
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                      {{this.title_prefix}}
+                    </span>
+                  {{/if}}
+                </div>
+              </td>
+
+              <!-- 2. Họ và Tên Thật -->
+              <td class="py-3 px-3">
+                <strong class="text-slate-900 block font-semibold text-xs">{{this.legalFullName}}</strong>
+                <span class="text-[10px] text-slate-400">
+                  Họ: <strong>{{this.last_name}}</strong> | Đệm: {{this.middle_name}} | Tên: <strong>{{this.first_name}}</strong>
+                </span>
+              </td>
+
+              <!-- 3. Vai trò (Badge) -->
+              <td class="py-3 px-3 whitespace-nowrap">
+                {{#if (eq this.role "SUPER_ADMIN")}}
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-purple-100 text-purple-800 border border-purple-200">SUPER ADMIN</span>
+                {{else if (eq this.role "ADMIN")}}
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-blue-100 text-blue-800 border border-blue-200">ADMIN</span>
+                {{else if (eq this.role "ORG_ADMIN")}}
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-teal-100 text-teal-800 border border-teal-200">HOSPITAL</span>
+                {{else if (eq this.role "COORDINATOR")}}
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200">COORDINATOR</span>
+                {{else if (eq this.role "FAMILY")}}
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">FAMILY</span>
+                {{else}}
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-slate-100 text-slate-800 border border-slate-200">MEMBER</span>
+                {{/if}}
+              </td>
+
+              <!-- 4. Chức vụ / Đơn vị / Quan hệ bé -->
+              <td class="py-3 px-3">
+                {{#if this.family_relation}}
+                  <div class="text-amber-800 font-semibold text-xs flex items-center gap-1">
+                    <span>👨‍👩‍👧</span>
+                    <span>{{this.family_relation}}</span>
+                    {{#if this.child_name}}
+                      <a href="/warriors/{{this.child_slug}}" class="text-rose-600 underline font-bold hover:text-rose-700">
+                        Bé {{this.child_name}}
+                      </a>
+                    {{/if}}
+                  </div>
+                {{/if}}
+
+                {{#if this.job_title}}
+                  <div class="text-slate-800 font-medium text-xs">{{this.job_title}}</div>
+                {{/if}}
+
+                {{#if this.organization_name}}
+                  <div class="text-[10px] text-teal-700 font-semibold flex items-center gap-1 mt-0.5">
+                    <span>🏥</span>
+                    <span>{{this.organization_name}}</span>
+                  </div>
+                {{/if}}
+
+                {{#if this.department}}
+                  <div class="text-[10px] text-slate-400">{{this.department}}</div>
+                {{/if}}
+              </td>
+
+              <!-- 5. Tên hiển thị công khai -->
+              <td class="py-3 px-3">
+                <span class="text-rose-700 font-bold block">{{this.displayName}}</span>
+                <span class="text-[9px] text-slate-400 font-mono">Chế độ: {{this.display_mode}}</span>
+              </td>
+
+              <!-- 6. Liên hệ -->
+              <td class="py-3 px-3 font-mono text-[11px]">
+                <div class="text-slate-800 font-medium">{{this.email}}</div>
+                {{#if this.phone_number}}
+                  <div class="text-slate-400 text-[10px]">{{this.phone_number}}</div>
+                {{/if}}
+              </td>
+
+              <!-- 7. Trạng thái -->
+              <td class="py-3 px-3 text-center whitespace-nowrap">
+                {{#if this.is_active}}
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Hoạt động
+                  </span>
+                {{else}}
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                    <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span> Bị khóa
+                  </span>
+                {{/if}}
+              </td>
+
+              <!-- 8. Thao tác -->
+              <td class="py-3 px-3 text-right whitespace-nowrap">
+                <div class="inline-flex items-center gap-1.5">
+                  <!-- Toggle Status Form -->
+                  <form action="/admin/users/{{this.id}}/toggle-status" method="POST" class="inline" onsubmit="return confirm('Bạn có chắc muốn {{#if this.is_active}}khóa{{else}}mở khóa{{/if}} tài khoản này?');">
+                    <button
+                      type="submit"
+                      class="px-2 py-1 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer {{#if this.is_active}}border-rose-200 text-rose-700 hover:bg-rose-50{{else}}border-emerald-200 text-emerald-700 hover:bg-emerald-50{{/if}}"
+                    >
+                      {{#if this.is_active}}Khóa{{else}}Mở{{/if}}
+                    </button>
+                  </form>
+
+                  <!-- Reset Password Form -->
+                  <form action="/admin/users/{{this.id}}/reset-password" method="POST" class="inline" onsubmit="return confirm('Đặt lại mật khẩu của {{this.email}} về Password@2026?');">
+                    <button
+                      type="submit"
+                      class="px-2 py-1 rounded-lg text-[11px] font-bold border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                      title="Đặt lại mật khẩu về Password@2026"
+                    >
+                      🔑 Reset
+                    </button>
+                  </form>
+                </div>
+              </td>
+
+            </tr>
+          {{else}}
+            <tr>
+              <td colspan="8" class="py-8 text-center text-slate-400">Không tìm thấy người dùng phù hợp với điều kiện tìm kiếm.</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Phân trang -->
+    {{#if (gt pagination.totalPages 1)}}
+      <div class="p-4 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500">
+        <span>Hiển thị trang <strong>{{pagination.page}}</strong> / {{pagination.totalPages}} (Tổng {{pagination.total}} người dùng)</span>
+        <div class="flex items-center gap-1.5">
+          {{#if pagination.hasPrevPage}}
+            <a href="?page={{sub pagination.page 1}}&role={{currentFilter.role}}&q={{currentFilter.q}}" class="px-3 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50">← Trước</a>
+          {{/if}}
+          {{#if pagination.hasNextPage}}
+            <a href="?page={{add pagination.page 1}}&role={{currentFilter.role}}&q={{currentFilter.q}}" class="px-3 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50">Tiếp →</a>
+          {{/if}}
+        </div>
+      </div>
+    {{/if}}
+  </div>
+
+</div>
+
+<!-- 4. MODAL CẤP TÀI KHOẢN MỚI (PROVISION USER MODAL) -->
+<div id="provisionModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar p-6 space-y-5 animate-in fade-in zoom-in duration-200">
+    
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div>
+        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+          <span>➕</span>
+          <span>Cấp Tài Khoản & Phân Quyền Người Dùng Mới</span>
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">Phân bổ đầy đủ các thuộc tính danh tính độc lập và gán đơn vị y tế/hồ sơ bé</p>
+      </div>
+      <button type="button" onclick="closeProvisionModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+        ✕
+      </button>
+    </div>
+
+    <form action="/admin/users/create" method="POST" class="space-y-4" id="provisionUserForm">
+      
+      <!-- HÀNG 1: GIỚI TÍNH & HỌC VỊ -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Giới tính (Tiền tố xưng hô) <span class="text-rose-500">*</span></label>
+          <select name="gender" id="p_gender" class="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs text-slate-800 font-medium">
+            <option value="MALE" selected>Nam (Ông / Anh - Mr.)</option>
+            <option value="FEMALE">Nữ (Bà / Chị - Mrs./Ms.)</option>
+            <option value="OTHER">Khác (Bạn - Mx.)</option>
+            <option value="UNSPECIFIED">Không xác định</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Học vị / Danh xưng chuyên môn</label>
+          <input type="text" name="title_prefix" id="p_title" placeholder="VD: BS., ThS., TS., PGS.TS., CN., ..." class="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs text-slate-800 font-medium" />
+        </div>
+      </div>
+
+      <!-- HÀNG 2: 3 THÀNH TỐ TÊN PHÂN TÁCH -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Họ <span class="text-rose-500">*</span></label>
+          <input type="text" name="last_name" id="p_last" required placeholder="Nguyễn" class="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs text-slate-800 font-medium" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tên đệm / lót</label>
+          <input type="text" name="middle_name" id="p_mid" placeholder="Văn" class="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs text-slate-800 font-medium" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tên chính <span class="text-rose-500">*</span></label>
+          <input type="text" name="first_name" id="p_first" required placeholder="An" class="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs text-slate-800 font-medium" />
+        </div>
+      </div>
+
+      <!-- HÀNG 3: EMAIL & MẬT KHẨU -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Email <span class="text-rose-500">*</span></label>
+          <input type="email" name="email" required placeholder="user@domain.com" class="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs text-slate-800 font-medium" />
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-700">Mật khẩu khởi tạo</label>
+            <button type="button" onclick="generateRandomPass()" class="text-[10px] text-blue-600 underline font-semibold">Tự sinh</button>
+          </div>
+          <input type="text" name="password" id="p_password" value="Password@2026" class="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-mono font-bold text-slate-800" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Số điện thoại</label>
+          <input type="tel" name="phone_number" placeholder="0912345678" class="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs text-slate-800 font-medium" />
+        </div>
+      </div>
+
+      <!-- HÀNG 4: CHỌN VAI TRÒ (ROLE) -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Phân quyền vai trò (Role) <span class="text-rose-500">*</span></label>
+        <select name="role" id="p_role" onchange="onRoleChange()" class="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs text-slate-800 font-bold">
+          <option value="ORG_ADMIN" selected>ORG_ADMIN - Quản trị viên Bệnh viện / Quỹ</option>
+          <option value="FAMILY">FAMILY - Phụ huynh / Gia đình chiến binh nhí</option>
+          <option value="COORDINATOR">COORDINATOR - Điều phối viên mạng lưới</option>
+          <option value="ADMIN">ADMIN - Quản trị viên vận hành hệ thống</option>
+          <option value="MEMBER">MEMBER - Thành viên / Nhà hảo tâm</option>
+        </select>
+      </div>
+
+      <!-- DYNAMIC SECTION 1: DÀNH CHO ORG_ADMIN & COORDINATOR -->
+      <div id="orgSection" class="p-3 rounded-xl bg-teal-50/60 border border-teal-100 space-y-3">
+        <div class="text-xs font-bold text-teal-900 flex items-center gap-1.5">
+          <span>🏥 Thông tin Bệnh Viện & Chức Vụ Công Tác</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Bệnh viện / Cơ sở y tế</label>
+            <select name="org_id" id="p_org_id" class="flex h-8 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800 font-medium">
+              <option value="">-- Chọn Bệnh Viện --</option>
+              {{#each organizations}}
+                <option value="{{this.id}}">{{this.name}} ({{this.code}})</option>
+              {{/each}}
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Chức vụ / Vị trí</label>
+            <input type="text" name="job_title" id="p_job_title" placeholder="VD: Bác sĩ điều trị / Trưởng khoa" class="flex h-8 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Khoa / Phòng ban</label>
+            <input type="text" name="department" placeholder="VD: Khoa Huyết học Ung bướu" class="flex h-8 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800" />
+          </div>
+        </div>
+      </div>
+
+      <!-- DYNAMIC SECTION 2: DÀNH CHO FAMILY -->
+      <div id="familySection" class="p-3 rounded-xl bg-amber-50/60 border border-amber-100 space-y-3 hidden">
+        <div class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+          <span>👨‍👩‍👧 Thông tin Giám Hộ & Liên Kết Chiến Binh Nhí</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Mối quan hệ với bé</label>
+            <select name="family_relation" id="p_family_relation" class="flex h-8 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800 font-medium">
+              <option value="Mẹ" selected>Mẹ của bé</option>
+              <option value="Bố">Bố của bé</option>
+              <option value="Bà">Bà của bé</option>
+              <option value="Ông">Ông của bé</option>
+              <option value="Người giám hộ">Người giám hộ hợp pháp</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Hồ sơ Chiến Binh Nhí liên kết</label>
+            <select name="child_id" class="flex h-8 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800 font-medium">
+              <option value="">-- Chọn hồ sơ bé --</option>
+              {{#each warriors}}
+                <option value="{{this.id}}">{{this.full_name}} ({{this.status}})</option>
+              {{/each}}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- HÀNG 5: TÙY CHỌN BẢO MẬT & HIỂN THỊ DANH TÍNH -->
+      <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+          <span>🛡️ Cấu hình hiển thị danh tính công khai</span>
+          <span class="text-[10px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Nghị định 13</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-700">
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" name="include_prefix_in_display" id="p_inc_prefix" class="rounded text-rose-600 focus:ring-rose-500">
+            <span>Hiện tiền tố xưng hô (Ông/Bà/Mr/Mrs)</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" name="include_title_in_display" id="p_inc_title" checked class="rounded text-rose-600 focus:ring-rose-500">
+            <span>Hiện học vị</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" name="include_relation_in_display" id="p_inc_relation" checked class="rounded text-rose-600 focus:ring-rose-500">
+            <span>Hiện mối quan hệ / Chức vụ</span>
+          </label>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-1">
+          <label class="flex items-center gap-1.5 p-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer">
+            <input type="radio" name="display_mode" value="FULL_NAME" checked class="text-rose-600">
+            <span>Đầy đủ họ tên</span>
+          </label>
+          <label class="flex items-center gap-1.5 p-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer">
+            <input type="radio" name="display_mode" value="HIDE_LAST_NAME" class="text-rose-600">
+            <span>Ẩn họ</span>
+          </label>
+          <label class="flex items-center gap-1.5 p-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer">
+            <input type="radio" name="display_mode" value="ABBREVIATED" class="text-rose-600">
+            <span>Viết tắt bảo mật</span>
+          </label>
+          <label class="flex items-center gap-1.5 p-1.5 rounded-lg border border-slate-200 bg-white cursor-pointer">
+            <input type="radio" name="display_mode" value="ANONYMOUS" class="text-rose-600">
+            <span>Ẩn danh</span>
+          </label>
+        </div>
+
+        <!-- LIVE PREVIEW REALTIME -->
+        <div class="pt-2 border-t border-slate-200 space-y-1 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500 font-medium">🇻🇳 Xem trước Tiếng Việt:</span>
+            <strong id="p_preview_vi" class="text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">BS. Nguyễn Văn An</strong>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500 font-medium">🇬🇧 English Translation:</span>
+            <strong id="p_preview_en" class="text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Mr. An Nguyen</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+        <button type="button" onclick="closeProvisionModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50">
+          Hủy bỏ
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 text-xs font-bold text-white hover:bg-slate-800 shadow-md">
+          ✨ Xác Nhận Cấp Tài Khoản
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<script>
+  function openProvisionModal() {
+    document.getElementById('provisionModal').classList.remove('hidden');
+    onRoleChange();
+    updateModalPreview();
+  }
+
+  function closeProvisionModal() {
+    document.getElementById('provisionModal').classList.add('hidden');
+  }
+
+  function onRoleChange() {
+    const role = document.getElementById('p_role').value;
+    const orgSec = document.getElementById('orgSection');
+    const famSec = document.getElementById('familySection');
+
+    if (role === 'ORG_ADMIN' || role === 'COORDINATOR') {
+      orgSec.classList.remove('hidden');
+      famSec.classList.add('hidden');
+    } else if (role === 'FAMILY') {
+      orgSec.classList.add('hidden');
+      famSec.classList.remove('hidden');
+    } else {
+      orgSec.classList.add('hidden');
+      famSec.classList.add('hidden');
+    }
+    updateModalPreview();
+  }
+
+  function generateRandomPass() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
+    let pass = 'Pass@';
+    for (let i = 0; i < 5; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('p_password').value = pass;
+  }
+
+  function updateModalPreview() {
+    const gender = document.getElementById('p_gender')?.value || 'MALE';
+    const title = (document.getElementById('p_title')?.value || '').trim();
+    const last = (document.getElementById('p_last')?.value || '').trim();
+    const mid = (document.getElementById('p_mid')?.value || '').trim();
+    const first = (document.getElementById('p_first')?.value || '').trim();
+    const showPrefix = document.getElementById('p_inc_prefix')?.checked;
+    const showTitle = document.getElementById('p_inc_title')?.checked;
+    const showRelation = document.getElementById('p_inc_relation')?.checked;
+    const role = document.getElementById('p_role')?.value;
+    const jobTitle = (document.getElementById('p_job_title')?.value || '').trim();
+    const familyRelation = document.getElementById('p_family_relation')?.value || 'Mẹ';
+
+    const selectedMode = document.querySelector('input[name="display_mode"]:checked')?.value || 'FULL_NAME';
+
+    if (selectedMode === 'ANONYMOUS') {
+      document.getElementById('p_preview_vi').textContent = 'Người dùng ẩn danh';
+      document.getElementById('p_preview_en').textContent = 'Anonymous User';
+      return;
+    }
+
+    let viName = [last, mid, first].filter(Boolean).join(' ') || 'Nguyễn Văn An';
+    if (selectedMode === 'HIDE_LAST_NAME') {
+      viName = [mid, first].filter(Boolean).join(' ') || first || 'Văn An';
+    } else if (selectedMode === 'ABBREVIATED') {
+      const midInit = mid ? mid.split(/\s+/).map(w => w[0].toUpperCase() + '.').join(' ') : '';
+      const firstInit = first ? first[0].toUpperCase() + '.' : '';
+      viName = [last, midInit, firstInit].filter(Boolean).join(' ') || 'Nguyễn V. A.';
+    } else if (selectedMode === 'FIRST_NAME_ONLY') {
+      viName = first || 'An';
+    }
+
+    let viSalutation = '';
+    if (showPrefix) {
+      if (gender === 'MALE') viSalutation = 'Ông';
+      else if (gender === 'FEMALE') viSalutation = 'Bà';
+      else if (gender === 'OTHER') viSalutation = 'Bạn';
+    }
+
+    let viTitle = (showTitle && title) ? title : '';
+    let viResult = [viSalutation, viTitle, viName].filter(Boolean).join(' ');
+
+    if (showRelation) {
+      if (role === 'FAMILY' && familyRelation) {
+        viResult += ` (${familyRelation})`;
+      } else if (jobTitle) {
+        viResult += ` (${jobTitle})`;
+      }
+    }
+    document.getElementById('p_preview_vi').textContent = viResult;
+
+    // EN preview
+    let enSalutation = '';
+    if (gender === 'MALE') enSalutation = 'Mr.';
+    else if (gender === 'FEMALE') enSalutation = 'Mrs.';
+    else if (gender === 'OTHER') enSalutation = 'Mx.';
+
+    let enTitle = (showTitle && title) ? title : '';
+    let enName = `${first || 'An'} ${last || 'Nguyen'}`;
+    if (selectedMode === 'FIRST_NAME_ONLY') enName = first || 'An';
+
+    let enResult = [enSalutation, enTitle, enName].filter(Boolean).join(' ');
+    if (showRelation && role === 'FAMILY') {
+      enResult += ` (Family Guardian)`;
+    }
+    document.getElementById('p_preview_en').textContent = enResult;
+  }
+
+  // Bind live listeners
+  ['p_gender', 'p_title', 'p_last', 'p_mid', 'p_first', 'p_inc_prefix', 'p_inc_title', 'p_inc_relation', 'p_job_title', 'p_family_relation'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', updateModalPreview);
+      el.addEventListener('change', updateModalPreview);
+    }
+  });
+
+  document.querySelectorAll('input[name="display_mode"]').forEach(r => {
+    r.addEventListener('change', updateModalPreview);
+  });
+</script>
