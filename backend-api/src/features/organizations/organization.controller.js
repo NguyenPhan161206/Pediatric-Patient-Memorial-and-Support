@@ -179,8 +179,139 @@ const updateOrganization = async (req, res) => {
   }
 };
 
+/**
+ * Lấy dữ liệu tổng hợp Dashboard dành riêng cho Bệnh viện (Dành cho ORG_ADMIN, ADMIN, SUPER_ADMIN)
+ */
+const getMyOrganizationPortal = async (req, res) => {
+  try {
+    let orgId = req.user.org_id;
+
+    // Nếu là Admin/Super Admin và có truyền query org_id
+    if ((!orgId || req.user.role === 'ADMIN' || req.user.role === 'SUPER_ADMIN') && req.query.org_id) {
+      orgId = req.query.org_id;
+    }
+
+    if (!orgId) {
+      const firstOrg = await db('organizations').where('is_active', true).first();
+      orgId = firstOrg ? firstOrg.id : null;
+    }
+
+    if (!orgId) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Không tìm thấy cơ sở y tế tương ứng với tài khoản này.'
+      });
+    }
+
+    const org = await db('organizations').where({ id: orgId }).first();
+    if (!org) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Cơ sở y tế không tồn tại.'
+      });
+    }
+
+    // 1. Thống kê số bệnh nhi
+    const childrenCountRes = await db('children')
+      .where({ organization_id: orgId })
+      .whereNull('deleted_at')
+      .count('id as count')
+      .first();
+    const totalChildren = parseInt(childrenCountRes.count, 10);
+
+    // 2. Thống kê viện phí đã tiếp sức & số giao dịch
+    const donationsStatsRes = await db('donations_transactions')
+      .where({ organization_id: orgId, status: 'VERIFIED' })
+      .select(
+        db.raw('COUNT(*) as verified_count'),
+        db.raw('COALESCE(SUM(amount), 0) as total_verified_amount')
+      )
+      .first();
+
+    const pendingDonationsRes = await db('donations_transactions')
+      .where({ organization_id: orgId, status: 'PENDING' })
+      .count('id as count')
+      .first();
+
+    // 3. Thống kê điều ước
+    const wishesStatsRes = await db('child_wishes as cw')
+      .join('children as c', 'cw.child_id', 'c.id')
+      .where({ 'c.organization_id': orgId })
+      .select(
+        db.raw('COUNT(cw.id) as total_wishes'),
+        db.raw("COUNT(CASE WHEN cw.status = 'PENDING' THEN 1 END) as pending_wishes")
+      )
+      .first();
+
+    // 4. Danh sách bệnh nhi thuộc viện
+    const warriors = await db('children as c')
+      .leftJoin('categories as cat', 'c.category_id', 'cat.id')
+      .where({ 'c.organization_id': orgId })
+      .whereNull('c.deleted_at')
+      .select(
+        'c.id',
+        'c.full_name',
+        'c.nickname',
+        'c.slug',
+        'c.status',
+        'c.dob',
+        'c.hometown',
+        'c.avatar_url',
+        'c.is_published',
+        'c.candle_count',
+        'c.created_at',
+        'cat.name as category_name'
+      )
+      .orderBy('c.created_at', 'desc');
+
+    // 5. Danh sách các giao dịch ủng hộ gần nhất của viện
+    const recentDonations = await db('donations_transactions as dt')
+      .join('children as c', 'dt.child_id', 'c.id')
+      .where({ 'dt.organization_id': orgId })
+      .select(
+        'dt.id',
+        'dt.transaction_code',
+        'dt.donor_name',
+        'dt.amount',
+        'dt.status',
+        'dt.certificate_code',
+        'dt.certificate_qr_token',
+        'dt.created_at',
+        'dt.verified_at',
+        'c.full_name as child_name',
+        'c.slug as child_slug'
+      )
+      .orderBy('dt.created_at', 'desc')
+      .limit(10);
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        organization: org,
+        stats: {
+          totalChildren,
+          totalVerifiedAmount: parseFloat(donationsStatsRes.total_verified_amount) || 0,
+          verifiedDonationCount: parseInt(donationsStatsRes.verified_count, 10) || 0,
+          pendingDonationCount: parseInt(pendingDonationsRes.count, 10) || 0,
+          totalWishes: parseInt(wishesStatsRes.total_wishes, 10) || 0,
+          pendingWishes: parseInt(wishesStatsRes.pending_wishes, 10) || 0
+        },
+        warriors,
+        recentDonations
+      }
+    });
+  } catch (error) {
+    console.error('[GET ORG PORTAL ERROR]', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Lỗi tải trang tổng quan Bệnh viện.'
+    });
+  }
+};
+
 module.exports = {
   getOrganizations,
   getOrganizationByIdOrCode,
-  updateOrganization
+  updateOrganization,
+  getMyOrganizationPortal
 };

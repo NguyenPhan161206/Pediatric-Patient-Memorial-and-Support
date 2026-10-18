@@ -13,6 +13,7 @@ const familyRoutes = require('./modules/family/family.routes');
 const tributeRoutes = require('./modules/tributes/tribute.routes');
 const donationRoutes = require('./modules/donations/donation.routes');
 const wishRoutes = require('./modules/wishes/wish.routes');
+const orgRoutes = require('./modules/organizations/org.routes');
 const { viewCertificate, renderWallOfHonor } = require('./modules/donations/donation.viewcontroller');
 
 const app = express();
@@ -123,6 +124,7 @@ app.use('/family', familyRoutes);
 app.use('/tributes', tributeRoutes);
 app.use('/donations', donationRoutes);
 app.use('/wishes', wishRoutes);
+app.use('/organizations', orgRoutes);
 
 // 404 Handler
 app.use((req, res) => {

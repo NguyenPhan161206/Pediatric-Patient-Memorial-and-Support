@@ -1,0 +1,275 @@
+<div class="space-y-6">
+  <!-- Header / Breadcrumbs -->
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
+        <a href="/" class="hover:text-slate-900 transition-colors">Trang chủ</a>
+        <span>/</span>
+        <span class="text-slate-900 font-semibold">Cổng Bệnh Viện & Quỹ Bảo Trợ</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
+        <span>🏥</span> {{organization.name}}
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Bảng điều khiển quản lý bệnh nhi, đối soát viện phí và tiếp nhận quà điều ước (ORG_ADMIN).
+      </p>
+    </div>
+
+    <!-- Switcher cho Admin/SuperAdmin nếu quản lý nhiều cơ sở -->
+    {{#if isSuperAdminOrAdmin}}
+      <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm shrink-0">
+        <span class="text-xs font-bold text-slate-500">Chuyển viện:</span>
+        <form method="GET" action="/organizations/portal" class="inline-block">
+          <select name="org_id" onchange="this.form.submit()" class="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900">
+            {{#each allOrganizations}}
+              <option value="{{this.id}}" {{#if (eq ../organization.id this.id)}}selected{{/if}}>{{this.name}}</option>
+            {{/each}}
+          </select>
+        </form>
+      </div>
+    {{/if}}
+  </div>
+
+  {{#if flashMessage}}
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 flex items-center gap-2 shadow-sm">
+      <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+      <span>{{flashMessage}}</span>
+    </div>
+  {{/if}}
+
+  {{#if errorMessage}}
+    <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-800 flex items-center gap-2 shadow-sm">
+      <svg class="w-4 h-4 text-rose-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+      <span>{{errorMessage}}</span>
+    </div>
+  {{/if}}
+
+  <!-- Metrics Row (Dashboard Stats) -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-xs font-medium text-slate-500">Bệnh Nhi Đang Điều Trị</div>
+      <div class="mt-2 text-2xl font-extrabold text-slate-900">{{stats.totalChildren}} bé</div>
+      <div class="mt-1 text-[11px] text-slate-400">Thuộc quản lý của cơ sở</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-xs font-medium text-slate-500">Tổng Viện Phí Đã Tiếp Sức</div>
+      <div class="mt-2 text-2xl font-extrabold text-rose-600 font-mono">{{formatMoney stats.totalVerifiedAmount}}</div>
+      <div class="mt-1 text-[11px] text-emerald-600 font-semibold">{{stats.verifiedDonationCount}} giao dịch hợp lệ</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-xs font-medium text-slate-500">Biên Lai Cần Đối Soát</div>
+      <div class="mt-2 text-2xl font-extrabold text-amber-600">{{stats.pendingDonationCount}} biên lai</div>
+      <a href="/donations/moderation" class="mt-1 inline-flex items-center text-[11px] text-indigo-600 hover:underline font-bold">
+        Đi tới Cổng Đối Soát &rarr;
+      </a>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-xs font-medium text-slate-500">Điều Ước Của Bé</div>
+      <div class="mt-2 text-2xl font-extrabold text-indigo-600">{{stats.totalWishes}} ước mơ</div>
+      <div class="mt-1 text-[11px] text-amber-600 font-semibold">{{stats.pendingWishes}} đang chờ trao tặng</div>
+    </div>
+  </div>
+
+  <!-- Phần 1: Danh sách Chiến Binh Nhí thuộc Bệnh viện -->
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+    <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100">
+      <div>
+        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+          <span>👶</span> Danh Sách Bệnh Nhi Thuộc Bệnh Viện ({{warriors.length}})
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">Hồ sơ bệnh án và nhật ký điều trị được xác nhận bởi Khoa Ung Bướu / CTXH</p>
+      </div>
+
+      <a 
+        href="/warriors/new"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.01]"
+      >
+        <span>➕</span> Thêm Bệnh Nhi Mới
+      </a>
+    </div>
+
+    {{#if warriors.length}}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {{#each warriors}}
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors flex items-start gap-3">
+            <a href="/warriors/{{this.slug}}" class="shrink-0">
+              <img src="{{this.avatar_url}}" alt="{{this.full_name}}" class="w-12 h-12 rounded-full object-cover border-2 border-slate-200" />
+            </a>
+            <div class="min-w-0 flex-1 text-xs">
+              <a href="/warriors/{{this.slug}}" class="font-bold text-slate-900 hover:text-rose-600 transition-colors block truncate">
+                {{this.full_name}} {{#if this.nickname}}<span class="text-slate-400 font-normal">({{this.nickname}})</span>{{/if}}
+              </a>
+              <p class="text-[11px] text-slate-500 truncate mt-0.5">{{this.category_name}} &bull; {{this.hometown}}</p>
+              
+              <div class="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-200/60">
+                <span class="font-semibold text-[10px] uppercase px-2 py-0.5 rounded-full {{#if (eq this.status 'FIGHTER')}}bg-amber-100 text-amber-800{{else if (eq this.status 'URGENT')}}bg-rose-100 text-rose-800{{else if (eq this.status 'RECOVERED')}}bg-emerald-100 text-emerald-800{{else}}bg-sky-100 text-sky-800{{/if}}">
+                  {{this.status}}
+                </span>
+                <a href="/warriors/{{this.slug}}" class="text-slate-600 hover:text-slate-900 font-semibold text-[11px]">
+                  Xem chi tiết &rarr;
+                </a>
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="text-xs text-slate-400 py-6 text-center">Chưa có hồ sơ bệnh nhi nào được liên kết với cơ sở này.</p>
+    {{/if}}
+  </div>
+
+  <!-- Phần 2: Nhật ký Đối Soát Viện Phí Mới Nhất -->
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+    <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100">
+      <div>
+        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+          <span>📑</span> Giao Dịch Tiếp Sức Viện Phí Gần Đây
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">Minh chứng đối soát tài chính theo quy định Nghị định 93/2021/NĐ-CP</p>
+      </div>
+
+      <a href="/donations/moderation" class="text-xs font-bold text-rose-600 hover:underline">
+        Xem toàn bộ biên lai chờ duyệt &rarr;
+      </a>
+    </div>
+
+    {{#if recentDonations.length}}
+      <div class="divide-y divide-slate-100 text-xs">
+        {{#each recentDonations}}
+          <div class="py-3 flex items-center justify-between flex-wrap gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <strong class="text-slate-900">{{this.donor_name}}</strong>
+                <span class="text-slate-400">&rarr;</span>
+                <span class="text-slate-700">bé <strong>{{this.child_name}}</strong></span>
+              </div>
+              <p class="text-[11px] text-slate-400 font-mono mt-0.5">
+                Mã GD: {{this.transaction_code}} &bull; {{formatDate this.created_at}}
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3 shrink-0">
+              <span class="font-mono font-bold text-rose-600 text-sm">{{formatMoney this.amount}}</span>
+              {{#if (eq this.status 'VERIFIED')}}
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                  Đã duyệt
+                </span>
+                {{#if this.certificate_qr_token}}
+                  <a href="/verify/cert/{{this.certificate_qr_token}}" target="_blank" class="text-indigo-600 hover:underline text-[11px] font-medium">
+                    Chứng nhận 📜
+                  </a>
+                {{/if}}
+              {{else}}
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                  Chờ đối soát
+                </span>
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="text-xs text-slate-400 py-6 text-center">Chưa có giao dịch tiếp sức viện phí nào tại cơ sở này.</p>
+    {{/if}}
+  </div>
+
+  <!-- Phần 3: Cập nhật thông tin phòng CTXH & Tài khoản viện phí -->
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+    <div class="pb-3 border-b border-slate-100">
+      <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+        <span>🏢</span> Thông Tin Phòng Công Tác Xã Hội & Tài Khoản Ngân Hàng Tiếp Nhận
+      </h3>
+      <p class="text-xs text-slate-500 mt-0.5">Thông tin hiển thị công khai để nhà hảo tâm quét mã VietQR và gửi quà trực tiếp</p>
+    </div>
+
+    <form action="/organizations/portal/{{organization.id}}/update" method="POST" class="space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Cán bộ / Trưởng phòng CTXH</label>
+          <input 
+            type="text" 
+            name="contact_person" 
+            value="{{organization.contact_person}}" 
+            class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Số điện thoại Hotline</label>
+          <input 
+            type="text" 
+            name="phone" 
+            value="{{organization.phone}}" 
+            class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Email tiếp nhận</label>
+          <input 
+            type="email" 
+            name="email" 
+            value="{{organization.email}}" 
+            class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Địa chỉ trụ sở / Phòng tiếp nhận quà</label>
+        <input 
+          type="text" 
+          name="address" 
+          value="{{organization.address}}" 
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+        />
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2 border-t border-slate-100">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Mã Ngân Hàng</label>
+          <input 
+            type="text" 
+            name="bank_code" 
+            value="{{organization.bank_code}}" 
+            class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 font-mono uppercase focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Tên Ngân Hàng</label>
+          <input 
+            type="text" 
+            name="bank_name" 
+            value="{{organization.bank_name}}" 
+            class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Số Tài Khoản</label>
+          <input 
+            type="text" 
+            name="bank_account_number" 
+            value="{{organization.bank_account_number}}" 
+            class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Tên Chủ Tài Khoản</label>
+          <input 
+            type="text" 
+            name="bank_account_name" 
+            value="{{organization.bank_account_name}}" 
+            class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 uppercase focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button 
+          type="submit" 
+          class="h-9 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.01]"
+        >
+          Lưu Cập Nhật Thông Tin 💾
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
