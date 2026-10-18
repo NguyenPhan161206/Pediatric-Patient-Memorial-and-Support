@@ -40,10 +40,20 @@ const login = async (req, res) => {
       id: user.id,
       email: user.email,
       fullName: user.full_name,
-      role: user.role
+      role: user.role,
+      org_id: user.org_id || null
     };
 
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '7d' });
+
+    // Lấy thông tin tổ chức nếu tài khoản trực thuộc bệnh viện/quỹ
+    let organization = null;
+    if (user.org_id) {
+      organization = await db('organizations')
+        .where({ id: user.org_id })
+        .select('id', 'name', 'code', 'logo_url', 'province')
+        .first();
+    }
 
     return res.status(200).json({
       status: 'success',
@@ -55,7 +65,9 @@ const login = async (req, res) => {
           email: user.email,
           fullName: user.full_name,
           phoneNumber: user.phone_number,
-          role: user.role
+          role: user.role,
+          org_id: user.org_id || null,
+          organization
         }
       }
     });
@@ -138,7 +150,7 @@ const getMe = async (req, res) => {
   try {
     const user = await db('users')
       .where({ id: req.user.id })
-      .select('id', 'email', 'full_name', 'phone_number', 'role', 'created_at')
+      .select('id', 'email', 'full_name', 'phone_number', 'role', 'org_id', 'created_at')
       .first();
 
     if (!user) {
@@ -146,6 +158,14 @@ const getMe = async (req, res) => {
         status: 'fail',
         message: 'Không tìm thấy thông tin tài khoản.'
       });
+    }
+
+    // Lấy thông tin tổ chức nếu có
+    let organization = null;
+    if (user.org_id) {
+      organization = await db('organizations')
+        .where({ id: user.org_id })
+        .first();
     }
 
     // Nếu là vai trò FAMILY, lấy thêm danh sách các bé thuộc quyền quản lý của gia đình
@@ -156,11 +176,24 @@ const getMe = async (req, res) => {
         .select('id', 'full_name', 'nickname', 'slug', 'status', 'is_published', 'candle_count');
     }
 
+    // Nếu là vai trò ORG_ADMIN, lấy danh sách các bé thuộc bệnh viện quản lý
+    let orgChildren = [];
+    if (user.role === 'ORG_ADMIN' && user.org_id) {
+      orgChildren = await db('children')
+        .where({ organization_id: user.org_id })
+        .whereNull('deleted_at')
+        .select('id', 'full_name', 'nickname', 'slug', 'status', 'is_published', 'candle_count');
+    }
+
     return res.status(200).json({
       status: 'success',
       data: {
-        user,
-        myChildren
+        user: {
+          ...user,
+          organization
+        },
+        myChildren,
+        orgChildren
       }
     });
   } catch (error) {

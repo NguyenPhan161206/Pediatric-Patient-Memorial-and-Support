@@ -20,9 +20,9 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           <!-- Full Text Search Input -->
-          <div class="lg:col-span-2">
+          <div>
             <label for="q" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Tìm kiếm toàn văn (Tên, ước mơ, quê quán)
+              Tìm kiếm toàn văn
             </label>
             <div class="relative">
               <input
@@ -30,7 +30,7 @@
                 id="q"
                 name="q"
                 value="{{query.q}}"
-                placeholder="Ví dụ: Bơ, cảnh sát, Hà Nội, bạch cầu..."
+                placeholder="Tên, ước mơ, quê..."
                 class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all"
               />
               <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -39,6 +39,25 @@
                 </svg>
               </div>
             </div>
+          </div>
+
+          <!-- Organization / Hospital Filter -->
+          <div>
+            <label for="organization" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Cơ sở Bệnh viện
+            </label>
+            <select
+              id="organization"
+              name="organization"
+              class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all"
+            >
+              <option value="">-- Tất cả bệnh viện / quỹ --</option>
+              {{#each organizations}}
+                <option value="{{this.code}}" {{#if (eq ../query.organization (lookup this 'code'))}}selected{{/if}}>
+                  {{this.name}}
+                </option>
+              {{/each}}
+            </select>
           </div>
 
           <!-- Category Filter -->
@@ -155,6 +174,13 @@
                   </span>
                   <span>📍 {{this.hometown}}</span>
                 </div>
+
+                {{#if this.organization_name}}
+                  <div class="mb-2 flex items-center gap-1.5 text-xs text-teal-800 font-medium bg-teal-50 border border-teal-100 px-2.5 py-1 rounded-lg">
+                    <span>🏥</span>
+                    <span class="truncate">{{this.organization_name}}</span>
+                  </div>
+                {{/if}}
 
                 <!-- Name & Nickname -->
                 <h3 class="text-lg font-bold text-slate-900 group-hover:text-rose-600 transition-colors">

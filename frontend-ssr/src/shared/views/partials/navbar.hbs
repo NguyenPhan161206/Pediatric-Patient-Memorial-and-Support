@@ -26,7 +26,7 @@
             <span>👨‍👩‍👧</span> Cổng Gia Đình
           </a>
         {{/if}}
-        {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "COORDINATOR"))}}
+        {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "SUPER_ADMIN") (eq currentUser.role "COORDINATOR") (eq currentUser.role "ORG_ADMIN"))}}
           <a href="/tributes/moderation" class="transition-colors hover:text-slate-900 flex items-center gap-1.5 text-indigo-700 font-medium">
             <span>🛡️</span> Duyệt Lời Chúc
           </a>
@@ -44,11 +44,12 @@
           <div class="hidden sm:flex flex-col text-right">
             <span class="text-xs font-bold text-slate-900 leading-tight">{{currentUser.fullName}}</span>
             <span class="text-[10px] uppercase font-semibold tracking-wider 
-              {{#if (eq currentUser.role "ADMIN")}}text-rose-600
+              {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "SUPER_ADMIN"))}}text-rose-600
+              {{else if (eq currentUser.role "ORG_ADMIN")}}text-teal-600
               {{else if (eq currentUser.role "FAMILY")}}text-amber-600
               {{else if (eq currentUser.role "COORDINATOR")}}text-indigo-600
               {{else}}text-slate-500{{/if}}">
-              {{currentUser.role}}
+              {{#if (eq currentUser.role "ORG_ADMIN")}}ADMIN BỆNH VIỆN{{else}}{{currentUser.role}}{{/if}}
             </span>
           </div>
 

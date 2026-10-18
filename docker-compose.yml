@@ -57,6 +57,7 @@ services:
       INTERNAL_API_SECRET: ${INTERNAL_API_SECRET:-super_secret_token_key_2026}
       NODE_ENV: production
     volumes:
+      - ./backend-api/src:/app/src
       - uploads_data:/app/uploads
     ports:
       - "${BACKEND_PORT:-5000}:5000"
@@ -83,6 +84,9 @@ services:
       BACKEND_API_URL: http://backend_api:5000/api/v1
       SESSION_SECRET: ${SESSION_SECRET:-warrior_hub_session_secret_2026}
       NODE_ENV: production
+    volumes:
+      - ./frontend-ssr/src:/app/src
+      - ./frontend-ssr/public:/app/public
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     depends_on:

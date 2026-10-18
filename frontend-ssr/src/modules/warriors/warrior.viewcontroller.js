@@ -7,18 +7,20 @@ const listWarriors = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = 6;
-    const { q, category, status, hometown } = req.query;
+    const { q, category, status, hometown, organization } = req.query;
 
-    const [warriorsRes, categoriesRes] = await Promise.all([
+    const [warriorsRes, categoriesRes, orgsRes] = await Promise.all([
       apiClient.get('/warriors', {
-        params: { page, limit, q, category, status, hometown }
+        params: { page, limit, q, category, status, hometown, organization }
       }),
-      apiClient.get('/warriors/categories/all')
+      apiClient.get('/warriors/categories/all').catch(() => ({ data: [] })),
+      apiClient.get('/organizations').catch(() => ({ data: { organizations: [] } }))
     ]);
 
     const warriors = warriorsRes.data || [];
     const pagination = warriorsRes.pagination || { total: 0, page: 1, totalPages: 1 };
     const categories = categoriesRes.data || [];
+    const organizations = orgsRes.data ? (orgsRes.data.organizations || []) : [];
 
     // Tạo mảng số trang để render thanh pagination
     const pageNumbers = [];
@@ -35,7 +37,8 @@ const listWarriors = async (req, res) => {
       pagination,
       pageNumbers,
       categories,
-      query: { q, category, status, hometown }
+      organizations,
+      query: { q, category, status, hometown, organization }
     });
   } catch (error) {
     console.error('[FRONTEND LIST WARRIORS ERROR]', error);

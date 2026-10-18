@@ -17,9 +17,27 @@ const ensureFamilyOwnership = async (req, res, next) => {
       });
     }
 
-    // Super Admin có toàn quyền
-    if (currentUser.role === 'ADMIN') {
+    // Super Admin có toàn quyền hệ thống
+    if (currentUser.role === 'ADMIN' || currentUser.role === 'SUPER_ADMIN') {
       return next();
+    }
+
+    // Nếu là Admin Đơn Vị (ORG_ADMIN)
+    if (currentUser.role === 'ORG_ADMIN') {
+      const child = await db('children')
+        .where({ id: childId })
+        .first();
+
+      if (!child) {
+        return res.status(404).json({
+          status: 'fail',
+          message: 'Không tìm thấy hồ sơ chiến binh nhí này.'
+        });
+      }
+
+      if (child.organization_id && child.organization_id === currentUser.org_id) {
+        return next(); // Đúng bé thuộc bệnh viện/cơ sở quản lý
+      }
     }
 
     // Nếu là vai trò FAMILY
@@ -40,13 +58,13 @@ const ensureFamilyOwnership = async (req, res, next) => {
       }
     }
 
-    // Điều phối viên (COORDINATOR) được phép sửa nếu họ là người tạo hồ sơ ban đầu
+    // Điều phối viên (COORDINATOR) được phép sửa nếu họ là người tạo hồ sơ ban đầu hoặc cùng viện
     if (currentUser.role === 'COORDINATOR') {
       const child = await db('children')
         .where({ id: childId })
         .first();
 
-      if (child && child.created_by === currentUser.id) {
+      if (child && (child.created_by === currentUser.id || (currentUser.org_id && child.organization_id === currentUser.org_id))) {
         return next();
       }
     }

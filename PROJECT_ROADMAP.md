@@ -12,7 +12,7 @@
 - [Giai đoạn 2: Cơ Sở Dữ Liệu 3NF, Trigger FTS & Dữ Liệu Mẫu Ban Đầu](#giai-đoạn-2-cơ-sở-dữ-liệu-3nf-trigger-fts--dữ-liệu-mẫu-ban-đầu) `[ĐÃ HOÀN THÀNH]`
 - [Giai đoạn 3: Xây Dựng Lõi Backend REST API & Kịch Bản CI/CD](#giai-đoạn-3-xây-dựng-lõi-backend-rest-api--kịch-bản-cicd) `[ĐÃ HOÀN THÀNH]`
 - [Giai đoạn 4: Hoàn Thiện Giao Diện Người Dùng Frontend SSR](#giai-đoạn-4-hoàn-thiện-giao-diện-người-dùng-frontend-ssr) `[ĐÃ HOÀN THÀNH]`
-- [Giai đoạn 5: Nâng Cấp Không Gian Đa Đơn Vị (Multi-Tenancy) & Phân Quyền 6 Cấp `ORG_ADMIN`](#giai-đoạn-5-nâng-cấp-không-gian-đa-đơn-vị-multi-tenancy--phân-quyền-6-cấp-org_admin) `[GIAI ĐOẠN TIẾP THEO - SẮP THỰC HIỆN]`
+- [Giai đoạn 5: Nâng Cấp Không Gian Đa Đơn Vị (Multi-Tenancy) & Phân Quyền 6 Cấp `ORG_ADMIN`](#giai-đoạn-5-nâng-cấp-không-gian-đa-đơn-vị-multi-tenancy--phân-quyền-6-cấp-org_admin) `[ĐÃ HOÀN THÀNH]`
 - [Giai đoạn 6: Bộ Tứ Tính Năng Mũi Nhọn "Ăn Điểm Tuyệt Đối" (The 4 Showcase Dazzlers)](#giai-đoạn-6-bộ-tứ-tính-năng-mũi-nhọn-ăn-điểm-tuyệt-đối-the-4-showcase-dazzlers) `[KẾ TIẾP]`
 - [Giai đoạn 7: Kiểm Thử Đầu Cuối (E2E), Tối Ưu Hiệu Năng & An Toàn Bảo Mật](#giai-đoạn-7-kiểm-thử-đầu-cuối-e2e-tối-ưu-hiệu-năng--an-toàn-bảo-mật) `[DỰ KIẾN]`
 - [Giai đoạn 8: Đóng Gói Báo Cáo Học Thuật, Slide & Kịch Bản Demo 5 Phút](#giai-đoạn-8-đóng-gói-báo-cáo-học-thuật-slide--kịch-bản-demo-5-phút) `[VỀ ĐÍCH]`
@@ -50,19 +50,19 @@
 
 ---
 
-### Giai đoạn 5: Nâng Cấp Không Gian Đa Đơn Vị (Multi-Tenancy) & Phân Quyền 6 Cấp `ORG_ADMIN` `[GIAI ĐOẠN TIẾP THEO - SẮP THỰC HIỆN]`
+### Giai đoạn 5: Nâng Cấp Không Gian Đa Đơn Vị (Multi-Tenancy) & Phân Quyền 6 Cấp `ORG_ADMIN` `[ĐÃ HOÀN THÀNH]`
 *Mục tiêu: Đưa hệ thống lên chuẩn Enterprise liên viện, giải quyết triệt để tính độc lập dữ liệu giữa Bệnh viện Nhi TW, Bệnh viện K Tân Triều và các Quỹ bảo trợ.*
-- [ ] **5.1.** Tạo Knex Migration `20261018000001_create_organizations_and_extend_rbac.js`:
+- [x] **5.1.** Tạo Knex Migration `20261018000001_create_organizations_and_extend_rbac.js`:
   - Tạo bảng `organizations` (`id`, `name`, `code`, `logo_url`, `bank_account_number`, `bank_code`, `contact_person`, `phone`, `address`, `lat`, `lng`).
   - Alter bảng `users`: Bổ sung cột `org_id` (khóa ngoại trỏ về `organizations`), mở rộng ENUM vai trò bổ sung giá trị `ORG_ADMIN`.
   - Alter bảng `children`: Bổ sung cột `organization_id` (khóa ngoại trỏ về `organizations`).
-- [ ] **5.2.** Tạo Knex Seed `02_seed_organizations_and_org_admins.js`:
+- [x] **5.2.** Tạo Knex Seed `02_seed_organizations_and_org_admins.js`:
   - Nạp 3 tổ chức mẫu: *Bệnh viện Nhi Trung Ương* (Hà Nội), *Bệnh viện K Tân Triều* (Hà Nội), *Quỹ Nụ Cười Em* (TP.HCM).
-  - Nạp tài khoản `ORG_ADMIN` chuyên biệt cho từng viện (ví dụ: `orgadmin.nhitrunguong@warriorhub.vn`, `orgadmin.ktan-trieu@warriorhub.vn`).
+  - Nạp tài khoản `ORG_ADMIN` chuyên biệt cho từng viện (ví dụ: `orgadmin.nhi@warriorhub.vn`, `orgadmin.k@warriorhub.vn`).
   - Gán các bé mẫu hiện có về từng đơn vị bệnh viện tương ứng.
-- [ ] **5.3.** Nâng cấp Middleware Backend RBAC (`auth.middleware.js`):
-  - Hỗ trợ phân quyền đa tầng: `SUPER_ADMIN` có quyền toàn cục; `ORG_ADMIN` bị chặn tự động ở tầng truy vấn nếu cố tình thao tác trên bệnh nhi hoặc điều phối viên của viện khác (ngăn chặn IDOR).
-- [ ] **5.4.** Xây dựng API và Cổng Thông Tin Bệnh Viện:
+- [x] **5.3.** Nâng cấp Middleware Backend RBAC (`auth.middleware.js`, `ensureOrgScope.js`, `ensureFamilyOwnership.js`):
+  - Hỗ trợ phân quyền đa tầng: `SUPER_ADMIN` có quyền toàn cục; `ORG_ADMIN` bị chặn tự động ở tầng truy vấn nếu cố tình thao tác trên bệnh nhi hoặc viện khác (ngăn chặn IDOR).
+- [x] **5.4.** Xây dựng API và Cổng Thông Tin Bệnh Viện:
   - Endpoint `GET /api/v1/organizations`: Lấy danh sách bệnh viện kèm tọa độ bản đồ.
   - Bộ lọc Bệnh viện điều trị trên giao diện Danh mục Chiến binh ngoài trang chủ.
 

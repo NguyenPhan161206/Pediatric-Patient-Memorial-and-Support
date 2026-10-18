@@ -68,11 +68,13 @@
             </div>
             <div>
               <span class="text-slate-400 block">Nơi điều trị:</span>
-              <strong class="text-slate-800">{{warrior.hospital_name}}</strong>
+              <strong class="text-teal-700 font-bold flex items-center gap-1">
+                <span>🏥</span> {{#if warrior.organization_name}}{{warrior.organization_name}}{{else}}Cơ sở y tế điều trị{{/if}}
+              </strong>
             </div>
             <div>
-              <span class="text-slate-400 block">Giai đoạn:</span>
-              <strong class="text-slate-800">{{warrior.treatment_stage}}</strong>
+              <span class="text-slate-400 block">Khu vực:</span>
+              <strong class="text-slate-800">{{#if warrior.organization_province}}{{warrior.organization_province}}{{else}}{{warrior.hometown}}{{/if}}</strong>
             </div>
           </div>
 
@@ -294,16 +296,21 @@
           <div class="space-y-2 text-xs bg-emerald-50/60 p-3.5 rounded-xl border border-emerald-100 mb-4">
             <div>
               <span class="text-slate-500 block">Ngân hàng thụ hưởng:</span>
-              <strong class="text-slate-900">{{warrior.bank_code}}</strong>
+              <strong class="text-slate-900">{{#if warrior.bank_code}}{{warrior.bank_code}}{{else}}{{warrior.org_bank_name}}{{/if}}</strong>
             </div>
             <div>
-              <span class="text-slate-500 block">Số tài khoản chính chủ:</span>
-              <strong class="text-emerald-700 font-mono text-sm tracking-wider">{{warrior.bank_account_number}}</strong>
+              <span class="text-slate-500 block">Số tài khoản:</span>
+              <strong class="text-emerald-700 font-mono text-sm tracking-wider">{{#if warrior.bank_account_number}}{{warrior.bank_account_number}}{{else}}{{warrior.org_bank_account_number}}{{/if}}</strong>
             </div>
             <div>
-              <span class="text-slate-500 block">Chủ tài khoản (Người thụ hưởng/giám hộ):</span>
-              <strong class="text-slate-900">{{warrior.bank_account_name}}</strong>
+              <span class="text-slate-500 block">Chủ tài khoản (Người thụ hưởng/viện phí):</span>
+              <strong class="text-slate-900">{{#if warrior.bank_account_name}}{{warrior.bank_account_name}}{{else}}{{warrior.org_bank_account_name}}{{/if}}</strong>
             </div>
+            {{#if warrior.organization_name}}
+              <div class="pt-1.5 border-t border-emerald-200/60 text-[11px] text-teal-800 font-medium">
+                🏥 Trực thuộc: <strong>{{warrior.organization_name}}</strong>
+              </div>
+            {{/if}}
             {{#if warrior.hospital_patient_code}}
               <div>
                 <span class="text-slate-500 block">Mã bệnh nhân viện phí:</span>

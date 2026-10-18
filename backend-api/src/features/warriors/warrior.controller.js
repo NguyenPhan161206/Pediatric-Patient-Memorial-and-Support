@@ -24,11 +24,12 @@ const getWarriors = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 6;
     const offset = (page - 1) * limit;
 
-    const { category, status, hometown, q } = req.query;
+    const { category, status, hometown, organization, q } = req.query;
 
     // Base query: Chỉ lấy hồ sơ chưa bị xóa mềm và đã được xuất bản
     let baseQuery = db('children as c')
       .leftJoin('categories as cat', 'c.category_id', 'cat.id')
+      .leftJoin('organizations as org', 'c.organization_id', 'org.id')
       .whereNull('c.deleted_at')
       .andWhere('c.is_published', true);
 
@@ -41,6 +42,14 @@ const getWarriors = async (req, res) => {
     if (category) {
       baseQuery = baseQuery.andWhere(function() {
         this.where('cat.slug', category).orWhere('cat.id', isNaN(category) ? 0 : Number(category));
+      });
+    }
+
+    // Lọc theo cơ sở Bệnh viện / Tổ chức (code hoặc id)
+    if (organization) {
+      baseQuery = baseQuery.andWhere(function() {
+        this.where('org.code', organization.toUpperCase())
+          .orWhere('org.id', isNaN(organization) && organization.includes('-') ? organization : null);
       });
     }
 
@@ -79,7 +88,11 @@ const getWarriors = async (req, res) => {
         'c.bank_verified',
         'c.bank_code',
         'cat.name as category_name',
-        'cat.slug as category_slug'
+        'cat.slug as category_slug',
+        'org.name as organization_name',
+        'org.code as organization_code',
+        'org.logo_url as organization_logo',
+        'org.province as organization_province'
       )
       .orderByRaw("CASE WHEN c.status = 'URGENT' THEN 1 ELSE 2 END ASC")
       .orderBy('c.created_at', 'desc')
@@ -116,9 +129,22 @@ const getWarriorBySlug = async (req, res) => {
 
     const warrior = await db('children as c')
       .leftJoin('categories as cat', 'c.category_id', 'cat.id')
+      .leftJoin('organizations as org', 'c.organization_id', 'org.id')
       .where('c.slug', slug)
       .whereNull('c.deleted_at')
-      .select('c.*', 'cat.name as category_name', 'cat.slug as category_slug')
+      .select(
+        'c.*',
+        'cat.name as category_name',
+        'cat.slug as category_slug',
+        'org.name as organization_name',
+        'org.code as organization_code',
+        'org.logo_url as organization_logo',
+        'org.bank_name as org_bank_name',
+        'org.bank_code as org_bank_code',
+        'org.bank_account_number as org_bank_account_number',
+        'org.bank_account_name as org_bank_account_name',
+        'org.province as organization_province'
+      )
       .first();
 
     if (!warrior) {
@@ -138,12 +164,16 @@ const getWarriorBySlug = async (req, res) => {
       .where({ child_id: warrior.id, status: 'APPROVED' })
       .orderBy('created_at', 'desc');
 
-    // Sinh link mã VietQR nếu tài khoản đã được thẩm định
+    // Sinh link mã VietQR: Ưu tiên tài khoản riêng của bé, nếu không lấy tài khoản chính thức của Viện
     let vietqrUrl = null;
-    if (warrior.bank_verified && warrior.bank_code && warrior.bank_account_number) {
-      const bankCode = warrior.bank_code.trim();
-      const accountNo = warrior.bank_account_number.trim();
-      const accountName = encodeURIComponent(warrior.bank_account_name || '');
+    const finalBankCode = warrior.bank_code || warrior.org_bank_code;
+    const finalAccountNo = warrior.bank_account_number || warrior.org_bank_account_number;
+    const finalAccountName = warrior.bank_account_name || warrior.org_bank_account_name;
+
+    if (finalBankCode && finalAccountNo) {
+      const bankCode = finalBankCode.trim();
+      const accountNo = finalAccountNo.trim();
+      const accountName = encodeURIComponent(finalAccountName || '');
       const addInfo = encodeURIComponent(`ChienBinhNhi ${warrior.slug}`);
       vietqrUrl = `https://img.vietqr.io/image/${bankCode}-${accountNo}-compact2.png?amount=0&addInfo=${addInfo}&accountName=${accountName}`;
     }
@@ -216,7 +246,8 @@ const createWarrior = async (req, res) => {
       bank_account_name: bank_account_name ? bank_account_name.toUpperCase().trim() : null,
       bank_verified: false, // Mặc định chưa thẩm định
       is_published: true,   // Cho phép hiển thị nếu Admin/Coordinator tạo
-      created_by: req.user.id
+      created_by: req.user.id,
+      organization_id: req.user.org_id || req.body.organization_id || null
     }).returning('*');
 
     await logAudit({

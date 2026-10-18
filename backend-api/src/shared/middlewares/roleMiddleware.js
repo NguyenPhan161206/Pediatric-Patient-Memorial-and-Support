@@ -11,7 +11,11 @@ const requireRoles = (...allowedRoles) => {
       });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    const userRole = req.user.role;
+    const isSuperAdmin = (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') && 
+                         (allowedRoles.includes('ADMIN') || allowedRoles.includes('SUPER_ADMIN'));
+
+    if (!allowedRoles.includes(userRole) && !isSuperAdmin) {
       return res.status(403).json({
         status: 'fail',
         message: `Quyền truy cập bị từ chối. Hành động này chỉ dành cho: ${allowedRoles.join(', ')}.`
