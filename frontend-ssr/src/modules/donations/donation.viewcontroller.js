@@ -101,7 +101,7 @@ const submitProof = async (req, res) => {
  */
 const mockSandboxPay = async (req, res) => {
   try {
-    const { child_id, donor_name, amount, message, slug } = req.body;
+    const { child_id, donor_name, amount, message, slug, open_cert } = req.body;
 
     const response = await apiClient.post('/donations/mock-sandbox-pay', {
       child_id,
@@ -112,8 +112,17 @@ const mockSandboxPay = async (req, res) => {
 
     const resData = response.data || response;
     const certCode = (resData.certificate && resData.certificate.code) || '';
+    const qrToken = (resData.certificate && resData.certificate.qrToken) || '';
     req.session.donationSuccess = `Thanh toán mô phỏng thành công! Đã cấp Chứng Nhận Tri Ân Số (${certCode}).`;
-    res.redirect(`/warriors/${slug}#wall-of-honor`);
+
+    if (open_cert === 'true' && qrToken) {
+      return res.redirect(`/verify/cert/${qrToken}`);
+    }
+
+    if (slug) {
+      return res.redirect(`/warriors/${slug}#wall-of-honor`);
+    }
+    return res.redirect('/wall-of-honor');
   } catch (error) {
     console.error('[MOCK SANDBOX FRONTEND ERROR]', error);
     res.redirect(`/warriors/${req.body.slug || ''}`);

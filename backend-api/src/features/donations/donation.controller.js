@@ -104,9 +104,19 @@ const mockSandboxPay = async (req, res) => {
       });
     }
 
-    const child = await db('children as c')
-      .leftJoin('organizations as org', 'c.organization_id', 'org.id')
-      .where('c.id', child_id)
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(child_id);
+    let childQuery = db('children as c')
+      .leftJoin('organizations as org', 'c.organization_id', 'org.id');
+
+    if (isUuid) {
+      childQuery = childQuery.where(function() {
+        this.where('c.id', child_id).orWhere('c.slug', child_id);
+      });
+    } else {
+      childQuery = childQuery.where('c.slug', child_id);
+    }
+
+    const child = await childQuery
       .select('c.*', 'org.code as org_code', 'org.name as org_name')
       .first();
 
