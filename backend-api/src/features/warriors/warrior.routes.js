@@ -11,11 +11,11 @@ router.get('/', warriorController.getWarriors);
 router.get('/categories/all', warriorController.getCategories);
 router.get('/:slug', warriorController.getWarriorBySlug);
 
-// Protected routes (Admin / Coordinator)
+// Protected routes (Admin / Coordinator / Org Admin)
 router.post(
   '/',
   authenticateToken,
-  requireRoles('ADMIN', 'COORDINATOR'),
+  requireRoles('ADMIN', 'SUPER_ADMIN', 'COORDINATOR', 'ORG_ADMIN'),
   warriorController.createWarrior
 );
 

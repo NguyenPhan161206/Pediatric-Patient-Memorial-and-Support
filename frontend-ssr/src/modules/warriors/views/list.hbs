@@ -2,16 +2,27 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <!-- Header Section -->
-    <div class="mb-8">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 mb-3">
-        <span>🌟</span> Cổng Lưu Trữ & Tri Ân
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 mb-3">
+          <span>🌟</span> Cổng Lưu Trữ & Tri Ân
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          Danh Sách Các Chiến Binh Nhí
+        </h1>
+        <p class="mt-2 text-slate-600 text-base max-w-2xl">
+          Nơi tôn vinh nghị lực kiên cường, lưu giữ ký ức tươi đẹp và trao gửi hy vọng đến những thiên thần nhỏ trên hành trình vượt qua bệnh tật hiểm nghèo.
+        </p>
       </div>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-        Danh Sách Các Chiến Binh Nhí
-      </h1>
-      <p class="mt-2 text-slate-600 text-base max-w-2xl">
-        Nơi tôn vinh nghị lực kiên cường, lưu giữ ký ức tươi đẹp và trao gửi hy vọng đến những thiên thần nhỏ trên hành trình vượt qua bệnh tật hiểm nghèo.
-      </p>
+
+      {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "SUPER_ADMIN") (eq currentUser.role "COORDINATOR") (eq currentUser.role "ORG_ADMIN"))}}
+        <a 
+          href="/warriors/new"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02] shrink-0"
+        >
+          <span>➕</span> Tạo Hồ Sơ Bé Mới
+        </a>
+      {{/if}}
     </div>
 
     <!-- Search & Filter Bar (FTS + Metadata Filters) -->

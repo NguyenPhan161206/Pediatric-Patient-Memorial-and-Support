@@ -6,6 +6,10 @@ const router = express.Router();
 // Danh sách chiến binh (kèm FTS, Filter, Phân trang)
 router.get('/', warriorViewController.listWarriors);
 
+// Tạo mới hồ sơ bé (Admin, Coordinator, Org Admin)
+router.get('/new', warriorViewController.renderCreateWarrior);
+router.post('/new', warriorViewController.handleCreateWarrior);
+
 // Chi tiết hồ sơ bé theo slug
 router.get('/:slug', warriorViewController.warriorDetail);
 

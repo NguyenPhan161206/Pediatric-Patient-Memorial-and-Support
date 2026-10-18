@@ -131,9 +131,107 @@ const lightCandle = async (req, res) => {
   }
 };
 
+/**
+ * Hiển thị form tạo mới hồ sơ Chiến Binh Nhí (GET /warriors/new)
+ */
+const renderCreateWarrior = async (req, res) => {
+  try {
+    const user = req.session.user;
+    if (!user || !['ADMIN', 'SUPER_ADMIN', 'COORDINATOR', 'ORG_ADMIN'].includes(user.role)) {
+      return res.redirect('/auth/login?redirect=/warriors/new');
+    }
+
+    const [categoriesRes, orgsRes] = await Promise.all([
+      apiClient.get('/warriors/categories/all').catch(() => ({ data: [] })),
+      apiClient.get('/organizations').catch(() => ({ data: { organizations: [] } }))
+    ]);
+
+    const categories = categoriesRes.data || [];
+    const organizations = orgsRes.data ? (orgsRes.data.organizations || []) : [];
+
+    res.render('warriors/views/create', {
+      title: 'Tạo Hồ Sơ Chiến Binh Nhí Mới',
+      categories,
+      organizations,
+      user,
+      errorMsg: req.session.createWarriorError || null
+    });
+    delete req.session.createWarriorError;
+  } catch (error) {
+    console.error('[RENDER CREATE WARRIOR ERROR]', error);
+    res.redirect('/warriors');
+  }
+};
+
+/**
+ * Xử lý tạo mới hồ sơ Chiến Binh Nhí (POST /warriors/new)
+ */
+const handleCreateWarrior = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const token = req.session.token;
+
+    if (!user || !token || !['ADMIN', 'SUPER_ADMIN', 'COORDINATOR', 'ORG_ADMIN'].includes(user.role)) {
+      return res.redirect('/auth/login?redirect=/warriors/new');
+    }
+
+    const {
+      full_name,
+      nickname,
+      dob,
+      hometown,
+      status,
+      category_id,
+      dream_summary,
+      story_html,
+      avatar_url,
+      sponsorship_type,
+      organization_id,
+      hospital_patient_code,
+      bank_code,
+      bank_account_number,
+      bank_account_name
+    } = req.body;
+
+    const response = await apiClient.post(
+      '/warriors',
+      {
+        full_name,
+        nickname,
+        dob,
+        hometown,
+        status,
+        category_id,
+        dream_summary,
+        story_html,
+        avatar_url,
+        sponsorship_type,
+        organization_id: organization_id || user.org_id || null,
+        hospital_patient_code,
+        bank_code,
+        bank_account_number,
+        bank_account_name
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    const newChild = response.data || response;
+    const childSlug = newChild.slug || '';
+    res.redirect(`/warriors/${childSlug}`);
+  } catch (error) {
+    console.error('[HANDLE CREATE WARRIOR ERROR]', error);
+    req.session.createWarriorError = error.message || 'Lỗi khi tạo hồ sơ. Vui lòng kiểm tra lại thông tin.';
+    res.redirect('/warriors/new');
+  }
+};
+
 module.exports = {
   listWarriors,
   warriorDetail,
   submitTribute,
-  lightCandle
+  lightCandle,
+  renderCreateWarrior,
+  handleCreateWarrior
 };
