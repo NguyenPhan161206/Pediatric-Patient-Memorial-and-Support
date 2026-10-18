@@ -43,6 +43,7 @@ const showHospitalPortal = async (req, res) => {
       stats: portalData.stats,
       warriors: portalData.warriors,
       recentDonations: portalData.recentDonations,
+      staff: portalData.staff || [],
       allOrganizations,
       isSuperAdminOrAdmin: role === 'ADMIN' || role === 'SUPER_ADMIN',
       flashMessage,

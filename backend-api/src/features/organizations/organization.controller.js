@@ -1,5 +1,6 @@
 const db = require('../../shared/database/knex');
 const { logAudit } = require('../../shared/audit/auditLogger');
+const { formatDisplayName } = require('../../shared/utils/nameFormatter');
 
 /**
  * Lấy danh sách các Bệnh viện / Tổ chức (Hỗ trợ hiển thị Bản Đồ Hy Vọng và Bộ lọc)
@@ -284,6 +285,21 @@ const getMyOrganizationPortal = async (req, res) => {
       .orderBy('dt.created_at', 'desc')
       .limit(10);
 
+    // 6. Danh sách cán bộ nhân viên y tế / điều phối viên thuộc viện
+    const rawStaff = await db('users')
+      .where({ org_id: orgId })
+      .select(
+        'id', 'full_name', 'last_name', 'middle_name', 'first_name',
+        'gender', 'title_prefix', 'job_title', 'department', 'email',
+        'phone_number', 'role', 'is_active', 'display_mode'
+      )
+      .orderBy('created_at', 'asc');
+
+    const staff = rawStaff.map(s => ({
+      ...s,
+      displayName: formatDisplayName(s)
+    }));
+
     return res.status(200).json({
       status: 'success',
       data: {
@@ -297,7 +313,8 @@ const getMyOrganizationPortal = async (req, res) => {
           pendingWishes: parseInt(wishesStatsRes.pending_wishes, 10) || 0
         },
         warriors,
-        recentDonations
+        recentDonations,
+        staff
       }
     });
   } catch (error) {

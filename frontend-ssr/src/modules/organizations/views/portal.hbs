@@ -173,7 +173,59 @@
     {{/if}}
   </div>
 
-  <!-- Phần 3: Cập nhật thông tin phòng CTXH & Tài khoản viện phí -->
+  <!-- Phần 3: Đội ngũ Cán Bộ Y Tế & Điều Phối Viên Thuộc Viện -->
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+    <div class="pb-3 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
+      <div>
+        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+          <span>👨‍⚕️</span> Đội Ngũ Cán Bộ Y Tế & Điều Phối Viên Bệnh Viện ({{staff.length}})
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">Bác sĩ điều trị, chuyên viên CTXH và điều phối viên phụ trách các chiến binh nhí</p>
+      </div>
+      <span class="text-xs text-slate-600 bg-slate-100 px-3 py-1 rounded-full font-semibold">
+        {{organization.name}}
+      </span>
+    </div>
+
+    {{#if staff.length}}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {{#each staff}}
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:shadow-sm transition-all space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="h-9 w-9 rounded-full bg-teal-100 text-teal-800 font-bold text-xs flex items-center justify-center shrink-0">
+                  {{#if (eq this.gender 'MALE')}}BS.{{else if (eq this.gender 'FEMALE')}}BS.{{else}}NV{{/if}}
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900">{{formatDisplayName this}}</h4>
+                  <p class="text-[11px] text-teal-700 font-medium">
+                    {{#if this.job_title}}{{this.job_title}}{{else}}{{this.role}}{{/if}}
+                  </p>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{#if (eq this.role 'ORG_ADMIN')}}bg-amber-100 text-amber-800{{else}}bg-blue-100 text-blue-800{{/if}}">
+                {{this.role}}
+              </span>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200/60 text-[11px] text-slate-500 space-y-1">
+              {{#if this.department}}
+                <div>Khoa / Phòng: <strong class="text-slate-700">{{this.department}}</strong></div>
+              {{/if}}
+              <div>Email: <span class="font-mono text-slate-700">{{this.email}}</span></div>
+              {{#if this.phone_number}}
+                <div>Điện thoại: <span class="font-mono text-slate-700">{{this.phone_number}}</span></div>
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="text-xs text-slate-400 py-6 text-center">Chưa có thông tin nhân sự y tế liên kết với cơ sở này.</p>
+    {{/if}}
+  </div>
+
+  <!-- Phần 4: Cập nhật thông tin phòng CTXH & Tài khoản viện phí -->
   <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
     <div class="pb-3 border-b border-slate-100">
       <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">

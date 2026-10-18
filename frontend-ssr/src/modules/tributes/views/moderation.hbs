@@ -74,6 +74,19 @@
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 leading-relaxed italic">
                   "{{this.content}}"
                 </div>
+
+                <!-- Voice Note Audio Auditing -->
+                {{#if this.audio_url}}
+                  <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200/80 space-y-1.5">
+                    <div class="flex items-center justify-between text-[11px] font-bold text-indigo-900">
+                      <span class="flex items-center gap-1.5">
+                        <span>🎙️</span> Thẩm định tin nhắn thoại / Lời ru {{#if this.duration_seconds}}({{this.duration_seconds}}s){{/if}}
+                      </span>
+                      <span class="text-[10px] text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200 font-mono">Bản ghi âm tiền kiểm</span>
+                    </div>
+                    <audio controls class="w-full h-8" src="{{this.audio_url}}"></audio>
+                  </div>
+                {{/if}}
               </div>
 
               <!-- Action Buttons -->
