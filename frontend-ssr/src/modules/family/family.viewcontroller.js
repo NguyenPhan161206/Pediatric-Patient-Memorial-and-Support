@@ -40,6 +40,19 @@ const showPortal = async (req, res) => {
       }));
     }
 
+    // Lấy danh sách điều ước cho từng bé
+    const childrenWithWishes = await Promise.all(
+      myChildren.map(async (child) => {
+        try {
+          const wishesRes = await apiClient.get(`/wishes/warrior/${child.slug || child.id}`);
+          const wishes = (wishesRes.data && wishesRes.data.wishes) || [];
+          return { ...child, wishes };
+        } catch (e) {
+          return { ...child, wishes: [] };
+        }
+      })
+    );
+
     const flashMessage = req.session.flashMessage || null;
     const errorMessage = req.session.errorMessage || null;
     delete req.session.flashMessage;
@@ -48,7 +61,7 @@ const showPortal = async (req, res) => {
     res.render('family/views/portal', {
       title: 'Cổng Quản Lý Gia Đình',
       user,
-      myChildren,
+      myChildren: childrenWithWishes,
       flashMessage,
       errorMessage
     });
@@ -116,8 +129,43 @@ const updateDiary = async (req, res) => {
   res.redirect('/family/portal');
 };
 
+/**
+ * Đăng ký điều ước mới cho con (POST /family/wishes/create)
+ */
+const createChildWish = async (req, res) => {
+  if (!req.session.user || !req.session.token) {
+    return res.redirect('/auth/login');
+  }
+
+  const { child_id, title, description, category, estimated_cost } = req.body;
+
+  try {
+    await apiClient.post(
+      '/wishes',
+      {
+        child_id,
+        title,
+        description,
+        category,
+        estimated_cost: estimated_cost ? parseFloat(estimated_cost) : null
+      },
+      {
+        headers: { Authorization: `Bearer ${req.session.token}` }
+      }
+    );
+
+    req.session.flashMessage = 'Đã đăng ký điều ước mới của bé thành công! Món quà ước mơ đã được kết nối lên Cây Điều Ước trực tuyến.';
+  } catch (error) {
+    console.error('[CREATE WISH ERROR]', error);
+    req.session.errorMessage = error.message || 'Lỗi khi gửi điều ước của bé.';
+  }
+
+  res.redirect('/family/portal');
+};
+
 module.exports = {
   showPortal,
   unpublishChild,
-  updateDiary
+  updateDiary,
+  createChildWish
 };

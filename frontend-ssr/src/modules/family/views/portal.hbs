@@ -154,6 +154,126 @@
               </form>
             </div>
 
+            <!-- Cây Điều Ước Của Con -->
+            <div class="pt-4 border-t border-slate-100 space-y-4">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span>🌟</span> Cây Điều Ước Của Con
+                </h4>
+                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                  {{this.wishes.length}} điều ước
+                </span>
+              </div>
+
+              <!-- Danh sách điều ước đã đăng ký -->
+              {{#if this.wishes.length}}
+                <div class="space-y-2">
+                  {{#each this.wishes}}
+                    <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between flex-wrap gap-2 text-xs">
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                          <span class="font-bold text-slate-900">{{this.title}}</span>
+                          <span class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200">
+                            {{this.category}}
+                          </span>
+                        </div>
+                        {{#if this.description}}
+                          <p class="text-[11px] text-slate-500 mt-0.5 italic">"{{this.description}}"</p>
+                        {{/if}}
+                        {{#if this.sponsor_name}}
+                          <p class="text-[11px] text-blue-700 mt-0.5">
+                            💌 Nhà hảo tâm nhận trao: <strong>{{this.sponsor_name}}</strong>
+                          </p>
+                        {{/if}}
+                      </div>
+
+                      <div class="flex items-center gap-3 shrink-0">
+                        {{#if this.estimated_cost}}
+                          <span class="font-mono font-bold text-slate-700">{{formatMoney this.estimated_cost}}</span>
+                        {{/if}}
+
+                        {{#if (eq this.status 'PENDING')}}
+                          <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px]">
+                            Đang chờ trao
+                          </span>
+                        {{else if (eq this.status 'PROMISED')}}
+                          <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px]">
+                            Đã có người nhận
+                          </span>
+                        {{else if (eq this.status 'FULFILLED')}}
+                          <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                            Đã nhận quà
+                          </span>
+                        {{/if}}
+                      </div>
+                    </div>
+                  {{/each}}
+                </div>
+              {{/if}}
+
+              <!-- Form đăng ký điều ước mới -->
+              <form action="/family/wishes/create" method="POST" class="p-4 rounded-xl bg-amber-50/40 border border-amber-200/80 space-y-3">
+                <input type="hidden" name="child_id" value="{{this.id}}" />
+                
+                <div class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                  <span>🎁</span> Đăng Ký Thêm Điều Ước Mới Cho Bé:
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div class="sm:col-span-2">
+                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1">Món quà ước mơ của con *</label>
+                    <input 
+                      type="text" 
+                      name="title" 
+                      required 
+                      placeholder="VD: Hộp màu vẽ sáp, Gấu bông thỏ trắng, Xe đồ chơi..."
+                      class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1">Phân loại</label>
+                    <select name="category" class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+                      <option value="TOY">🧸 Đồ chơi & Giải trí</option>
+                      <option value="BOOK">📚 Sách truyện & Học tập</option>
+                      <option value="CLOTHES">👕 Quần áo & Giày dép</option>
+                      <option value="EXPERIENCE">🎡 Trải nghiệm & Ước mơ</option>
+                      <option value="OTHER">🎁 Điều ước khác</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1">Chi phí ước tính (VNĐ)</label>
+                    <input 
+                      type="number" 
+                      name="estimated_cost" 
+                      placeholder="VD: 150000"
+                      class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1">Lời tâm sự / Mong muốn của bé</label>
+                    <input 
+                      type="text" 
+                      name="description" 
+                      placeholder="Con ước có hộp màu để vẽ tặng các bác sĩ..."
+                      class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                </div>
+
+                <div class="flex justify-end pt-1">
+                  <button 
+                    type="submit" 
+                    class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-sm transition-all hover:scale-[1.01]"
+                  >
+                    <span>Gửi Điều Ước Lên Cây 🌟</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
             <!-- Emergency Unpublish Zone (Điều 33 Luật Trẻ em 2016) -->
             {{#if this.is_published}}
               <div class="p-5 rounded-2xl bg-rose-50/60 border-2 border-rose-200 space-y-3">

@@ -12,4 +12,7 @@ router.post('/unpublish/:id', familyViewController.unpublishChild);
 // Cập nhật nhật ký điều trị của bé
 router.post('/update/:id', familyViewController.updateDiary);
 
+// Đăng ký điều ước mới của bé
+router.post('/wishes/create', familyViewController.createChildWish);
+
 module.exports = router;
