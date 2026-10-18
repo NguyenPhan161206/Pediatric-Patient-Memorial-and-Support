@@ -18,7 +18,15 @@ exports.seed = async function(knex) {
 
   const passwordHash = await bcrypt.hash('Password@2026', 10);
 
-  // 1. Chèn người dùng mẫu (5-Tier RBAC)
+  // 1. Chèn người dùng mẫu (6-Tier RBAC)
+  const [superadminUser] = await knex('users').insert({
+    email: 'superadmin@warrior.org',
+    password_hash: passwordHash,
+    full_name: 'Đặng Quốc Anh (Tổng Quản Trị Hệ Thống)',
+    phone_number: '0909999999',
+    role: 'SUPER_ADMIN'
+  }).returning('*');
+
   const [adminUser] = await knex('users').insert({
     email: 'admin@warrior.org',
     password_hash: passwordHash,
@@ -48,6 +56,22 @@ exports.seed = async function(knex) {
     password_hash: passwordHash,
     full_name: 'Lê Văn Hải (Bố Bé Mai Chi)',
     phone_number: '0977889900',
+    role: 'FAMILY'
+  }).returning('*');
+
+  const [familyTuanKiet] = await knex('users').insert({
+    email: 'family.tuankiet@gmail.com',
+    password_hash: passwordHash,
+    full_name: 'Trần Văn Đức (Bố Bé Tuấn Kiệt)',
+    phone_number: '0971234567',
+    role: 'FAMILY'
+  }).returning('*');
+
+  const [familyThienAn] = await knex('users').insert({
+    email: 'family.thienan@gmail.com',
+    password_hash: passwordHash,
+    full_name: 'Phạm Thu Trang (Mẹ Bé Thiên Ân)',
+    phone_number: '0982345678',
     role: 'FAMILY'
   }).returning('*');
 
@@ -159,6 +183,13 @@ exports.seed = async function(knex) {
     avatar_url: 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=600&auto=format&fit=crop&q=80',
     candle_count: 580,
     created_by: adminUser.id,
+    family_user_id: familyTuanKiet.id,
+    sponsorship_type: 'HOSPITAL',
+    hospital_patient_code: 'BVK-2024-5512',
+    bank_code: 'VCB',
+    bank_account_number: '0011004455667',
+    bank_account_name: 'QUY NGAY MAI TUOI SANG - BV K',
+    bank_verified: true,
     is_published: true
   }).returning('*');
 
@@ -179,6 +210,13 @@ exports.seed = async function(knex) {
     avatar_url: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&auto=format&fit=crop&q=80',
     candle_count: 890,
     created_by: adminUser.id,
+    family_user_id: familyThienAn.id,
+    sponsorship_type: 'HOSPITAL',
+    hospital_patient_code: 'Q开展-2023-0199',
+    bank_code: 'MB',
+    bank_account_number: '088899998888',
+    bank_account_name: 'QUY NU CUOI EM VIET NAM',
+    bank_verified: true,
     is_published: true
   }).returning('*');
 
@@ -197,6 +235,22 @@ exports.seed = async function(knex) {
       guardian_user_id: familyMaiChi.id,
       document_proof_url: 'https://placehold.co/800x600/e2e8f0/1e293b?text=Giay+Khai+Sinh+Mai+Chi',
       child_consent_verified: false,
+      legal_terms_agreed: true,
+      ip_address: '127.0.0.1'
+    },
+    {
+      child_id: childTuanKiet.id,
+      guardian_user_id: familyTuanKiet.id,
+      document_proof_url: 'https://placehold.co/800x600/e2e8f0/1e293b?text=Giay+Khai+Sinh+Tuan+Kiet',
+      child_consent_verified: true,
+      legal_terms_agreed: true,
+      ip_address: '127.0.0.1'
+    },
+    {
+      child_id: childThienAn.id,
+      guardian_user_id: familyThienAn.id,
+      document_proof_url: 'https://placehold.co/800x600/e2e8f0/1e293b?text=Giay+Khai+Sinh+Thien+An',
+      child_consent_verified: true,
       legal_terms_agreed: true,
       ip_address: '127.0.0.1'
     }

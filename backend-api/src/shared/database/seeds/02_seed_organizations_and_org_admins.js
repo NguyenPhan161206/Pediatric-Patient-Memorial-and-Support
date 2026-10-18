@@ -95,6 +95,15 @@ exports.seed = async function(knex) {
         role: 'ORG_ADMIN',
         org_id: kTanTrieu.id,
         is_active: true
+      },
+      {
+        email: 'orgadmin.nucuoiem@warriorhub.vn',
+        password_hash: passwordHash,
+        full_name: 'Chị Đặng Thùy Dương (Admin Quỹ Nụ Cười Em)',
+        phone_number: '0908885566',
+        role: 'ORG_ADMIN',
+        org_id: nuCuoiEm.id,
+        is_active: true
       }
     ])
     .onConflict('email')

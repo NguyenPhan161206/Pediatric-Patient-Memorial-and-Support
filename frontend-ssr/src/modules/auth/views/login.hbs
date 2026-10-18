@@ -56,21 +56,84 @@
         </button>
       </form>
 
-      <!-- Gợi ý tài khoản mẫu -->
+      <!-- Gợi ý tài khoản mẫu theo từng Role (1-Click Fill) -->
       <div class="mt-8 pt-6 border-t border-slate-100">
-        <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tài Khoản Kiểm Thử Mẫu (Mật khẩu: Password@2026):</h4>
-        <div class="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200/60 font-mono">
-          <div class="flex justify-between items-center cursor-pointer hover:text-rose-600" onclick="fillCreds('admin@warrior.org')">
-            <span>👑 Super Admin:</span>
-            <span class="font-bold underline">admin@warrior.org</span>
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-xs font-semibold text-slate-700 uppercase tracking-wider">Tài Khoản Kiểm Thử (1-Click Fill)</h4>
+          <span class="text-[11px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Pass: Password@2026</span>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <!-- Role Quản trị -->
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Quản Trị Viên (System Admin)</div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button type="button" onclick="fillCreds('superadmin@warrior.org')" class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-purple-200 bg-purple-50/50 hover:bg-purple-100/70 text-purple-900 transition-colors text-left">
+                <span class="font-medium truncate">👑 Super Admin</span>
+                <span class="text-[10px] font-mono text-purple-600 ml-1 shrink-0">Điền</span>
+              </button>
+              <button type="button" onclick="fillCreds('admin@warrior.org')" class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-rose-200 bg-rose-50/50 hover:bg-rose-100/70 text-rose-900 transition-colors text-left">
+                <span class="font-medium truncate">🛡️ System Admin</span>
+                <span class="text-[10px] font-mono text-rose-600 ml-1 shrink-0">Điền</span>
+              </button>
+            </div>
           </div>
-          <div class="flex justify-between items-center cursor-pointer hover:text-amber-600" onclick="fillCreds('family.minhan@gmail.com')">
-            <span>👨‍👩‍👧 Mẹ Bé Minh An:</span>
-            <span class="font-bold underline">family.minhan@gmail.com</span>
+
+          <!-- Role Bệnh viện / Quỹ -->
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Bệnh Viện & Quỹ (ORG_ADMIN)</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+              <button type="button" onclick="fillCreds('orgadmin.nhi@warriorhub.vn')" class="flex items-center justify-between px-2 py-1.5 rounded-lg border border-blue-200 bg-blue-50/50 hover:bg-blue-100/70 text-blue-900 transition-colors text-left">
+                <span class="font-medium truncate">🏥 BV Nhi TW</span>
+                <span class="text-[10px] font-mono text-blue-600 ml-1 shrink-0">Điền</span>
+              </button>
+              <button type="button" onclick="fillCreds('orgadmin.k@warriorhub.vn')" class="flex items-center justify-between px-2 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100/70 text-emerald-900 transition-colors text-left">
+                <span class="font-medium truncate">🏥 BV K Tân Triều</span>
+                <span class="text-[10px] font-mono text-emerald-600 ml-1 shrink-0">Điền</span>
+              </button>
+              <button type="button" onclick="fillCreds('orgadmin.nucuoiem@warriorhub.vn')" class="flex items-center justify-between px-2 py-1.5 rounded-lg border border-amber-200 bg-amber-50/50 hover:bg-amber-100/70 text-amber-900 transition-colors text-left">
+                <span class="font-medium truncate">🎗️ Quỹ Nụ Cười Em</span>
+                <span class="text-[10px] font-mono text-amber-600 ml-1 shrink-0">Điền</span>
+              </button>
+            </div>
           </div>
-          <div class="flex justify-between items-center cursor-pointer hover:text-indigo-600" onclick="fillCreds('coordinator@warrior.org')">
-            <span>🩺 Điều Phối Viên:</span>
-            <span class="font-bold underline">coordinator@warrior.org</span>
+
+          <!-- Role Điều phối & Nhà hảo tâm -->
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Điều Phối & Nhà Hảo Tâm</div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button type="button" onclick="fillCreds('coordinator@warrior.org')" class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100/70 text-indigo-900 transition-colors text-left">
+                <span class="font-medium truncate">🩺 Điều Phối Viên</span>
+                <span class="text-[10px] font-mono text-indigo-600 ml-1 shrink-0">Điền</span>
+              </button>
+              <button type="button" onclick="fillCreds('supporter@gmail.com')" class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition-colors text-left">
+                <span class="font-medium truncate">💖 Nhà Hảo Tâm</span>
+                <span class="text-[10px] font-mono text-slate-500 ml-1 shrink-0">Điền</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Role Gia đình bệnh nhi -->
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Gia Đình Chiến Binh (FAMILY)</div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button type="button" onclick="fillCreds('family.minhan@gmail.com')" class="flex items-center justify-between px-2 py-1.5 rounded-lg border border-amber-200 bg-amber-50/40 hover:bg-amber-100/60 text-amber-900 transition-colors text-left">
+                <span class="font-medium truncate">👨‍👩‍👦 Mẹ Bé Minh An</span>
+                <span class="text-[10px] font-mono text-amber-600 shrink-0">Điền</span>
+              </button>
+              <button type="button" onclick="fillCreds('family.maichi@gmail.com')" class="flex items-center justify-between px-2 py-1.5 rounded-lg border border-amber-200 bg-amber-50/40 hover:bg-amber-100/60 text-amber-900 transition-colors text-left">
+                <span class="font-medium truncate">👨‍👧 Bố Bé Mai Chi</span>
+                <span class="text-[10px] font-mono text-amber-600 shrink-0">Điền</span>
+              </button>
+              <button type="button" onclick="fillCreds('family.tuankiet@gmail.com')" class="flex items-center justify-between px-2 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50/40 hover:bg-emerald-100/60 text-emerald-900 transition-colors text-left">
+                <span class="font-medium truncate">👨‍👦 Bố Bé Tuấn Kiệt</span>
+                <span class="text-[10px] font-mono text-emerald-600 shrink-0">Điền</span>
+              </button>
+              <button type="button" onclick="fillCreds('family.thienan@gmail.com')" class="flex items-center justify-between px-2 py-1.5 rounded-lg border border-sky-200 bg-sky-50/40 hover:bg-sky-100/60 text-sky-900 transition-colors text-left">
+                <span class="font-medium truncate">🕊️ Mẹ Bé Thiên Ân</span>
+                <span class="text-[10px] font-mono text-sky-600 shrink-0">Điền</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
