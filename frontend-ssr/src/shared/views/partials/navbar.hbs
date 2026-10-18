@@ -58,7 +58,7 @@
             {{currentUser.fullName.[0]}}
           </div>
           <div class="hidden md:flex flex-col text-left">
-            <span class="text-xs font-bold text-slate-900 leading-tight">{{currentUser.fullName}}</span>
+            <span class="text-xs font-bold text-slate-900 leading-tight">{{formatDisplayName currentUser}}</span>
             <span class="text-[9px] uppercase font-bold tracking-wider
               {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "SUPER_ADMIN"))}}text-rose-600
               {{else if (eq currentUser.role "ORG_ADMIN")}}text-teal-600
