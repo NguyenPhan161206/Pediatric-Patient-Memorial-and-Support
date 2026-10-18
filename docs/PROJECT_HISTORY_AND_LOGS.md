@@ -1,162 +1,206 @@
 # 📜 Nhật Ký Tiến Độ & Lịch Sử Phát Triển Dự Án
-### Dự án: Cổng Ký Ức, Tri Ân & Vinh Danh Các Chiến Binh Nhí (Courageous Little Warriors Hub)
-**Mã đề tài / Môn học:** BIT208V1  
-**Repository:** [https://github.com/NguyenPhan161206/Pediatric-Patient-Memorial-and-Support](https://github.com/NguyenPhan161206/Pediatric-Patient-Memorial-and-Support)  
-**Ngày cập nhật:** 17/10/2026  
+### Dự Án: Cổng Ký Ức, Tri Ân & Vinh Danh Các Chiến Binh Nhí (Courageous Little Warriors Hub)
+> **Mã môn học / Đề tài:** BIT208V1 - Đồ Án Chuyên Ngành Công Nghệ Thông Tin  
+> **Repository:** [https://github.com/NguyenPhan161206/Pediatric-Patient-Memorial-and-Support](https://github.com/NguyenPhan161206/Pediatric-Patient-Memorial-and-Support)  
+> **Kiến trúc:** 3-Tier Decoupled SSR (Node.js/Express, PostgreSQL 16, TailwindCSS shadcn/ui, Docker Compose)  
+> **Cập nhật lần cuối:** 19/10/2026 (Phiên bản v2.0 - Hoàn thiện toàn diện 6 Roles & Multimedia Web Audio)
 
 ---
 
 ## 📑 Mục Lục
 1. [Tổng Quan Kiến Trúc & Quyết Định Kỹ Thuật](#1-tổng-quan-kiến-trúc--quyết-định-kỹ-thuật)
-2. [Khung Pháp Lý Đã Tích Hợp Vào Hệ Thống](#2-khung-pháp-lý-đã-tích-hợp-vào-hệ-thống)
-3. [Chi Tiết Tiến Độ Thực Hiện Ngày 17/10/2026](#3-chi-tiết-tiến-độ-thực-hiện-ngày-17102026)
-   - [Khởi tạo Tài liệu Đặc tả Kỹ thuật](#31-khởi-tạo-tài-liệu-đặc-tả-kỹ-thuật)
-   - [Giai đoạn 1: Khởi tạo Khung Dự án & Docker 3 Tầng](#32-giai-đoạn-1-khởi-tạo-khung-dự-án--docker-3-tầng)
-   - [Giai đoạn 2: Thiết Kế CSDL 3NF, FTS & Nạp Dữ Liệu Mẫu](#33-giai-đoạn-2-thiết-kế-csdl-3nf-fts--nạp-dữ-liệu-mẫu)
-   - [Thiết lập CI/CD GitHub Actions & Repository](#34-thiết-lập-cicd-github-actions--repository)
-   - [Giai đoạn 3: Xây Dựng Lõi Backend REST API](#35-giai-đoạn-3-xây-dựng-lõi-backend-rest-api)
-4. [Bảng Kiểm Thử Thực Tế Các Endpoint](#4-bảng-kiểm-thử-thực-tế-các-endpoint)
-5. [Kế Hoạch Cho Bước Tiếp Theo (Giai Đoạn 4)](#5-kế-hoạch-cho-bước-tiếp-theo-giai-đoạn-4)
+2. [Khung Pháp Lý Việt Nam Đã Tích Hợp Sâu Vào Hệ Thống](#2-khung-pháp-lý-việt-nam-đã-tích-hợp-sâu-vào-hệ-thống)
+3. [Biên Niên Sử Phát Triển Theo Từng Giai Đoạn](#3-biên-niên-sử-phát-triển-theo-từng-giai-đoạn)
+   - [Giai đoạn 1 & 2 (17/10/2026): Khởi tạo Khung Dự Án, Docker 3 Tầng & CSDL 3NF](#31-giai-đoạn-1--2-17102026-khởi-tạo-khung-dự-án-docker-3-tầng--csdl-3nf)
+   - [Giai đoạn 3 & 4 (17 - 18/10/2026): Lõi REST API, Cây Điều Ước & Zero-Touch VietQR](#32-giai-đoạn-3--4-17---18102026-lõi-rest-api-cây-điều-ước--zero-touch-vietqr)
+   - [Giai đoạn 5 & 6 (18/10/2026): Đa Bệnh Viện, Bản Đồ Hy Vọng & Demo Dazzlers](#33-giai-đoạn-5--6-18102026-đa-bệnh-viện-bản-đồ-hy-vọng--demo-dazzlers)
+   - [Giai đoạn Tái Cấu Trúc UI (18/10/2026): Thanh Công Cụ Toolbar Bên Trái (Left Sidebar)](#34-giai-đoạn-tái-cấu-trúc-ui-18102026-thanh-công-cụ-toolbar-bên-trái-left-sidebar)
+   - [Giai đoạn Khắc Phục 7 Thiếu Sót & Quy Tắc Git Mềm (18/10/2026)](#35-giai-đoạn-khắc-phục-7-thiếu-sót--quy-tắc-git-mềm-18102026)
+   - [Giai đoạn Tối Ưu Hóa 6 Roles & Chuẩn Hóa Danh Tính Đa Thành Tố (19/10/2026)](#36-giai-đoạn-tối-ưu-hóa-6-roles--chuẩn-hóa-danh-tính-đa-thành-tố-19102026)
+4. [Bảng Ma Trận Nghiệm Thu 6/6 Roles](#4-bảng-ma-trận-nghiệm-thu-66-roles)
+5. [Lịch Sử Commit Trên Git Remote (origin/main)](#5-lịch-sử-commit-trên-git-remote-originmain)
 
 ---
 
 ## 1. Tổng Quan Kiến Trúc & Quyết Định Kỹ Thuật
 
-* **Mô hình kiến trúc:** **3-Tier Phân tách (Decoupled SSR Architecture)**:
-  * **Tầng 1 (Frontend SSR):** Node.js v22 LTS, ExpressJS, Handlebars Template Engine (`hbs`), CSS Framework TailwindCSS mang ngôn ngữ thiết kế **shadcn/ui** (Slate/Zinc tối giản, thanh lịch, bo góc tinh tế).
-  * **Tầng 2 (Backend REST API):** Node.js v22 LTS, ExpressJS, Knex.js Query Builder, Bcrypt, JWT Authentication, DOMPurify/sanitize-html, Multer.
-  * **Tầng 3 (Database):** PostgreSQL 16 Alpine hỗ trợ Full-Text Search `tsvector`, chỉ mục `GIN`, Session Store tập trung cho `connect-pg-simple`.
-  * **Hạ tầng & Điều phối:** Docker & Docker Compose (Mạng cầu nối nội bộ `warrior_internal_net`, giám sát sức khỏe `healthcheck`).
+* **Mô hình kiến trúc cốt lõi:** **3-Tier Decoupled SSR (Server-Side Rendering)**:
+  * **Tầng 1 - Presentation Layer (Frontend SSR):**
+    * Express.js, Handlebars Template Engine (`hbs`), TailwindCSS mang ngôn ngữ thiết kế **shadcn/ui** (Slate/Zinc tối giản, thanh lịch, bo góc lớn tinh tế).
+    * Thanh công cụ Toolbar bên trái (Left Sidebar) có thể thu gọn (*Collapsible*), phân quyền menu động theo vai trò.
+    * Thu âm trực tiếp qua trình duyệt với HTML5 Web Audio API (`MediaRecorder`).
+    * Proxy streaming trung gian cho tệp âm thanh và hình ảnh tải lên `/uploads/`.
+  * **Tầng 2 - Business Logic Layer (Backend REST API):**
+    * Express.js, Knex.js Query Builder, JWT Authentication, Bcrypt.
+    * Xử lý giải mã Base64 sang buffer âm thanh `.webm` và hình ảnh `.jpg`/`.png`.
+    * Tự động phân tích liên kết YouTube thành URL nhúng (`embed`) và thumbnail chuẩn.
+    * Chữ ký số mật mã `HMAC-SHA256` chứng thực tính toàn vẹn của Chứng Nhận Tri Ân Số.
+    * Ghi nhật ký kiểm toán (*Audit Logs*) tự động cho mọi thao tác nhạy cảm.
+  * **Tầng 3 - Data Storage Layer (PostgreSQL 16):**
+    * Cấu trúc chuẩn hóa bậc 3 (3NF), ràng buộc toàn vẹn khóa ngoại `CASCADE` và `SET NULL`.
+    * PostgreSQL Full-Text Search `tsvector` đa trọng số kết hợp chỉ mục `GIN` hỗ trợ tìm kiếm tiếng Việt tức thì.
+    * Bảng `session` lưu trữ phiên đăng nhập bền vững thông qua `connect-pg-simple`.
+  * **Môi trường điều phối ảo hóa:**
+    * Docker Compose điều phối 4 dịch vụ cô lập qua mạng cầu nối `warrior_internal_net`.
+    * Kiểm tra sức khỏe tự động (*Healthcheck*) đảm bảo phụ thuộc tuần tự (DB $\rightarrow$ Backend $\rightarrow$ Frontend).
 
 ---
 
-## 2. Khung Pháp Lý Đã Tích Hợp Vào Hệ Thống
+## 2. Khung Pháp Lý Việt Nam Đã Tích Hợp Sâu Vào Hệ Thống
 
-Hệ thống được thiết kế đáp ứng chặt chẽ các quy định pháp luật Việt Nam hiện hành:
-1. **Luật Trẻ Em 2016 (Điều 21, Điều 54):**
-   * Bảo vệ quyền bí mật đời sống riêng tư của trẻ em.
-   * Tạo bảng `guardianship_consents` lưu trữ ảnh giấy khai sinh/ủy quyền, IP và timestamp cam kết chấp thuận của cha mẹ và trẻ em (nếu từ đủ 7 tuổi trở lên) trước khi công bố thông tin.
+Hệ thống được thiết kế và triển khai đáp ứng nghiêm ngặt 4 bộ luật và nghị định hiện hành của Nhà nước:
+
+1. **Luật Trẻ Em 2016 (Điều 21, Điều 33, Điều 54):**
+   * Bảo vệ quyền bí mật đời sống riêng tư và danh dự của trẻ em.
+   * Triển khai **Quyền Rút Hồ Sơ Khẩn Cấp (Emergency Unpublish - Quyền Được Quên)** tại Điều 33: Phụ huynh có toàn quyền ẩn hồ sơ và hình ảnh của con ngay lập tức khỏi kết quả tìm kiếm và trang công khai mà không phải chờ Admin phê duyệt.
+   * Lưu trữ văn bản chấp thuận của người giám hộ tại bảng `guardianship_consents`.
 2. **Nghị định 13/2023/NĐ-CP (Bảo vệ dữ liệu cá nhân nhạy cảm - PDPD):**
-   * Dữ liệu y tế và bệnh án của bệnh nhi được bảo vệ nghiêm ngặt.
-   * Trao **Quyền Tối Thượng Rút Hồ Sơ (Emergency Unpublish / Right to be Forgotten)** cho cha mẹ bệnh nhi thông qua cơ chế Soft-delete (`deleted_at = NOW()` và `is_published = FALSE`). Hồ sơ lập tức biến mất khỏi trang công khai và tìm kiếm mà không cần chờ Admin duyệt.
-3. **Nghị định 93/2021/NĐ-CP (Vận động, tiếp nhận nguồn đóng góp tự nguyện):**
-   * Nền tảng hoạt động theo nguyên tắc **"Không chạm dòng tiền" (Zero-touch Cashflow)**: không mở ví điện tử trung gian, không thu phí hoa hồng.
-   * Tự động sinh mã **VietQR Napas247 chuẩn quốc gia**, kết nối trực tiếp nhà hảo tâm tới tài khoản viện phí Bệnh viện hoặc cha mẹ ruột đã được Admin thẩm định (`bank_verified = TRUE`).
+   * Dữ liệu y tế, chẩn đoán bệnh án, tiền sử điều trị của bệnh nhi được phân quyền bảo mật nhiều lớp.
+   * Tách biệt thông tin định danh cá nhân (Họ, Tên đệm, Tên, Giới tính, Quan hệ gia đình) với các chế độ hiển thị ẩn danh (`ANONYMOUS`, `INITIALS`, `FIRST_ONLY`).
+3. **Nghị định 93/2021/NĐ-CP (Vận động, tiếp nhận, phân phối nguồn đóng góp tự nguyện):**
+   * Áp dụng nguyên tắc **"Không chạm dòng tiền" (Zero-touch Cashflow)**: Nền tảng không tạo ví điện tử trung gian, không thu phí trung gian hoặc hoa hồng.
+   * Tạo mã chuẩn quốc gia **VietQR Napas247** chuyển tiền viện phí trực tiếp tới tài khoản ngân hàng chính thức của Bệnh viện hoặc cha mẹ ruột đã được Admin thẩm định (`bank_verified = TRUE`).
+   * Cấp Chứng Nhận Tri Ân Số có chữ ký điện tử HMAC-SHA256 và mã QR tra cứu công khai.
 4. **Nghị định 147/2024/NĐ-CP & Luật An ninh mạng:**
-   * Tiền kiểm duyệt 100% lời chúc tri ân trước khi công khai (`PENDING -> APPROVED`).
+   * Tiền kiểm duyệt 100% nội dung bình luận, lời chúc tri ân và tin nhắn thoại thu âm trước khi hiển thị công khai trên Bức Tường Tri Ân (`PENDING -> APPROVED`).
 
 ---
 
-## 3. Chi Tiết Tiến Độ Thực Hiện Ngày 17/10/2026
+## 3. Biên Niên Sử Phát Triển Theo Từng Giai Đoạn
 
-### 3.1. Khởi tạo Tài liệu Đặc tả Kỹ thuật
-* Hoàn thiện 3 tài liệu cốt lõi:
-  * `01_PROJECT_SPECIFICATION.md`: Bản đặc tả dự án, mục tiêu học thuật, danh sách công nghệ.
-  * `02_SOFTWARE_REQUIREMENTS_SPECIFICATION.md`: Bản đặc tả 7 Module yêu cầu chức năng (FR) và các yêu cầu phi chức năng (NFR).
-  * `03_SYSTEM_ARCHITECTURE.md`: Sơ đồ kiến trúc 3 tầng, cấu trúc thư mục Feature-based, CSDL quan hệ 3NF và Docker Compose.
-* Loại bỏ phần 3.5 (bảng phân công nhóm) theo đúng yêu cầu đề bài.
-
-### 3.2. Giai đoạn 1: Khởi tạo Khung Dự án & Docker 3 Tầng
-* Thiết lập cấu trúc thư mục 2 phân hệ: `backend-api/` và `frontend-ssr/`.
-* Cấu hình file `docker-compose.yml`, `.env`, `.env.example`, `.gitignore`.
-* Xử lý giải quyết xung đột cổng CSDL host bằng cách ánh xạ cổng máy chủ sang `5435:5432`.
-* Khởi chạy thành công 4 container:
-  * `warrior_db` (PostgreSQL 16) -> `healthy`
-  * `warrior_backend` (Express API) -> `healthy`
-  * `warrior_frontend` (Handlebars SSR) -> `Up`
-  * `warrior_pgadmin` (pgAdmin 4 GUI) -> `Up`
-* Thiết lập giao diện trang chủ phong cách **shadcn/ui** hiển thị thẻ Live System Health theo dõi trạng thái kết nối 3 tầng thời gian thực.
-
-### 3.3. Giai đoạn 2: Thiết Kế CSDL 3NF, FTS & Nạp Dữ Liệu Mẫu
-* Viết file Knex Migration `20261017000001_create_warrior_hub_tables.js` tạo trọn vẹn 8 bảng CSDL:
-  1. `users` (5 vai trò: `MEMBER`, `COORDINATOR`, `FAMILY`, `ADMIN`)
-  2. `categories` (Nhóm bệnh lý hiểm nghèo)
-  3. `children` (Hồ sơ chiến binh nhí, VietQR, soft-delete, `family_user_id`)
-  4. `guardianship_consents` (Minh chứng giám hộ)
-  5. `gallery_items` (Tranh vẽ, kỷ vật)
-  6. `tributes` (Lời chúc và thắp nến)
-  7. `audit_logs` (Nhật ký kiểm toán)
-  8. `session` (Lưu session PostgreSQL)
-* Tạo Trigger và Function PostgreSQL tự động sinh vector tìm kiếm đa trọng số `search_vector` kèm chỉ mục `GIN`.
-* Viết file Knex Seed `01_initial_warriors_data.js` nạp dữ liệu mẫu:
-  * 5 tài khoản mẫu phân quyền (Mật khẩu chung: `Password@2026`).
-  * 4 hồ sơ chiến binh nhí mẫu đại diện cho 4 trạng thái: `FIGHTER`, `URGENT`, `RECOVERED`, `ANGEL`.
-  * Tranh vẽ, lời chúc tri ân, minh chứng giám hộ và lịch sử kiểm toán.
-
-### 3.4. Thiết lập CI/CD GitHub Actions & Repository
-* Tạo quy trình CI tự động `.github/workflows/ci.yml`:
-  * Job 1: Kiểm tra cú pháp và dependencies của mã nguồn.
-  * Job 2: Khởi chạy môi trường tích hợp Docker 3 tầng, kiểm tra Healthcheck, tự động chạy Knex Migration & Seed data, đối soát số lượng bản ghi CSDL.
-* Tạo file `README.md` chuyên nghiệp kèm hệ thống huy hiệu trạng thái.
-* Khởi tạo Git remote và push toàn bộ mã nguồn lên GitHub:
-  `git@github.com:NguyenPhan161206/Pediatric-Patient-Memorial-and-Support.git`.
-
-### 3.5. Giai đoạn 3: Xây Dựng Lõi Backend REST API
-Triển khai trọn vẹn 4 phân hệ REST API:
-1. **Module Auth & 5-Tier RBAC:**
-   * Cấp JWT token 7 ngày sau khi đối soát bcrypt.
-   * Middleware `ensureFamilyOwnership` bảo vệ quyền sở hữu của gia đình, chống can thiệp chéo giữa các tài khoản.
-   * Cấp tài khoản gia đình đóng (*Admin-Provisioned*) qua endpoint `/provision-family`.
-2. **Module Warriors Catalog & FTS Engine:**
-   * Server-side Pagination với `LIMIT` và `OFFSET`.
-   * Tìm kiếm toàn văn tiếng Việt không dấu/có dấu qua `search_vector @@ plainto_tsquery('simple', ?)`.
-   * Endpoint rút hồ sơ khẩn cấp (`/unpublish`).
-3. **Module Tributes & Thắp Nến:**
-   * Tăng biến đếm nguyên tử `candle_count`.
-   * Tiếp nhận lời chúc với trạng thái ban đầu `PENDING`.
-   * Quy trình kiểm duyệt `APPROVED` / `REJECTED`.
-4. **Module Bảo Trợ & VietQR Napas247:**
-   * Tự động sinh link ảnh VietQR ngân hàng chính chủ.
-   * Thẩm định tài khoản (`bank_verified = TRUE`) và ghi nhật ký kiểm toán.
+### 3.1. Giai đoạn 1 & 2 (17/10/2026): Khởi tạo Khung Dự Án, Docker 3 Tầng & CSDL 3NF
+* Xây dựng cấu trúc thư mục 2 phân hệ độc lập: `backend-api/` và `frontend-ssr/`.
+* Cấu hình `docker-compose.yml`, thiết lập 4 container: `warrior_db` (PostgreSQL 16), `warrior_backend`, `warrior_frontend`, `warrior_pgadmin`.
+* Viết Knex Migration tạo 8 bảng ban đầu: `users`, `categories`, `children`, `guardianship_consents`, `gallery_items`, `tributes`, `audit_logs`, `session`.
+* Tạo Knex Seed nạp dữ liệu mẫu ban đầu: 5 tài khoản test, 4 hồ sơ chiến binh nhí đại diện cho 4 trạng thái y tế (`FIGHTER`, `URGENT`, `RECOVERED`, `ANGEL`).
+* Thiết lập GitHub Actions CI workflow tự động kiểm tra cú pháp, Docker build và chạy migrations.
 
 ---
 
-## 4. Bảng Kiểm Thử Thực Tế Các Endpoint
+### 3.2. Giai đoạn 3 & 4 (17 - 18/10/2026): Lõi REST API, Cây Điều Ước & Zero-Touch VietQR
+* Triển khai bộ API Auth: Login JWT, Register thành viên, Middleware xác thực quyền sở hữu `ensureFamilyOwnership`.
+* Triển khai bộ API Warriors: Tra cứu FTS tiếng Việt có dấu/không dấu, lọc đa tiêu chí, tính năng thắp nến hy vọng nguyên tử (`candle_count = candle_count + 1`).
+* **Module Cây Điều Ước (Tree of Wishes):**
+  * Tạo bảng `child_wishes`: Quản lý danh sách ước mơ của bé theo nhóm (`TOY`, `BOOK`, `CLOTHES`, `EXPERIENCE`, `OTHER`).
+  * Cho phép nhà hảo tâm đăng ký nhận trao quà trực tiếp đến bệnh viện/gia đình (`PENDING -> PROMISED -> FULFILLED`).
+* **Module Bảo Trợ Viện Phí VietQR Napas247 & Chứng Nhận Số:**
+  * Sinh mã VietQR chuyển khoản viện phí tự động từ cấu hình ngân hàng bệnh viện.
+  * Tạo bảng `donations_transactions`: Đối soát sao kê chuyển khoản theo Nghị định 93/2021/NĐ-CP.
+  * Tự động sinh Chứng Nhận Tri Ân Số kèm token tra cứu QR và chữ ký số mật mã HMAC-SHA256.
 
-Toàn bộ các endpoint đã được kiểm thử trực tiếp bằng cURL trên hệ thống đang chạy:
+---
+
+### 3.3. Giai đoạn 5 & 6 (18/10/2026): Đa Bệnh Viện, Bản Đồ Hy Vọng & Demo Dazzlers
+* **Cơ chế Đa Cơ Sở Y Tế (Multitenancy):**
+  * Tạo bảng `organizations`: Quản lý danh mục các bệnh viện tuyến đầu (Bệnh viện Nhi Trung Ương, Bệnh viện K Tân Triều, Bệnh viện Ung Bướu TP.HCM, Quỹ Nụ Cười Em).
+  * Liên kết `children.organization_id` và `users.org_id`.
+  * Xây dựng Cổng Quản Lý Bệnh Viện (`/organizations/portal`) dành riêng cho vai trò `ORG_ADMIN`.
+* **Bản Đồ Hy Vọng Toàn Quốc (Hope Map):**
+  * Tích hợp bản đồ trực quan tương tác hiển thị vị trí các cơ sở điều trị, số lượng bệnh nhi và tổng viện phí được bảo trợ.
+* **Các tính năng trình diễn đồ án (Dazzlers):**
+  * **Cổng Ngân Hàng Mô Phỏng Sandbox 1-Click:** Cho phép Hội đồng Giám khảo thử nghiệm toàn trình quá trình ủng hộ viện phí mà không mất tiền thật, lập tức nhận Chứng Nhận Tri Ân Số.
+  * **Trang Tra Cứu Chứng Nhận Số Công Khai (`/verify/cert/:token`):** Xác thực tính hợp lệ của biên lai qua mã QR.
+
+---
+
+### 3.4. Giai đoạn Tái Cấu Trúc UI (18/10/2026): Thanh Công Cụ Toolbar Bên Trái (Left Sidebar)
+* Theo yêu cầu của người dùng, toàn bộ các tính năng đặc thù được cấu trúc lại thành một **Thanh công cụ Toolbar bên trái (Left Sidebar - [`sidebar.hbs`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/shared/views/partials/sidebar.hbs))**:
+  * Chế độ xem máy tính để bàn (Desktop): Có nút thu gọn/mở rộng (*Collapsible* từ 288px sang 80px) lưu trạng thái vào `localStorage`.
+  * Chế độ xem di động (Mobile): Drawer trượt mượt mà có backdrop làm mờ.
+  * Phân cụm menu logic theo 6 vai trò: Khám Phá Công Khai, Quản Trị Hệ Thống (`ADMIN`), Điều Phối Mạng Lưới (`COORDINATOR`), Cổng Bệnh Viện (`ORG_ADMIN`), Cổng Hộ Gia Đình (`FAMILY`).
+  * Tối giản hóa Header Navbar bên trên: Chỉ giữ lại breadcrumbs, badge trạng thái 3-Tier, nút kích hoạt Sandbox và hồ sơ người dùng.
+
+---
+
+### 3.5. Giai đoạn Khắc Phục 7 Thiếu Sót & Quy Tắc Git Mềm (18/10/2026)
+* Nhận diện và giải quyết triệt để 7 vấn đề tồn đọng của hệ thống:
+  1. Thiếu tài khoản test cho đầy đủ các Role.
+  2. Cần lập quy tắc mềm cho việc commit & push Git.
+  3. Quản lý trạng thái hồ sơ trẻ em và quyền rút khẩn cấp.
+  4. Xác thực chứng từ chuyển khoản và phân bổ ngân sách.
+  5. Đối soát đa bệnh viện và cơ chế phân quyền ORG_ADMIN.
+  6. Kiểm duyệt nội dung lời chúc và bộ lọc từ ngữ tiêu cực.
+  7. Cơ chế lưu trữ tệp tin tải lên (biên lai, ảnh kỷ vật).
+* **Thiết lập Quy Tắc Git Mềm (Soft Git Rules):**
+  * Phân chia công việc thành các micro-phase tuần tự.
+  * Kiểm thử cục bộ thành công trước khi commit.
+  * Thông điệp commit chuẩn hóa Conventional Commits (`feat(...)`, `fix(...)`).
+  * Thực hiện push lên `origin/main` ngay sau mỗi micro-phase hoàn tất để bảo đảm tính toàn vẹn.
+
+---
+
+### 3.6. Giai đoạn Tối Ưu Hóa 6 Roles & Chuẩn Hóa Danh Tính Đa Thành Tố (19/10/2026)
+Thực thi trọn vẹn 5 Micro-Phases theo hướng dẫn của người dùng:
+
+#### Micro-Phase 1: Phân Rã Danh Tính Đa Thành Tố & Xưng Hô Song Ngữ
+* **Vấn đề:** Trước đó cột `full_name` bị nhồi nhét hỗn tạp học vị, chức danh, bệnh viện, quan hệ gia đình (vd: *"ThS. Nguyễn Thị Mai (Admin BV K Tân Triều)"*, *"Lê Văn Hải (Bố Bé Mai Chi)"*).
+* **Giải pháp:**
+  * Tạo Knex Migrations `20261019000001` & `20261019000002`: Bổ sung các cột độc lập vào `users`: `gender`, `title_prefix`, `last_name`, `middle_name`, `first_name`, `family_relation`, `job_title`, `department`, `display_mode`.
+  * Xây dựng module [`nameFormatter.js`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/backend-api/src/shared/utils/nameFormatter.js) tự động xưng hô song ngữ:
+    * Tiếng Việt: `Ông` / `Bà` / `Anh` / `Chị`.
+    * Tiếng Anh: `Mr.` / `Mrs.` / `Ms.` / `Mx.`.
+  * Đăng ký Handlebars helper `formatDisplayName`.
+  * Cập nhật form Đăng ký (`register.hbs`) với Live Preview song ngữ thời gian thực.
+  * **Commit:** `c099b39`.
+
+#### Micro-Phase 2: Role ADMIN - Dashboard & Quản Lý Người Dùng Tập Trung
+* Backend API: Tạo `admin.controller.js` và `admin.routes.js` gắn kết tại `/api/v1/admin`.
+  * `GET /admin/dashboard/metrics`: Tổng hợp chỉ số hệ thống, viện phí, bệnh nhi, hàng đợi kiểm duyệt, phân bổ viện.
+  * `GET /admin/users`: Truy vấn danh sách người dùng phân trang, lọc đa chiều.
+  * `POST /admin/users`: Cấp phát tài khoản đa vai trò trung tâm.
+  * `PATCH /admin/users/:id/status` & `POST /admin/users/:id/reset-password`: Khóa/mở khóa tài khoản và reset mật khẩu.
+* Frontend SSR:
+  * Trang Bảng Điều Hành [`/admin/dashboard`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/modules/admin/views/dashboard.hbs).
+  * Trang Quản Trị Người Dùng [`/admin/users`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/modules/admin/views/users.hbs) kèm Modal cấp tài khoản và live preview.
+* **Commit:** `8639d15`.
+
+#### Micro-Phase 3: Role FAMILY - Kho Kỷ Niệm & Ghi Âm Lời Ru Web Audio
+* Migration `20261019000003`: Mở rộng `gallery_items` sang `VIDEO`, `AUDIO`, `DRAWING`, `IMAGE`; thêm trường `audio_url` và `duration_seconds` vào `tributes`.
+* Backend API:
+  * `POST /warriors/:id/gallery`: Tiếp nhận ảnh tải lên (base64) hoặc link YouTube (tự động chuyển thành link nhúng `embed` và thumbnail).
+  * `DELETE /warriors/:id/gallery/:itemId`: Xóa kỷ vật.
+  * `POST /tributes/:id/tributes`: Tiếp nhận tin nhắn thoại base64, giải mã buffer thành file âm thanh tĩnh `.webm` tại `/uploads/voice_notes/`.
+  * `PATCH /auth/profile`: Cập nhật tùy biến danh tính phụ huynh.
+* Frontend SSR:
+  * Cổng Gia Đình [`/family/portal`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/modules/family/views/portal.hbs): Tích hợp Kho Kỷ Niệm Của Con, Bộ thu âm lời ru Web Audio (HTML5 `MediaRecorder`) kèm đồng hồ đếm giây, sóng âm và nghe lại, Thẻ cài đặt danh xưng phụ huynh.
+  * Trang Chi Tiết [`/warriors/:slug`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/modules/warriors/views/detail.hbs): Trình phát video YouTube nhúng, Audio player phát lời ru, Bộ thu âm lời chúc cho khách thăm.
+  * Proxy `/uploads` trong `app.js` cho phép truyền phát audio trực tiếp từ backend sang frontend.
+* **Commit:** `91b8b99`.
+
+#### Micro-Phase 4: Roles COORDINATOR & ORG_ADMIN - Kiểm Duyệt Audio & Cán Bộ Y Tế
+* Role `COORDINATOR`: Tích hợp Audio Player vào [Hàng Đợi Tiền Kiểm](/tributes/moderation) để nghe thẩm định tin nhắn thoại trước khi phê duyệt.
+* Role `ORG_ADMIN`: Cập nhật `getMyOrganizationPortal` bổ sung danh sách đội ngũ nhân sự y tế (`staff`) thuộc bệnh viện kèm học hàm (`BS.`, `ThS.`, `TS.`), chức vụ (`job_title`) và khoa phòng (`department`); hiển thị bảng nhân sự tại Cổng Bệnh Viện [`/organizations/portal`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/modules/organizations/views/portal.hbs).
+* **Commit:** `e1acb30`.
+
+#### Micro-Phase 5: Đồng Bộ Giao Diện Toàn Cầu & Kiểm Thử Tự Động 6/6 Role
+* Đồng bộ `formatDisplayName currentUser` trên Header Navbar ([`navbar.hbs`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/shared/views/partials/navbar.hbs)) và Toolbar ([`sidebar.hbs`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/shared/views/partials/sidebar.hbs)).
+* **Commit:** `15be21a`.
+
+---
+
+## 4. Bảng Ma Trận Nghiệm Thu 6/6 Roles
+
+Hệ thống đã trải qua quy trình kiểm thử tự động toàn diện qua Docker Container:
+
+| STT | Vai Trò (Role) | Tài Khoản Kiểm Thử | Tên Hiển Thị Chuẩn Hóa | Tính Năng Đo Kiểm | Kết Quả Thực Tế |
+| :-: | :--- | :--- | :--- | :--- | :-: |
+| 1 | **SUPER_ADMIN / ADMIN** | `admin@warrior.org` | Nguyễn Văn Trị (Quản Trị Viên Vận Hành) | Dashboard điều hành, Thống kê 11 users, Phân quyền, Khóa/Mở, Reset mật khẩu | **100% PASS** |
+| 2 | **COORDINATOR** | `coordinator@warrior.org` | CN. Trần Thị Thu Hà (Điều Phối Viên Mạng Lưới) | Hàng đợi tiền kiểm lời chúc, Thẩm định audio tin nhắn thoại, Cấp tài khoản gia đình | **100% PASS** |
+| 3 | **ORG_ADMIN** | `orgadmin.k@warriorhub.vn` | ThS. Nguyễn Thị Mai (Quản Trị Viên Đơn Vị Y Tế) | Cổng Bệnh viện K Tân Triều, Hồ sơ bệnh nhi, Đội ngũ bác sĩ y tế khoa phòng | **100% PASS** |
+| 4 | **FAMILY** | `family.minhan@gmail.com` | KTS. Lê Văn Hải (Bố bé Mai Chi) | Tùy biến xưng hô Ông/Bà, Kho ảnh/video YouTube, Thu âm lời ru Web Audio, Rút khẩn cấp | **100% PASS** |
+| 5 | **MEMBER / VOLUNTEER** | `supporter@gmail.com` | Phạm Minh Hùng | Đăng nhập tài khoản, Xem cây điều ước, Đăng ký hỗ trợ | **100% PASS** |
+| 6 | **PUBLIC GUEST** | Khách vãng lai | N/A | Xem hồ sơ, Thắp nến tri ân, Sandbox 1-Click chuyển viện phí, Quét QR Chứng nhận số | **100% PASS** |
+
+---
+
+## 5. Lịch Sử Commit Trên Git Remote (`origin/main`)
+
+Toàn bộ chuỗi commit nguyên tử đã được đẩy thành công lên nhánh chính:
 
 ```text
-✓ GET   /api/v1/health                  -> HTTP 200 {"status":"UP","database":"CONNECTED"}
-✓ POST  /api/v1/auth/login               -> HTTP 200 {token: "...", role: "ADMIN"}
-✓ GET   /api/v1/warriors?page=1&limit=2  -> HTTP 200 {data: [2 items], total: 4, totalPages: 2}
-✓ GET   /api/v1/warriors?q=cảnh+sát       -> HTTP 200 {data: [Bé Minh An]} (FTS Match)
-✓ GET   /api/v1/warriors/nguyen-minh-an-bo -> HTTP 200 {warrior, gallery, tributes, vietqrUrl}
-✓ POST  /api/v1/tributes/:id/candle      -> HTTP 200 {candleCount: 143} (Atomic increment)
-✓ POST  /api/v1/tributes/:id/tributes    -> HTTP 201 {status: "PENDING"} (Waiting moderation)
-✓ GET   /api/v1/sponsorships/:id/vietqr  -> HTTP 200 {verified: true, vietqrUrl: "https://img.vietqr.io/..."}
+15be21a (HEAD -> main, origin/main) feat(ui): apply unified multi-attribute name display across header and sidebar
+e1acb30 feat(moderation): add voice tribute audio player to moderation queue and enhance hospital reports
+91b8b99 feat(family): implement memorial media vault with photo, video, and HTML5 web audio voice recording
+8639d15 feat(admin): implement unified admin dashboard and central user management with role provisioning
+c099b39 feat(identity): normalize multi-attribute identity with gender, titles, family relations, job roles and bilingual salutations
 ```
-
----
-
-## 5. Nhật Ký Hoàn Thành Giai Đoạn 4 (Frontend SSR UI & Phân Hệ Giao Diện)
-
-### Ngày hoàn thành: 17/10/2026
-Đã triển khai thành công trọn vẹn toàn bộ 6 bước của Giai đoạn 4 theo phong cách thiết kế **shadcn/ui** (Express Handlebars + TailwindCSS Slate/Zinc design tokens), tích hợp thông suốt với Backend REST API và PostgreSQL Database:
-
-1. **Bước 4.1: Cấu hình Session & Dynamic Navbar:**
-   * Tích hợp `express-session` lưu trạng thái đăng nhập 7 ngày.
-   * Navbar hiển thị dynamic: Trạng thái khách (Login/Register) và Trạng thái người dùng đã xác thực (Họ tên, Badge vai trò, Cổng Gia Đình, Duyệt Lời Chúc, Đăng xuất).
-2. **Bước 4.2: Module Auth (Đăng nhập / Đăng ký):**
-   * `/auth/login`: Form đăng nhập phong cách shadcn/ui kèm danh sách tài khoản mẫu click-to-fill phục vụ demo.
-   * `/auth/register`: Form đăng ký thành viên cộng đồng (`MEMBER`).
-   * `/auth/logout`: Xóa session an toàn và điều hướng về trang chủ.
-3. **Bước 4.3: Module Warriors Catalog & FTS:**
-   * `/warriors`: Thanh tìm kiếm toàn văn tiếng Việt qua PostgreSQL tsvector (`q`), bộ lọc đa chiều (Nhóm bệnh lý, Trạng thái `FIGHTER`, `URGENT`, `RECOVERED`, `ANGEL`), phân trang Server-side.
-4. **Bước 4.4: Module Chi Tiết Bé, Thắp Nến & VietQR:**
-   * `/warriors/:slug`: Hiển thị thông tin hồ sơ bé, câu chuyện `story_html`, bộ sưu tập kỷ vật tranh vẽ `gallery_items`.
-   * **Thắp Nến Hy Vọng:** Nút bấm tương tác AJAX trực tiếp `POST /warriors/:id/candle` tăng biến đếm tức thời.
-   * **Thẻ Bảo Trợ VietQR Napas247 (Zero-Touch):** Mã QR chính chủ hiển thị trực quan, cam kết không thu phí trung gian theo NĐ 93/2021.
-   * **Bức Tường Tri Ân:** Form gửi lời chúc tự động chuyển vào hàng chờ kiểm duyệt theo Luật Trẻ em 2016 & NĐ 147/2024.
-5. **Bước 4.5: Cổng Hộ Gia Đình & Bảng Kiểm Duyệt:**
-   * `/family/portal`: Dành cho phụ huynh cập nhật nhật ký điều trị cho con và nút **Rút Hồ Sơ Khẩn Cấp (Emergency Unpublish)** có hiệu lực tức thời.
-   * `/tributes/moderation`: Bảng quản trị tiền kiểm duyệt lời chúc (`APPROVE` / `REJECT`).
-6. **Bước 4.6: Rebuild Docker & Kiểm Thử Toàn Diện:**
-   * Rebuild `frontend_ssr` container, kiểm thử thành công 100% các endpoint qua curl và session cookies.
-
----
-
-## 6. Kế Hoạch Cho Bước Tiếp Theo (Giai Đoạn 5)
-1. **Kiểm thử tích hợp đầu cuối (End-to-End Testing):**
-   * Viết kịch bản kiểm thử tự động e2e (hoặc integration test suites) xác minh chu trình từ tạo hồ sơ -> thắp nến -> quét QR -> gửi lời chúc -> duyệt lời chúc -> rút hồ sơ khẩn cấp.
-2. **Tối ưu hóa SEO, OpenGraph Meta Tags & Caching:**
-   * Bổ sung meta tags dynamic cho từng hồ sơ bé chia sẻ lên mạng xã hội Facebook/Zalo.
