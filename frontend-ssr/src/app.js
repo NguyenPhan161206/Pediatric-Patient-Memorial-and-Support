@@ -16,6 +16,8 @@ const wishRoutes = require('./modules/wishes/wish.routes');
 const orgRoutes = require('./modules/organizations/org.routes');
 const { viewCertificate, renderWallOfHonor } = require('./modules/donations/donation.viewcontroller');
 
+const { formatDisplayName } = require('./shared/utils/nameFormatter');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -40,7 +42,8 @@ app.engine('.hbs', engine({
     formatMoney: (num) => {
       if (num === null || num === undefined) return '0 đ';
       return Number(num).toLocaleString('vi-VN') + ' đ';
-    }
+    },
+    formatDisplayName: (user, viewerRole) => formatDisplayName(user, typeof viewerRole === 'string' ? viewerRole : null)
   }
 }));
 

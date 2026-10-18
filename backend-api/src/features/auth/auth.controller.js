@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../../shared/database/knex');
 const { JWT_SECRET } = require('../../shared/middlewares/authMiddleware');
 const { logAudit } = require('../../shared/audit/auditLogger');
+const { formatDisplayName, decomposeFullName } = require('../../shared/utils/nameFormatter');
 
 /**
  * Đăng nhập người dùng (hỗ trợ tất cả 5 vai trò)
@@ -35,11 +36,23 @@ const login = async (req, res) => {
       });
     }
 
+    const displayName = formatDisplayName(user);
+
     // Ký JWT Token có hạn 7 ngày
     const tokenPayload = {
       id: user.id,
       email: user.email,
       fullName: user.full_name,
+      lastName: user.last_name,
+      middleName: user.middle_name,
+      firstName: user.first_name,
+      gender: user.gender,
+      titlePrefix: user.title_prefix,
+      familyRelation: user.family_relation,
+      jobTitle: user.job_title,
+      department: user.department,
+      displayMode: user.display_mode,
+      displayName,
       role: user.role,
       org_id: user.org_id || null
     };
@@ -64,6 +77,16 @@ const login = async (req, res) => {
           id: user.id,
           email: user.email,
           fullName: user.full_name,
+          lastName: user.last_name,
+          middleName: user.middle_name,
+          firstName: user.first_name,
+          gender: user.gender,
+          titlePrefix: user.title_prefix,
+          familyRelation: user.family_relation,
+          jobTitle: user.job_title,
+          department: user.department,
+          displayMode: user.display_mode,
+          displayName,
           phoneNumber: user.phone_number,
           role: user.role,
           org_id: user.org_id || null,
@@ -85,14 +108,44 @@ const login = async (req, res) => {
  */
 const register = async (req, res) => {
   try {
-    const { email, password, full_name, phone_number } = req.body;
+    let {
+      email,
+      password,
+      full_name,
+      last_name,
+      middle_name,
+      first_name,
+      gender,
+      title_prefix,
+      family_relation,
+      job_title,
+      department,
+      include_prefix_in_display,
+      include_title_in_display,
+      include_relation_in_display,
+      display_mode,
+      phone_number
+    } = req.body;
 
-    if (!email || !password || !full_name) {
+    // Nếu gửi full_name gộp, tự động phân tách
+    if ((!last_name || !first_name) && full_name) {
+      const decomposed = decomposeFullName(full_name);
+      last_name = last_name || decomposed.lastName;
+      middle_name = middle_name || decomposed.middleName;
+      first_name = first_name || decomposed.firstName;
+      title_prefix = title_prefix || decomposed.titlePrefix;
+      family_relation = family_relation || decomposed.familyRelation;
+      job_title = job_title || decomposed.jobTitle;
+    }
+
+    if (!email || !password || !last_name || !first_name) {
       return res.status(400).json({
         status: 'fail',
-        message: 'Email, mật khẩu và họ tên là các trường bắt buộc.'
+        message: 'Email, mật khẩu, họ và tên chính là các trường bắt buộc.'
       });
     }
+
+    const computedFullName = [last_name.trim(), middle_name ? middle_name.trim() : null, first_name.trim()].filter(Boolean).join(' ');
 
     const normalizedEmail = email.toLowerCase().trim();
     const existing = await db('users').where({ email: normalizedEmail }).first();
@@ -109,15 +162,39 @@ const register = async (req, res) => {
     const [newUser] = await db('users').insert({
       email: normalizedEmail,
       password_hash: passwordHash,
-      full_name: full_name.trim(),
+      full_name: computedFullName,
+      last_name: last_name.trim(),
+      middle_name: middle_name ? middle_name.trim() : null,
+      first_name: first_name.trim(),
+      gender: gender || 'UNSPECIFIED',
+      title_prefix: title_prefix ? title_prefix.trim() : null,
+      family_relation: family_relation ? family_relation.trim() : null,
+      job_title: job_title ? job_title.trim() : null,
+      department: department ? department.trim() : null,
+      include_prefix_in_display: !!include_prefix_in_display,
+      include_title_in_display: include_title_in_display !== false,
+      include_relation_in_display: include_relation_in_display !== false,
+      display_mode: display_mode || 'FULL_NAME',
       phone_number: phone_number ? phone_number.trim() : null,
       role: 'MEMBER'
     }).returning('*');
+
+    const displayName = formatDisplayName(newUser);
 
     const token = jwt.sign({
       id: newUser.id,
       email: newUser.email,
       fullName: newUser.full_name,
+      lastName: newUser.last_name,
+      middleName: newUser.middle_name,
+      firstName: newUser.first_name,
+      gender: newUser.gender,
+      titlePrefix: newUser.title_prefix,
+      familyRelation: newUser.family_relation,
+      jobTitle: newUser.job_title,
+      department: newUser.department,
+      displayMode: newUser.display_mode,
+      displayName,
       role: newUser.role
     }, JWT_SECRET, { expiresIn: '7d' });
 
@@ -130,6 +207,16 @@ const register = async (req, res) => {
           id: newUser.id,
           email: newUser.email,
           fullName: newUser.full_name,
+          lastName: newUser.last_name,
+          middleName: newUser.middle_name,
+          firstName: newUser.first_name,
+          gender: newUser.gender,
+          titlePrefix: newUser.title_prefix,
+          familyRelation: newUser.family_relation,
+          jobTitle: newUser.job_title,
+          department: newUser.department,
+          displayMode: newUser.display_mode,
+          displayName,
           role: newUser.role
         }
       }
@@ -150,7 +237,12 @@ const getMe = async (req, res) => {
   try {
     const user = await db('users')
       .where({ id: req.user.id })
-      .select('id', 'email', 'full_name', 'phone_number', 'role', 'org_id', 'created_at')
+      .select(
+        'id', 'email', 'full_name', 'last_name', 'middle_name', 'first_name',
+        'gender', 'title_prefix', 'family_relation', 'job_title', 'department',
+        'include_prefix_in_display', 'include_title_in_display', 'include_relation_in_display',
+        'display_mode', 'phone_number', 'role', 'org_id', 'created_at'
+      )
       .first();
 
     if (!user) {
@@ -159,6 +251,8 @@ const getMe = async (req, res) => {
         message: 'Không tìm thấy thông tin tài khoản.'
       });
     }
+
+    const displayName = formatDisplayName(user);
 
     // Lấy thông tin tổ chức nếu có
     let organization = null;
@@ -190,6 +284,7 @@ const getMe = async (req, res) => {
       data: {
         user: {
           ...user,
+          displayName,
           organization
         },
         myChildren,
@@ -210,14 +305,24 @@ const getMe = async (req, res) => {
  */
 const provisionFamily = async (req, res) => {
   try {
-    const { email, password, full_name, phone_number, child_id } = req.body;
+    let { email, password, full_name, last_name, middle_name, first_name, gender, family_relation, display_mode, phone_number, child_id } = req.body;
 
-    if (!email || !password || !full_name || !child_id) {
+    if ((!last_name || !first_name) && full_name) {
+      const decomposed = decomposeFullName(full_name);
+      last_name = last_name || decomposed.lastName;
+      middle_name = middle_name || decomposed.middleName;
+      first_name = first_name || decomposed.firstName;
+      family_relation = family_relation || decomposed.familyRelation;
+    }
+
+    if (!email || !password || !last_name || !first_name || !child_id) {
       return res.status(400).json({
         status: 'fail',
         message: 'Vui lòng cung cấp đầy đủ email, mật khẩu, họ tên phụ huynh và mã hồ sơ bé (child_id).'
       });
     }
+
+    const computedFullName = [last_name.trim(), middle_name ? middle_name.trim() : null, first_name.trim()].filter(Boolean).join(' ');
 
     const child = await db('children').where({ id: child_id }).first();
     if (!child) {
@@ -235,14 +340,29 @@ const provisionFamily = async (req, res) => {
       const [createdUser] = await db('users').insert({
         email: normalizedEmail,
         password_hash: passwordHash,
-        full_name: full_name.trim(),
+        full_name: computedFullName,
+        last_name: last_name.trim(),
+        middle_name: middle_name ? middle_name.trim() : null,
+        first_name: first_name.trim(),
+        gender: gender || 'UNSPECIFIED',
+        family_relation: family_relation ? family_relation.trim() : 'Người giám hộ',
+        display_mode: display_mode || 'FULL_NAME',
         phone_number: phone_number ? phone_number.trim() : null,
         role: 'FAMILY'
       }).returning('*');
       familyUser = createdUser;
     } else {
-      // Nếu user đã tồn tại, cập nhật role thành FAMILY
-      await db('users').where({ id: familyUser.id }).update({ role: 'FAMILY' });
+      // Nếu user đã tồn tại, cập nhật role thành FAMILY và họ tên nếu có
+      await db('users').where({ id: familyUser.id }).update({
+        role: 'FAMILY',
+        full_name: computedFullName,
+        last_name: last_name.trim(),
+        middle_name: middle_name ? middle_name.trim() : null,
+        first_name: first_name.trim(),
+        gender: gender || familyUser.gender || 'UNSPECIFIED',
+        family_relation: family_relation ? family_relation.trim() : familyUser.family_relation || 'Người giám hộ',
+        display_mode: display_mode || familyUser.display_mode || 'FULL_NAME'
+      });
     }
 
     // Gán family_user_id vào hồ sơ của bé

@@ -48,20 +48,49 @@ const showRegisterForm = (req, res) => {
 };
 
 const processRegister = async (req, res) => {
-  const { email, password, full_name, phone_number } = req.body;
+  const {
+    email,
+    password,
+    full_name,
+    last_name,
+    middle_name,
+    first_name,
+    gender,
+    title_prefix,
+    family_relation,
+    job_title,
+    department,
+    include_prefix_in_display,
+    include_title_in_display,
+    include_relation_in_display,
+    display_mode,
+    phone_number
+  } = req.body;
 
   try {
     const response = await apiClient.post('/auth/register', {
       email,
       password,
       full_name,
+      last_name,
+      middle_name,
+      first_name,
+      gender,
+      title_prefix,
+      family_relation,
+      job_title,
+      department,
+      include_prefix_in_display: include_prefix_in_display === 'on' || include_prefix_in_display === true,
+      include_title_in_display: include_title_in_display === 'on' || include_title_in_display === true,
+      include_relation_in_display: include_relation_in_display === 'on' || include_relation_in_display === true,
+      display_mode,
       phone_number
     });
 
     if (response && response.data) {
       req.session.token = response.data.token;
       req.session.user = response.data.user;
-      req.session.successMsg = 'Đăng ký tài khoản thành công!';
+      req.session.successMsg = `Đăng ký tài khoản thành công! Chào mừng ${response.data.user.displayName || response.data.user.fullName}.`;
       return res.redirect('/');
     }
 
