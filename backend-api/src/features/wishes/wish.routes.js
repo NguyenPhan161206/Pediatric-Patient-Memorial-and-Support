@@ -4,7 +4,10 @@ const wishController = require('./wish.controller');
 const { authenticateToken } = require('../../shared/middlewares/authMiddleware');
 const { requireRoles } = require('../../shared/middlewares/roleMiddleware');
 
-// 1. Lấy danh sách điều ước của một bé (Public)
+// 1. Lấy toàn bộ danh sách điều ước toàn quốc (Public)
+router.get('/', wishController.getAllWishes);
+
+// 2. Lấy danh sách điều ước của một bé (Public)
 router.get('/warrior/:slugOrId', wishController.getWishesByWarrior);
 
 // 2. Tạo điều ước mới cho bé (Yêu cầu đăng nhập: FAMILY, COORDINATOR, ORG_ADMIN, ADMIN)

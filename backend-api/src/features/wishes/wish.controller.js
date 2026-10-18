@@ -2,6 +2,97 @@ const db = require('../../shared/database/knex');
 const { logAudit } = require('../../shared/audit/auditLogger');
 
 /**
+ * Lấy toàn bộ danh sách điều ước trên toàn quốc kèm filter theo category, status, organization_id
+ */
+const getAllWishes = async (req, res) => {
+  try {
+    const { category, status, organization_id, page = 1, limit = 20 } = req.query;
+
+    let query = db('child_wishes as cw')
+      .join('children as c', 'cw.child_id', 'c.id')
+      .leftJoin('organizations as org', 'c.organization_id', 'org.id');
+
+    if (category) {
+      query = query.where('cw.category', category);
+    }
+
+    if (status) {
+      query = query.where('cw.status', status);
+    }
+
+    if (organization_id) {
+      query = query.where('c.organization_id', organization_id);
+    }
+
+    const totalCountRes = await query.clone().count('cw.id as count').first();
+    const totalWishes = parseInt(totalCountRes.count, 10);
+
+    const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+
+    const wishes = await query
+      .select(
+        'cw.id',
+        'cw.title',
+        'cw.description',
+        'cw.category',
+        'cw.estimated_cost',
+        'cw.status',
+        'cw.sponsor_name',
+        'cw.sponsor_message',
+        'cw.promised_at',
+        'cw.fulfilled_at',
+        'cw.created_at',
+        'c.id as child_id',
+        'c.full_name as child_name',
+        'c.nickname as child_nickname',
+        'c.slug as child_slug',
+        'c.avatar_url as child_avatar_url',
+        'c.hometown as child_hometown',
+        'org.id as org_id',
+        'org.name as org_name',
+        'org.address as org_address'
+      )
+      .orderByRaw("CASE WHEN cw.status = 'PENDING' THEN 1 WHEN cw.status = 'PROMISED' THEN 2 ELSE 3 END ASC")
+      .orderBy('cw.created_at', 'desc')
+      .limit(parseInt(limit, 10))
+      .offset(offset);
+
+    // Thống kê tổng quan cây điều ước
+    const stats = await db('child_wishes')
+      .select(
+        db.raw("COUNT(*) as total"),
+        db.raw("COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending_count"),
+        db.raw("COUNT(CASE WHEN status = 'PROMISED' THEN 1 END) as promised_count"),
+        db.raw("COUNT(CASE WHEN status = 'FULFILLED' THEN 1 END) as fulfilled_count")
+      )
+      .first();
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        totalWishes,
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        totalPages: Math.ceil(totalWishes / parseInt(limit, 10)) || 1,
+        stats: {
+          total: parseInt(stats.total, 10) || 0,
+          pending: parseInt(stats.pending_count, 10) || 0,
+          promised: parseInt(stats.promised_count, 10) || 0,
+          fulfilled: parseInt(stats.fulfilled_count, 10) || 0
+        },
+        wishes
+      }
+    });
+  } catch (error) {
+    console.error('[GET ALL WISHES ERROR]', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Lỗi tải danh mục điều ước.'
+    });
+  }
+};
+
+/**
  * Lấy danh sách điều ước của một chiến binh nhí
  */
 const getWishesByWarrior = async (req, res) => {
@@ -217,6 +308,7 @@ const fulfillWish = async (req, res) => {
 };
 
 module.exports = {
+  getAllWishes,
   getWishesByWarrior,
   createWish,
   sponsorWish,

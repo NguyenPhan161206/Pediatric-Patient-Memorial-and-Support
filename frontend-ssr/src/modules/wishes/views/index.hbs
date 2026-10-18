@@ -1,0 +1,300 @@
+<div class="space-y-6">
+  <!-- Header / Breadcrumbs -->
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
+        <a href="/" class="hover:text-slate-900 transition-colors">Trang chủ</a>
+        <span>/</span>
+        <span class="text-slate-900 font-semibold">Cây Điều Ước Trực Tuyến</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
+        <span>🌟</span> Cây Điều Ước Trực Tuyến
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Nơi kết nối yêu thương — Giúp các chiến binh nhí biến những ước mơ bình dị nhất thành hiện thực.
+      </p>
+    </div>
+  </div>
+
+  {{#if sponsoredSuccess}}
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 flex items-start gap-3 shadow-sm animate-fade-in">
+      <svg class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <div>
+        <h4 class="font-bold text-emerald-900">Đăng ký trao tặng điều ước thành công!</h4>
+        <p class="text-xs text-emerald-700 mt-0.5">
+          Cảm ơn bạn đã sẻ chia yêu thương. Điều phối viên CTXH của bệnh viện bảo trợ sẽ liên hệ với bạn trong vòng 24h để hướng dẫn gửi quà tới tận tay bé.
+        </p>
+      </div>
+    </div>
+  {{/if}}
+
+  <!-- Thống kê điều ước (Overview Metrics) -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-slate-300 transition-all">
+      <div class="text-xs font-medium text-slate-500">Tổng Điều Ước</div>
+      <div class="mt-1 text-2xl font-bold text-slate-900">{{stats.total}}</div>
+      <div class="mt-1 text-[11px] text-slate-400">Trên toàn hệ thống</div>
+    </div>
+    <div class="rounded-xl border border-amber-200 bg-amber-50/40 p-4 shadow-sm">
+      <div class="text-xs font-medium text-amber-700">Đang Chờ Trao Tặng</div>
+      <div class="mt-1 text-2xl font-bold text-amber-900">{{stats.pending}}</div>
+      <div class="mt-1 text-[11px] text-amber-600 font-medium">Cần các nhà hảo tâm sẻ chia</div>
+    </div>
+    <div class="rounded-xl border border-blue-200 bg-blue-50/40 p-4 shadow-sm">
+      <div class="text-xs font-medium text-blue-700">Đã Được Nhận Trao</div>
+      <div class="mt-1 text-2xl font-bold text-blue-900">{{stats.promised}}</div>
+      <div class="mt-1 text-[11px] text-blue-600">Đang chuẩn bị gửi quà</div>
+    </div>
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-sm">
+      <div class="text-xs font-medium text-emerald-700">Đã Hoàn Thành</div>
+      <div class="mt-1 text-2xl font-bold text-emerald-900">{{stats.fulfilled}}</div>
+      <div class="mt-1 text-[11px] text-emerald-600">Nụ cười đã rạng rỡ trên môi bé</div>
+    </div>
+  </div>
+
+  <!-- Bộ lọc (Filters Toolbar) -->
+  <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <form method="GET" action="/wishes" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      <!-- Lọc Danh mục -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Loại Điều Ước</label>
+        <select name="category" onchange="this.form.submit()" class="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900">
+          <option value="">Tất cả danh mục</option>
+          <option value="TOY" {{#if (eq currentCategory 'TOY')}}selected{{/if}}>🧸 Đồ chơi & Giải trí</option>
+          <option value="BOOK" {{#if (eq currentCategory 'BOOK')}}selected{{/if}}>📚 Sách truyện & Học tập</option>
+          <option value="CLOTHES" {{#if (eq currentCategory 'CLOTHES')}}selected{{/if}}>👕 Quần áo & Giày dép</option>
+          <option value="EXPERIENCE" {{#if (eq currentCategory 'EXPERIENCE')}}selected{{/if}}>🎡 Trải nghiệm & Ước mơ</option>
+          <option value="OTHER" {{#if (eq currentCategory 'OTHER')}}selected{{/if}}>🎁 Điều ước khác</option>
+        </select>
+      </div>
+
+      <!-- Lọc Trạng thái -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Trạng Thái</label>
+        <select name="status" onchange="this.form.submit()" class="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900">
+          <option value="">Tất cả trạng thái</option>
+          <option value="PENDING" {{#if (eq currentStatus 'PENDING')}}selected{{/if}}>🟡 Đang chờ trao tặng</option>
+          <option value="PROMISED" {{#if (eq currentStatus 'PROMISED')}}selected{{/if}}>🔵 Đã có người nhận trao</option>
+          <option value="FULFILLED" {{#if (eq currentStatus 'FULFILLED')}}selected{{/if}}>🟢 Đã trao tận tay bé</option>
+        </select>
+      </div>
+
+      <!-- Lọc Bệnh viện / Tổ chức -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Bệnh Viện / Cơ Sở</label>
+        <select name="organization_id" onchange="this.form.submit()" class="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900">
+          <option value="">Tất cả cơ sở y tế</option>
+          {{#each organizations}}
+            <option value="{{this.id}}" {{#if (eq ../currentOrgId this.id)}}selected{{/if}}>{{this.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+
+      <!-- Action reset -->
+      <div class="flex items-end">
+        <a href="/wishes" class="h-9 w-full inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition-colors">
+          Đặt lại bộ lọc
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Danh sách Điều Ước (Grid Cards) -->
+  {{#if wishes.length}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {{#each wishes}}
+        <div class="group relative rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div>
+            <!-- Header bé & bệnh viện -->
+            <div class="flex items-start gap-3 mb-3">
+              <a href="/warriors/{{this.child_slug}}" class="shrink-0">
+                <img src="{{this.child_avatar_url}}" alt="{{this.child_name}}" class="w-12 h-12 rounded-full object-cover border-2 border-rose-100 group-hover:border-rose-300 transition-all" />
+              </a>
+              <div class="min-w-0 flex-1">
+                <a href="/warriors/{{this.child_slug}}" class="font-bold text-slate-900 text-sm hover:text-rose-600 transition-colors line-clamp-1">
+                  {{this.child_name}} {{#if this.child_nickname}}<span class="text-slate-400 font-normal">({{this.child_nickname}})</span>{{/if}}
+                </a>
+                <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                  <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <span class="truncate">{{#if this.org_name}}{{this.org_name}}{{else}}{{this.child_hometown}}{{/if}}</span>
+                </p>
+              </div>
+
+              <!-- Badge Category -->
+              <span class="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 uppercase">
+                {{this.category}}
+              </span>
+            </div>
+
+            <!-- Tên điều ước & Mô tả -->
+            <div class="mt-2">
+              <h3 class="font-bold text-base text-slate-900 group-hover:text-rose-600 transition-colors">
+                {{this.title}}
+              </h3>
+              {{#if this.description}}
+                <p class="text-xs text-slate-600 mt-1 line-clamp-3 leading-relaxed">
+                  "{{this.description}}"
+                </p>
+              {{/if}}
+            </div>
+
+            <!-- Giá trị ước tính nếu có -->
+            {{#if this.estimated_cost}}
+              <div class="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+                <span>Ước tính khoảng:</span>
+                <span class="font-bold text-rose-600 font-mono">{{formatMoney this.estimated_cost}}</span>
+              </div>
+            {{/if}}
+          </div>
+
+          <!-- Footer trạng thái & Action -->
+          <div class="mt-4 pt-3 border-t border-slate-100">
+            {{#if (eq this.status 'PENDING')}}
+              <div class="flex items-center justify-between gap-2">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  Đang chờ trao
+                </span>
+                <button 
+                  type="button" 
+                  onclick="openSponsorModal('{{this.id}}', '{{this.title}}', '{{this.child_name}}', '{{this.org_name}}')"
+                  class="inline-flex items-center gap-1 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg shadow-sm transition-all hover:scale-[1.02]"
+                >
+                  <span>🎁</span> Nhận Trao Quà
+                </button>
+              </div>
+            {{else if (eq this.status 'PROMISED')}}
+              <div class="space-y-1 bg-blue-50/60 p-2.5 rounded-lg border border-blue-100">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-semibold text-blue-800 flex items-center gap-1">
+                    <span>💌</span> Đã có người nhận
+                  </span>
+                  <span class="text-[10px] text-blue-600">{{formatDate this.promised_at}}</span>
+                </div>
+                <p class="text-[11px] text-slate-600">
+                  Nhà hảo tâm: <strong class="text-slate-800">{{this.sponsor_name}}</strong>
+                </p>
+                {{#if this.sponsor_message}}
+                  <p class="text-[11px] text-slate-500 italic">"{{this.sponsor_message}}"</p>
+                {{/if}}
+              </div>
+            {{else if (eq this.status 'FULFILLED')}}
+              <div class="flex items-center justify-between bg-emerald-50/70 p-2.5 rounded-lg border border-emerald-100">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
+                  <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  Đã trao tận tay bé
+                </div>
+                <span class="text-[10px] font-mono text-emerald-700">{{formatDate this.fulfilled_at}}</span>
+              </div>
+            {{/if}}
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+      <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-xl mb-3">
+        🌱
+      </div>
+      <h3 class="font-bold text-slate-800">Chưa có điều ước nào phù hợp</h3>
+      <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+        Hiện không tìm thấy điều ước nào theo bộ lọc đã chọn. Vui lòng bấm "Đặt lại bộ lọc" để xem toàn bộ.
+      </p>
+      <a href="/wishes" class="mt-4 inline-flex items-center text-xs font-semibold text-rose-600 hover:underline">
+        Xem tất cả điều ước &rarr;
+      </a>
+    </div>
+  {{/if}}
+</div>
+
+<!-- Modal Nhận Trao Quà Điều Ước (shadcn/ui Dialog style) -->
+<div id="sponsorModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-fade-in">
+    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🎁</span>
+        <h3 class="font-bold text-base text-slate-900">Nhận Trao Tặng Điều Ước</h3>
+      </div>
+      <button type="button" onclick="closeSponsorModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Tóm tắt điều ước -->
+    <div class="bg-rose-50/50 rounded-xl p-3 border border-rose-100 mb-4 text-xs">
+      <div class="font-bold text-rose-900 text-sm" id="modalWishTitle">Tên điều ước</div>
+      <div class="text-slate-600 mt-0.5">Dành cho: <strong class="text-slate-900" id="modalChildName">Bé</strong> &bull; Cơ sở bảo trợ: <span id="modalOrgName" class="font-medium text-slate-700">Bệnh viện</span></div>
+    </div>
+
+    <form id="sponsorForm" method="POST" action="" class="space-y-3.5">
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Họ và tên của bạn <span class="text-rose-500">*</span></label>
+        <input 
+          type="text" 
+          name="sponsor_name" 
+          required 
+          placeholder="Ví dụ: Nguyễn Văn Hảo"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Số điện thoại liên lạc <span class="text-rose-500">*</span></label>
+        <input 
+          type="tel" 
+          name="sponsor_phone" 
+          required 
+          placeholder="09xx xxx xxx"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+        />
+        <p class="text-[10px] text-slate-400 mt-1">Điều phối viên bệnh viện sẽ liên hệ số này để hướng dẫn gửi quà.</p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Lời chúc nhắn gửi đến bé</label>
+        <textarea 
+          name="sponsor_message" 
+          rows="2"
+          placeholder="Chúc con mau khỏe để tiếp tục ước mơ..."
+          class="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+        ></textarea>
+      </div>
+
+      <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/60 text-[11px] text-slate-600">
+        🛡️ <strong>Lưu ý:</strong> Quà hiện vật sẽ được tiếp nhận và kiểm định bởi Phòng Công tác Xã hội của Bệnh viện bảo trợ để đảm bảo vô trùng và an toàn cho bé.
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button 
+          type="button" 
+          onclick="closeSponsorModal()" 
+          class="h-9 px-4 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+        >
+          Hủy
+        </button>
+        <button 
+          type="submit" 
+          class="h-9 px-4 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02]"
+        >
+          Xác Nhận Nhận Trao Quà
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openSponsorModal(wishId, title, childName, orgName) {
+    document.getElementById('modalWishTitle').innerText = title;
+    document.getElementById('modalChildName').innerText = childName;
+    document.getElementById('modalOrgName').innerText = orgName || 'Phòng CTXH Bệnh viện';
+    document.getElementById('sponsorForm').action = '/wishes/' + wishId + '/sponsor';
+    document.getElementById('sponsorModal').classList.remove('hidden');
+  }
+
+  function closeSponsorModal() {
+    document.getElementById('sponsorModal').classList.add('hidden');
+  }
+</script>
