@@ -548,17 +548,24 @@ const rejectDonation = async (req, res) => {
 const verifyCertificatePublic = async (req, res) => {
   try {
     const { qrToken } = req.params;
+    const queryTerm = (qrToken || '').trim();
 
     const donation = await db('donations_transactions as dt')
       .join('children as c', 'dt.child_id', 'c.id')
       .leftJoin('organizations as org', 'dt.organization_id', 'org.id')
       .leftJoin('users as u', 'dt.verified_by', 'u.id')
-      .where({ 'dt.certificate_qr_token': qrToken, 'dt.status': 'VERIFIED' })
+      .where('dt.status', 'VERIFIED')
+      .andWhere(function() {
+        this.where('dt.certificate_qr_token', queryTerm)
+          .orWhere('dt.certificate_code', queryTerm)
+          .orWhere('dt.transaction_code', queryTerm);
+      })
       .select(
         'dt.id',
         'dt.certificate_code',
         'dt.certificate_qr_token',
         'dt.certificate_qr_data',
+        'dt.transaction_code',
         'dt.donor_name',
         'dt.amount',
         'dt.transfer_message',
@@ -598,6 +605,48 @@ const verifyCertificatePublic = async (req, res) => {
   }
 };
 
+/**
+ * Lấy danh sách các chứng nhận đã cấp gần đây nhất để phục vụ tra cứu
+ */
+const getRecentCertificates = async (req, res) => {
+  try {
+    const certificates = await db('donations_transactions as dt')
+      .join('children as c', 'dt.child_id', 'c.id')
+      .leftJoin('organizations as org', 'dt.organization_id', 'org.id')
+      .where('dt.status', 'VERIFIED')
+      .whereNotNull('dt.certificate_code')
+      .select(
+        'dt.id',
+        'dt.certificate_code',
+        'dt.certificate_qr_token',
+        'dt.transaction_code',
+        'dt.donor_name',
+        'dt.amount',
+        'dt.is_anonymous',
+        'dt.verified_at',
+        'c.full_name as child_name',
+        'c.slug as child_slug',
+        'c.avatar_url as child_avatar',
+        'org.name as org_name'
+      )
+      .orderBy('dt.verified_at', 'desc')
+      .limit(10);
+
+    const sanitized = certificates.map(c => ({
+      ...c,
+      donor_name: c.is_anonymous ? 'Nhà Hảo Tâm Ẩn Danh' : c.donor_name
+    }));
+
+    return res.status(200).json({
+      status: 'success',
+      data: sanitized
+    });
+  } catch (error) {
+    console.error('[GET RECENT CERTS ERROR]', error);
+    return res.status(500).json({ status: 'error', message: 'Lỗi tải danh sách chứng nhận.' });
+  }
+};
+
 module.exports = {
   submitProof,
   mockSandboxPay,
@@ -606,5 +655,6 @@ module.exports = {
   getPendingDonations,
   verifyDonation,
   rejectDonation,
-  verifyCertificatePublic
+  verifyCertificatePublic,
+  getRecentCertificates
 };

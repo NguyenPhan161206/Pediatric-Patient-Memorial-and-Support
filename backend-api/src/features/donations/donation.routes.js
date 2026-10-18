@@ -72,4 +72,7 @@ router.patch(
 // 7. Tra cứu công khai tính hợp lệ của Chứng Nhận Số qua Mã QR
 router.get('/verify/:qrToken', donationController.verifyCertificatePublic);
 
+// 8. Danh sách chứng nhận cấp gần đây
+router.get('/recent-certs', donationController.getRecentCertificates);
+
 module.exports = router;

@@ -5,6 +5,9 @@ const donationViewController = require('./donation.viewcontroller');
 // Bức Tường Vinh Danh Toàn Quốc
 router.get('/wall', donationViewController.renderWallOfHonor);
 
+// Tra cứu Chứng Nhận Tri Ân Số công khai
+router.get('/lookup', donationViewController.renderLookupCertificate);
+
 // Cổng xét duyệt biên lai (Dành cho ORG_ADMIN, FAMILY, ADMIN)
 router.get('/moderation', donationViewController.viewModeration);
 

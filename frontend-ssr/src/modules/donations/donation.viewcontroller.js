@@ -240,6 +240,48 @@ const renderWallOfHonor = async (req, res) => {
   }
 };
 
+/**
+ * Hiển thị Cổng Tra Cứu Chứng Nhận Tri Ân Số
+ */
+const renderLookupCertificate = async (req, res) => {
+  try {
+    const { code } = req.query;
+
+    let certResult = null;
+    let notFound = false;
+
+    if (code) {
+      try {
+        const response = await apiClient.get(`/donations/verify/${encodeURIComponent(code.trim())}`);
+        certResult = response.data || response;
+      } catch (err) {
+        notFound = true;
+      }
+    }
+
+    // Lấy 10 chứng nhận mẫu vừa cấp
+    const recentRes = await apiClient.get('/donations/recent-certs').catch(() => ({ data: [] }));
+    const recentCerts = recentRes.data || [];
+
+    res.render('donations/views/lookup', {
+      title: 'Tra Cứu Chứng Nhận Tri Ân Số',
+      description: 'Cổng tra cứu tính xác thực của Chứng Nhận Tri Ân Số theo quy chuẩn Nghị định 93/2021/NĐ-CP',
+      searchCode: code || '',
+      certResult,
+      notFound,
+      recentCerts,
+      activeMenu: 'cert-lookup'
+    });
+  } catch (error) {
+    console.error('[RENDER LOOKUP ERROR]', error);
+    res.status(500).render('donations/views/lookup', {
+      title: 'Tra Cứu Chứng Nhận',
+      recentCerts: [],
+      errorMsg: 'Lỗi tải trang tra cứu.'
+    });
+  }
+};
+
 module.exports = {
   viewCertificate,
   viewModeration,
@@ -248,5 +290,6 @@ module.exports = {
   verifyDonation,
   rejectDonation,
   sponsorWish,
-  renderWallOfHonor
+  renderWallOfHonor,
+  renderLookupCertificate
 };
