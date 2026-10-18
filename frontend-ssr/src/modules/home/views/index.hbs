@@ -219,4 +219,124 @@
     </div>
   </section>
 
+  <!-- SECTION: BẢN ĐỒ HY VỌNG TOÀN QUỐC (LEAFLET.JS MAP OF HOPE) -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200 mb-2">
+            <span>🗺️</span> Mạng Lưới Đa Đơn Vị (Multi-Tenancy)
+          </div>
+          <h2 class="text-2xl font-bold tracking-tight text-slate-900">Bản Đồ Hy Vọng Toàn Quốc</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            Mạng lưới kết nối trực tiếp các bệnh viện nhi, khoa ung bướu và quỹ bảo trợ đồng hành tiếp sức cho các chiến binh nhí.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
+            🏥 3 Cơ Sở Điều Trị & Quỹ Bảo Trợ
+          </span>
+        </div>
+      </div>
+
+      <!-- Map Container -->
+      <div class="relative w-full rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+        <div id="map-of-hope" class="h-[460px] w-full z-0"></div>
+      </div>
+
+      <!-- Partner Units Highlights -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-4 rounded-2xl bg-teal-50/50 border border-teal-100 flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-teal-700 tracking-wider">Hà Nội • Bệnh Viện Hạng Đặc Biệt</span>
+            <h4 class="text-sm font-bold text-slate-900 mt-1">Bệnh Viện Nhi Trung Ương</h4>
+            <p class="text-xs text-slate-600 mt-1">18/879 La Thành, Láng Thượng, Đống Đa, Hà Nội</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-teal-100 flex items-center justify-between">
+            <span class="text-[11px] font-mono font-semibold text-teal-800">Vietcombank • 1029384756</span>
+            <a href="/warriors?organization=BV_NHI_TW" class="text-xs font-bold text-rose-600 hover:underline">Xem các bé &rarr;</a>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-sky-50/50 border border-sky-100 flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-sky-700 tracking-wider">Hà Nội • Khoa Nhi Ung Bướu</span>
+            <h4 class="text-sm font-bold text-slate-900 mt-1">Bệnh Viện K Tân Triều</h4>
+            <p class="text-xs text-slate-600 mt-1">Số 30 đường Cầu Bươu, Tân Triều, Thanh Trì, Hà Nội</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-sky-100 flex items-center justify-between">
+            <span class="text-[11px] font-mono font-semibold text-sky-800">BIDV • 21510001234567</span>
+            <a href="/warriors?organization=BV_K_TAN_TRIEU" class="text-xs font-bold text-rose-600 hover:underline">Xem các bé &rarr;</a>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-amber-50/50 border border-amber-100 flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-amber-700 tracking-wider">TP. Hồ Chí Minh • Quỹ Thiện Nguyện</span>
+            <h4 class="text-sm font-bold text-slate-900 mt-1">Quỹ Hy Vọng & Nụ Cười Em</h4>
+            <p class="text-xs text-slate-600 mt-1">Quận 3, TP. Hồ Chí Minh</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between">
+            <span class="text-[11px] font-mono font-semibold text-amber-800">Techcombank • 1903666888999</span>
+            <a href="/warriors?organization=QUY_NU_CUOI_EM" class="text-xs font-bold text-rose-600 hover:underline">Xem các bé &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
 </div>
+
+<!-- Leaflet.js Assets & Map Initialization -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    try {
+      const orgsData = {{{organizationsJson}}};
+      const geoCoords = {
+        'BV_NHI_TW': [21.0264, 105.8085],
+        'BV_K_TAN_TRIEU': [20.9634, 105.7952],
+        'QUY_NU_CUOI_EM': [10.7719, 106.6710]
+      };
+
+      // Khởi tạo bản đồ trung tâm Việt Nam
+      const map = L.map('map-of-hope').setView([16.047079, 107.5], 6);
+
+      // Thêm lớp OpenStreetMap
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap contributors | Chiến Binh Nhí Hub'
+      }).addTo(map);
+
+      // Render từng điểm mốc bệnh viện
+      if (Array.isArray(orgsData) && orgsData.length > 0) {
+        orgsData.forEach(function(org) {
+          const coords = geoCoords[org.code] || [21.0285, 105.8542];
+          const marker = L.marker(coords).addTo(map);
+
+          const popupContent = `
+            <div style="min-width: 210px; font-family: Inter, sans-serif; padding: 4px;">
+              <span style="font-size: 10px; font-weight: 700; color: #0d9488; text-transform: uppercase;">
+                ${org.type === 'HOSPITAL' ? '🏥 Bệnh Viện Tiếp Nhận' : '💛 Quỹ Bảo Trợ Bệnh Nhi'}
+              </span>
+              <h4 style="font-size: 13px; font-weight: 800; margin: 4px 0; color: #0f172a;">${org.name}</h4>
+              <p style="font-size: 11px; color: #64748b; margin: 2px 0 6px;">📍 ${org.address || org.province || ''}</p>
+              <div style="font-size: 11px; color: #059669; font-weight: 600; margin-bottom: 8px;">
+                STK: <code>${org.bank_account_number || ''}</code> (${org.bank_name || ''})
+              </div>
+              <a href="/warriors?organization=${org.code}" style="display: block; text-align: center; font-size: 11px; font-weight: 700; color: white; background: #e11d48; padding: 6px 10px; border-radius: 8px; text-decoration: none;">
+                Xem danh sách bé tại đây &rarr;
+              </a>
+            </div>
+          `;
+          marker.bindPopup(popupContent);
+        });
+      }
+    } catch (e) {
+      console.error('[MAP OF HOPE ERROR]', e);
+    }
+  });
+</script>

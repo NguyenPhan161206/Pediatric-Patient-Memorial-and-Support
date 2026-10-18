@@ -13,8 +13,8 @@
 - [Giai đoạn 3: Xây Dựng Lõi Backend REST API & Kịch Bản CI/CD](#giai-đoạn-3-xây-dựng-lõi-backend-rest-api--kịch-bản-cicd) `[ĐÃ HOÀN THÀNH]`
 - [Giai đoạn 4: Hoàn Thiện Giao Diện Người Dùng Frontend SSR](#giai-đoạn-4-hoàn-thiện-giao-diện-người-dùng-frontend-ssr) `[ĐÃ HOÀN THÀNH]`
 - [Giai đoạn 5: Nâng Cấp Không Gian Đa Đơn Vị (Multi-Tenancy) & Phân Quyền 6 Cấp `ORG_ADMIN`](#giai-đoạn-5-nâng-cấp-không-gian-đa-đơn-vị-multi-tenancy--phân-quyền-6-cấp-org_admin) `[ĐÃ HOÀN THÀNH]`
-- [Giai đoạn 6: Bộ Tứ Tính Năng Mũi Nhọn "Ăn Điểm Tuyệt Đối" (The 4 Showcase Dazzlers)](#giai-đoạn-6-bộ-tứ-tính-năng-mũi-nhọn-ăn-điểm-tuyệt-đối-the-4-showcase-dazzlers) `[KẾ TIẾP]`
-- [Giai đoạn 7: Kiểm Thử Đầu Cuối (E2E), Tối Ưu Hiệu Năng & An Toàn Bảo Mật](#giai-đoạn-7-kiểm-thử-đầu-cuối-e2e-tối-ưu-hiệu-năng--an-toàn-bảo-mật) `[DỰ KIẾN]`
+- [Giai đoạn 6: Bộ Tứ Tính Năng Mũi Nhọn "Ăn Điểm Tuyệt Đối" (The 4 Showcase Dazzlers)](#giai-đoạn-6-bộ-tứ-tính-năng-mũi-nhọn-ăn-điểm-tuyệt-đối-the-4-showcase-dazzlers) `[ĐÃ HOÀN THÀNH]`
+- [Giai đoạn 7: Kiểm Thử Đầu Cuối (E2E), Tối Ưu Hiệu Năng & An Toàn Bảo Mật](#giai-đoạn-7-kiểm-thử-đầu-cuối-e2e-tối-ưu-hiệu-năng--an-toàn-bảo-mật) `[KẾ TIẾP]`
 - [Giai đoạn 8: Đóng Gói Báo Cáo Học Thuật, Slide & Kịch Bản Demo 5 Phút](#giai-đoạn-8-đóng-gói-báo-cáo-học-thuật-slide--kịch-bản-demo-5-phút) `[VỀ ĐÍCH]`
 
 ---
@@ -68,22 +68,24 @@
 
 ---
 
-### Giai đoạn 6: Bộ Tứ Tính Năng Mũi Nhọn "Ăn Điểm Tuyệt Đối" (The 4 Showcase Dazzlers) `[KẾ TIẾP]`
+### Giai đoạn 6: Bộ Tứ Tính Năng Mũi Nhọn "Ăn Điểm Tuyệt Đối" (The 4 Showcase Dazzlers) `[ĐÃ HOÀN THÀNH]`
 *Mục tiêu: Tạo ra các điểm chạm tương tác sinh động và giải quyết trọn vẹn bài toán minh bạch thiện nguyện theo NĐ 93/2021/NĐ-CP.*
-- [ ] **6.1. Bức Tường Vinh Danh & Xét Duyệt Biên Lai (Proof Verification Flow):**
-  - Tạo bảng `donations_recognition`: Lưu thông tin ủng hộ, mã tham chiếu ngân hàng, ảnh chụp màn hình chuyển khoản, trạng thái `PENDING`/`VERIFIED`/`REJECTED`.
-  - Màn hình cho Nhà hảo tâm: Upload biên lai chuyển khoản Napas247 VietQR.
-  - Màn hình cho `ORG_ADMIN` & `FAMILY`: Danh sách biên lai chờ duyệt kèm ảnh phóng to, 1-click [Duyệt & Vinh Danh].
-- [ ] **6.2. Chứng Nhận Tri Ân Số (Digital Certificate of Appreciation with QR):**
-  - Tự động sinh Thẻ Chứng Nhận Tri Ân Số dạng Vector SVG/HTML Canvas trang trọng, có logo Bệnh viện, con dấu số và mã QR xác thực.
-  - Trang tra cứu công khai `GET /verify/:certificateQrCode`: Quét mã bằng điện thoại xác minh chứng nhận thật/giả.
-- [ ] **6.3. Cây Điều Ước Trực Tuyến (Online Wishlist / Child Wishes):**
-  - Tạo bảng `child_wishes`: Quản lý danh mục điều ước hiện vật của bé (Hộp màu, đồ chơi Lego, truyện tranh...).
-  - Giao diện Cây Điều Ước tương tác trên trang chi tiết bé.
-  - Luồng Nhà hảo tâm nhận tặng: Bấm nút nhận tặng $\rightarrow$ Hiển thị mã tiếp nhận và địa chỉ Phòng CTXH BV $\rightarrow$ Huy hiệu "Đã được trao tặng".
-- [ ] **6.4. Bản Đồ Hy Vọng Tương Tác (Interactive Map of Hope - Leaflet.js):**
-  - Tích hợp Leaflet.js & OpenStreetMap trên Trang chủ.
-  - Ghim các điểm sáng bệnh viện/quỹ trên toàn quốc kèm popup số lượng chiến binh nhí đang nhận điều trị.
+- [x] **6.1. Bức Tường Vinh Danh & Xét Duyệt Biên Lai (Proof Verification Flow):**
+  - Tạo Knex migration `20261018000002_create_donations_and_wishes_tables.js` cho bảng `donations_transactions` (`child_id`, `organization_id`, `amount`, `payment_method`, `proof_image_url`, `status`, `certificate_code`, `certificate_qr_token`, `certificate_qr_data`).
+  - Giao diện nộp biên lai: Form nộp ảnh minh chứng chuyển khoản Napas247 VietQR (`POST /donations/submit-proof`).
+  - Cổng đối soát cho `ORG_ADMIN` & `FAMILY`: Màn hình `/donations/moderation` xem ảnh minh chứng phóng to, 1-click [Duyệt & Cấp Chứng Nhận] (`POST /donations/:id/verify`) hoặc [Từ Chối] (`POST /donations/:id/reject`).
+  - Widget Bức Tường Vinh Danh hiển thị tổng số tiền viện phí đã đối soát và danh sách nhà hảo tâm trên trang chi tiết bé.
+- [x] **6.2. Cổng Ngân Hàng Mô Phỏng Sandbox (1-Click Demo) & Cấp Chứng Nhận Tri Ân Số kèm Mã QR:**
+  - Nút bấm "Mô Phỏng Chuyển Khoản Sandbox" (`POST /donations/mock-sandbox-pay`) cho phép Hội đồng Giám khảo thử nghiệm thanh toán 200k-5tr trong 3 giây không mất tiền thật.
+  - Tự động sinh Thẻ Chứng Nhận Tri Ân Số vector sang trọng (`/donations/cert/:qrToken` và `/verify/cert/:qrToken`) viền vàng hoa văn, biểu tượng chữ ký số bệnh viện và mã QR offline (Base64 dataURL) chống rớt mạng.
+  - Hỗ trợ in trực tiếp / Lưu PDF qua `window.print()` định dạng A4 chuẩn.
+- [x] **6.3. Cây Điều Ước Trực Tuyến (Online Wishlist / Child Wishes):**
+  - Tạo bảng `child_wishes` và seed dữ liệu điều ước hiện vật cho các bé (hộp màu sáp, gấu bông, mô hình xe lửa).
+  - Giao diện Cây Điều Ước tương tác trên trang chi tiết bé với 3 trạng thái huy hiệu rõ ràng (`PENDING`, `PROMISED`, `FULFILLED`).
+  - Modal tiếp nhận trao tặng điều ước (`POST /donations/wishes/:id/sponsor`) cập nhật ngay thông tin người nhận tặng.
+- [x] **6.4. Bản Đồ Hy Vọng Tương Tác (Interactive Map of Hope - Leaflet.js):**
+  - Nhúng thư viện Leaflet.js & bản đồ OpenStreetMap trực tiếp ngoài Trang chủ (`/`).
+  - Tự động đọc dữ liệu liên viện `organizationsJson` và ghim vị trí các cơ sở tiếp nhận (Bệnh viện Nhi TW, Bệnh viện K Tân Triều, Quỹ Nụ Cười Em) kèm Popup thông tin tài khoản và link xem hồ sơ bệnh nhi.
 
 ---
 

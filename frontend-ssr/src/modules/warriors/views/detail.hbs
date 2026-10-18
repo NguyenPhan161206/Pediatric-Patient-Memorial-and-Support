@@ -2,14 +2,49 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <!-- Breadcrumb & Back -->
-    <div class="mb-6">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
       <a href="/warriors" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
         Quay lại danh sách chiến binh
       </a>
+
+      <!-- Quick Jump Navigation -->
+      <div class="flex items-center gap-2 text-xs">
+        <a href="#wishes" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-amber-600 hover:border-amber-300 font-medium transition-colors">
+          ⭐ Cây Điều Ước ({{wishes.length}})
+        </a>
+        <a href="#wall-of-honor" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-emerald-600 hover:border-emerald-300 font-medium transition-colors">
+          🏆 Bức Tường Vinh Danh ({{donations.length}})
+        </a>
+        <a href="#tributes" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-300 font-medium transition-colors">
+          💌 Lời Chúc ({{tributes.length}})
+        </a>
+      </div>
     </div>
+
+    <!-- Flash Notifications -->
+    {{#if donationSuccess}}
+      <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-6 flex items-start gap-2 shadow-sm animate-fade-in">
+        <span class="text-base">🎉</span>
+        <div>{{donationSuccess}}</div>
+      </div>
+    {{/if}}
+
+    {{#if wishSuccess}}
+      <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold mb-6 flex items-start gap-2 shadow-sm animate-fade-in">
+        <span class="text-base">🎁</span>
+        <div>{{wishSuccess}}</div>
+      </div>
+    {{/if}}
+
+    {{#if successMessage}}
+      <div class="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-sky-800 text-xs font-semibold mb-6 flex items-start gap-2 shadow-sm">
+        <span class="text-base">💌</span>
+        <div>{{successMessage}}</div>
+      </div>
+    {{/if}}
 
     <!-- Hero Card Profile -->
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8 mb-8">
@@ -83,7 +118,7 @@
             <button
               id="btn-light-candle"
               data-id="{{warrior.id}}"
-              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-md shadow-rose-500/20 active:scale-95 transition-all"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-md shadow-rose-500/20 active:scale-95 transition-all cursor-pointer"
             >
               <span class="text-base">🕯️</span>
               <span>Thắp một ngọn nến hy vọng</span>
@@ -107,13 +142,11 @@
     <!-- Main Content Layout (2 Columns) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
-      <!-- Left Column (Story, Gallery, Tributes) -->
+      <!-- Left Column (Story, Wishes, Wall of Honor, Gallery, Tributes) -->
       <div class="lg:col-span-2 space-y-8">
         
         <!-- Story Card -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
-          
-          <!-- Dream Quote Box -->
           {{#if warrior.dream_summary}}
             <div class="p-4 rounded-xl bg-rose-50/60 border-l-4 border-rose-500 mb-6">
               <span class="text-xs font-bold uppercase tracking-wider text-rose-700 block mb-1">Ước mơ của con</span>
@@ -130,6 +163,173 @@
           <div class="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed">
             {{{warrior.story_html}}}
           </div>
+        </div>
+
+        <!-- 🌟 FEATURE 1: CÂY ĐIỀU ƯỚC TRỰC TUYẾN (WISHES) -->
+        <div id="wishes" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-3 border-b border-slate-100">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <span>🌟</span> Cây Điều Ước Của Bé
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Những mong ước giản dị nhưng thắp sáng niềm tin để con kiên cường chiến đấu.
+              </p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 self-start sm:self-auto">
+              {{wishes.length}} điều ước
+            </span>
+          </div>
+
+          {{#if wishes.length}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {{#each wishes}}
+                <div class="p-5 rounded-2xl bg-gradient-to-b from-amber-50/30 via-white to-slate-50 border border-amber-200/60 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                  <div>
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                      <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded-md">
+                        {{this.category}}
+                      </span>
+                      {{#if (eq this.status "FULFILLED")}}
+                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                          <span>✓</span> Đã Thành Hiện Thực
+                        </span>
+                      {{else if (eq this.status "PROMISED")}}
+                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
+                          <span>🎁</span> Đang Chuẩn Bị
+                        </span>
+                      {{else}}
+                        <span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                          <span>⭐</span> Chờ Trao Tặng
+                        </span>
+                      {{/if}}
+                    </div>
+
+                    <h4 class="text-sm font-bold text-slate-900 mb-1.5 leading-snug">
+                      {{this.wish_title}}
+                    </h4>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                      {{this.description}}
+                    </p>
+                  </div>
+
+                  <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Ước tính giá trị:</span>
+                      <strong class="text-xs font-bold text-emerald-700 font-mono">
+                        {{formatMoney this.estimated_cost}}
+                      </strong>
+                    </div>
+
+                    {{#if (eq this.status "PENDING")}}
+                      <button
+                        type="button"
+                        onclick="openWishModal('{{this.id}}', '{{this.wish_title}}')"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 shadow-sm shadow-rose-500/20 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <span>Nhận Trao Tặng</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </button>
+                    {{else if (eq this.status "PROMISED")}}
+                      <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block">Được nhận bởi:</span>
+                        <span class="text-xs font-semibold text-slate-700">{{this.sponsor_name}}</span>
+                      </div>
+                    {{else if (eq this.status "FULFILLED")}}
+                      <div class="text-right text-emerald-600 text-xs font-semibold flex items-center gap-1">
+                        <span>💖</span> Đã trao tận tay
+                      </div>
+                    {{/if}}
+                  </div>
+                </div>
+              {{/each}}
+            </div>
+          {{else}}
+            <div class="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-400">
+              Hiện chưa có điều ước nào được ghi lại cho bé.
+            </div>
+          {{/if}}
+        </div>
+
+        <!-- 🏆 FEATURE 2: BỨC TƯỜNG VINH DANH (WALL OF HONOR) & CHỨNG NHẬN SỐ -->
+        <div id="wall-of-honor" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-3 border-b border-slate-100">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <span>🏆</span> Bức Tường Vinh Danh Tấm Lòng Vàng
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Ghi nhận các tấm lòng vàng đã bảo trợ trực tiếp viện phí & tiếp sức cho bé.
+              </p>
+            </div>
+
+            <!-- Total Verified Badge -->
+            <div class="p-2 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm flex items-center gap-2 self-start sm:self-auto">
+              <span class="text-sm">💎</span>
+              <div>
+                <span class="text-[10px] uppercase font-bold text-emerald-100 block leading-none">Tổng viện phí đã đối soát</span>
+                <strong class="text-sm font-extrabold font-mono tracking-tight">{{formatMoney totalDonated}}</strong>
+              </div>
+            </div>
+          </div>
+
+          {{#if donations.length}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {{#each donations}}
+                <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-50/40 via-white to-emerald-50/20 border border-amber-200/70 shadow-sm flex flex-col justify-between hover:border-amber-300 transition-colors">
+                  <div>
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                      <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-rose-400 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                          💛
+                        </div>
+                        <div>
+                          <strong class="text-xs font-bold text-slate-900 block">
+                            {{#if this.is_anonymous}}Nhà Hảo Tâm Ẩn Danh{{else}}{{this.donor_name}}{{/if}}
+                          </strong>
+                          <span class="text-[10px] text-slate-400">{{formatDate this.verified_at}}</span>
+                        </div>
+                      </div>
+
+                      <span class="text-xs font-extrabold text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                        {{formatMoney this.amount}}
+                      </span>
+                    </div>
+
+                    {{#if this.transfer_message}}
+                      <div class="p-2.5 rounded-xl bg-white/80 border border-slate-100 text-xs text-slate-600 italic mb-3">
+                        "{{this.transfer_message}}"
+                      </div>
+                    {{/if}}
+                  </div>
+
+                  <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-[10px] font-mono text-slate-400 truncate max-w-[140px]" title="{{this.certificate_code}}">
+                      {{this.certificate_code}}
+                    </span>
+
+                    <!-- Certificate Button with QR Link -->
+                    <a
+                      href="/donations/cert/{{this.certificate_qr_token}}"
+                      target="_blank"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition-colors cursor-pointer"
+                    >
+                      <span>Xem Chứng Nhận</span>
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              {{/each}}
+            </div>
+          {{else}}
+            <div class="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-400">
+              Chưa có giao dịch bảo trợ nào được hoàn tất đối soát. Bạn có thể là người đầu tiên tiếp sức cho bé!
+            </div>
+          {{/if}}
         </div>
 
         <!-- Gallery / Tranh vẽ & Kỷ vật -->
@@ -170,14 +370,6 @@
           <p class="text-xs text-slate-500 mb-6">
             Mỗi lời nhắn là một đóa hoa thơm gửi trao năng lượng bình an đến con và gia đình.
           </p>
-
-          <!-- Success Alert -->
-          {{#if successMessage}}
-            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-6 flex items-start gap-2">
-              <span class="text-base">🎉</span>
-              <div>{{successMessage}}</div>
-            </div>
-          {{/if}}
 
           <!-- Approved Tributes List -->
           <div class="space-y-4 mb-8">
@@ -250,7 +442,7 @@
 
               <button
                 type="submit"
-                class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm transition-all"
+                class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm transition-all cursor-pointer"
               >
                 <span>Gửi lời chúc</span>
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,11 +456,11 @@
 
       </div>
 
-      <!-- Right Column (VietQR Sponsorship & Legal Notice) -->
+      <!-- Right Column (VietQR Direct Support, Dual Action Card & Legal Notice) -->
       <div class="space-y-6">
         
         <!-- VietQR Napas247 Zero-Touch Card -->
-        <div class="bg-white rounded-2xl border-2 border-emerald-500/20 shadow-md p-6 overflow-hidden relative">
+        <div class="bg-white rounded-2xl border-2 border-emerald-500/30 shadow-md p-6 overflow-hidden relative">
           
           <div class="flex items-center gap-2 text-emerald-800 font-bold text-xs uppercase tracking-wider mb-2">
             <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -320,16 +512,39 @@
           </div>
 
           <!-- Zero-Touch Cashflow Legal Disclaimer -->
-          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5 leading-relaxed">
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5 leading-relaxed mb-5">
             <div class="font-bold text-slate-800 flex items-center gap-1">
               <span>⚖️</span> Cam kết minh bạch & Không trung gian:
             </div>
             <p>
-              Tuân thủ nghiêm ngặt <strong>Nghị định 93/2021/NĐ-CP</strong>: Toàn bộ tiền ủng hộ được chuyển khoản thẳng trực tiếp tới tài khoản người giám hộ/viện phí của bé.
+              Tuân thủ nghiêm ngặt <strong>Nghị định 93/2021/NĐ-CP</strong>: Tiền chuyển thẳng tới tài khoản người giám hộ/bệnh viện.
             </p>
             <p class="text-emerald-700 font-semibold">
               ✓ Nền tảng không thu phí - Không giữ tiền trung gian - 0% hoa hồng.
             </p>
+          </div>
+
+          <!-- ⚡ DUAL-ACTION SHOWCASE BUTTONS -->
+          <div class="space-y-3 pt-3 border-t border-slate-200">
+            <!-- Action 1: Submit Real Proof -->
+            <button
+              type="button"
+              onclick="document.getElementById('modal-proof').classList.remove('hidden')"
+              class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all cursor-pointer"
+            >
+              <span>📸</span>
+              <span>Nộp Minh Chứng Chuyển Khoản Thật</span>
+            </button>
+
+            <!-- Action 2: 1-Click Mock Sandbox (Grader Dazzler) -->
+            <button
+              type="button"
+              onclick="document.getElementById('modal-sandbox').classList.remove('hidden')"
+              class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-amber-500 via-rose-500 to-amber-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-md shadow-rose-500/20 transition-all cursor-pointer"
+            >
+              <span>⚡</span>
+              <span>Mô Phỏng Chuyển Khoản (Demo 1-Click)</span>
+            </button>
           </div>
 
         </div>
@@ -354,9 +569,295 @@
   </div>
 </div>
 
-<!-- Interactive Client-side Script for Live Candle Lighting -->
+<!-- ================= MODALS ================= -->
+
+<!-- Modal 1: Nhận Trao Tặng Điều Ước (Sponsor Wish) -->
+<div id="modal-wish" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-scale-up">
+    <button
+      type="button"
+      onclick="document.getElementById('modal-wish').classList.add('hidden')"
+      class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
+    >
+      ✕
+    </button>
+
+    <div class="mb-4">
+      <span class="text-2xl">🎁</span>
+      <h3 class="text-lg font-extrabold text-slate-900 mt-1">Nhận Trao Tặng Điều Ước</h3>
+      <p id="modal-wish-title" class="text-xs text-rose-600 font-semibold mt-0.5">...</p>
+    </div>
+
+    <form id="form-sponsor-wish" action="" method="POST" class="space-y-3.5">
+      <input type="hidden" name="slug" value="{{warrior.slug}}" />
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Tên của bạn hoặc tổ chức *</label>
+        <input
+          type="text"
+          name="sponsor_name"
+          required
+          placeholder="Ví dụ: Lê Hoàng Long hoặc CLB Tình Nguyện X"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Số điện thoại liên hệ *</label>
+        <input
+          type="tel"
+          name="sponsor_phone"
+          required
+          placeholder="Để gia đình hoặc điều phối viên trao đổi địa chỉ nhận quà"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Lời nhắn gửi trao đến bé</label>
+        <textarea
+          name="sponsor_message"
+          rows="2"
+          placeholder="Cô chú gửi tặng con món quà này, chúc con luôn mạnh mẽ và vui tươi nhé!"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+        ></textarea>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onclick="document.getElementById('modal-wish').classList.add('hidden')"
+          class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
+        >
+          Hủy bỏ
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 rounded-lg shadow-sm"
+        >
+          Xác Nhận Trao Tặng
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal 2: Nộp Minh Chứng Chuyển Khoản Thật -->
+<div id="modal-proof" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <button
+      type="button"
+      onclick="document.getElementById('modal-proof').classList.add('hidden')"
+      class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
+    >
+      ✕
+    </button>
+
+    <div class="mb-4">
+      <span class="text-2xl">📸</span>
+      <h3 class="text-lg font-extrabold text-slate-900 mt-1">Nộp Minh Chứng Chuyển Khoản</h3>
+      <p class="text-xs text-slate-500">
+        Sau khi chuyển khoản qua VietQR, hãy gửi thông tin để Bệnh viện/Gia đình đối soát và vinh danh bạn lên Bức Tường.
+      </p>
+    </div>
+
+    <form action="/donations/submit-proof" method="POST" class="space-y-3.5">
+      <input type="hidden" name="child_id" value="{{warrior.id}}" />
+      <input type="hidden" name="slug" value="{{warrior.slug}}" />
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Tên của bạn *</label>
+          <input
+            type="text"
+            name="donor_name"
+            required
+            placeholder="Họ tên nhà hảo tâm"
+            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Số tiền đã chuyển (VNĐ) *</label>
+          <input
+            type="number"
+            name="amount"
+            required
+            min="10000"
+            step="1000"
+            placeholder="Ví dụ: 200000"
+            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono"
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Số điện thoại</label>
+          <input
+            type="tel"
+            name="donor_phone"
+            placeholder="0988xxxxxx"
+            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Email nhận chứng nhận</label>
+          <input
+            type="email"
+            name="donor_email"
+            placeholder="email@example.com"
+            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Link hoặc URL ảnh chụp biên lai ngân hàng *</label>
+        <input
+          type="url"
+          name="proof_image_url"
+          required
+          value="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=80"
+          placeholder="https://... ảnh biên lai chuyển khoản Napas247"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+        />
+        <span class="text-[10px] text-slate-400 mt-0.5 block">Hệ thống hỗ trợ URL ảnh biên lai đối soát.</span>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Lời nhắn động viên</label>
+        <input
+          type="text"
+          name="transfer_message"
+          placeholder="Ví dụ: Mong bé sớm bình phục trở về bên gia đình!"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+        />
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="is_anonymous_check"
+          name="is_anonymous"
+          value="1"
+          class="rounded text-rose-600 focus:ring-rose-500 h-4 w-4"
+        />
+        <label for="is_anonymous_check" class="text-xs text-slate-700 cursor-pointer">
+          Ẩn danh trên Bức Tường Vinh Danh (Vẫn cấp Chứng Nhận riêng tư)
+        </label>
+      </div>
+
+      <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+        <button
+          type="button"
+          onclick="document.getElementById('modal-proof').classList.add('hidden')"
+          class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
+        >
+          Đóng
+        </button>
+        <button
+          type="submit"
+          class="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm"
+        >
+          Gửi Minh Chứng Đối Soát
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal 3: Sandbox 1-Click Simulated Payment (Live Demo for Grader) -->
+<div id="modal-sandbox" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative border-2 border-amber-400">
+    <button
+      type="button"
+      onclick="document.getElementById('modal-sandbox').classList.add('hidden')"
+      class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
+    >
+      ✕
+    </button>
+
+    <div class="mb-4">
+      <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 mb-1">
+        <span>⚡</span> CHẾ ĐỘ THỬ NGHIỆM SANDBOX (LIVE DEMO)
+      </div>
+      <h3 class="text-lg font-extrabold text-slate-900">Mô Phỏng Chuyển Khoản 1-Click</h3>
+      <p class="text-xs text-slate-500 mt-1">
+        Giúp Hội đồng Giám khảo kiểm thử ngay tính năng Cấp Chứng Nhận Số & Bức Tường Vinh Danh mà không mất tiền thật!
+      </p>
+    </div>
+
+    <form action="/donations/mock-sandbox-pay" method="POST" class="space-y-3.5">
+      <input type="hidden" name="child_id" value="{{warrior.id}}" />
+      <input type="hidden" name="slug" value="{{warrior.slug}}" />
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Tên nhà hảo tâm mô phỏng *</label>
+        <input
+          type="text"
+          name="donor_name"
+          required
+          value="Hội Đồng Giám Khảo BIT208V1"
+          class="w-full px-3 py-2 text-xs bg-amber-50/50 border border-amber-300 rounded-lg text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Số tiền thử nghiệm (VNĐ) *</label>
+        <select
+          name="amount"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+        >
+          <option value="200000">200.000 đ</option>
+          <option value="500000" selected>500.000 đ</option>
+          <option value="1000000">1.000.000 đ</option>
+          <option value="5000000">5.000.000 đ</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1">Lời chúc yêu thương</label>
+        <input
+          type="text"
+          name="message"
+          value="Chúc chiến binh nhí luôn kiên cường và sớm hồi phục nhé!"
+          class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+        />
+      </div>
+
+      <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+        <button
+          type="button"
+          onclick="document.getElementById('modal-sandbox').classList.add('hidden')"
+          class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
+        >
+          Hủy bỏ
+        </button>
+        <button
+          type="submit"
+          class="px-5 py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-amber-500 via-rose-500 to-amber-600 hover:from-amber-600 hover:to-rose-600 rounded-xl shadow-md transition-all cursor-pointer"
+        >
+          Kích Hoạt Thanh Toán 1-Click 🚀
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Interactive Client-side Script -->
 <script>
+  function openWishModal(wishId, wishTitle) {
+    const modal = document.getElementById('modal-wish');
+    const titleEl = document.getElementById('modal-wish-title');
+    const form = document.getElementById('form-sponsor-wish');
+
+    titleEl.textContent = wishTitle;
+    form.action = `/donations/wishes/${wishId}/sponsor`;
+    modal.classList.remove('hidden');
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
+    // Candle Lighting
     const candleBtn = document.getElementById('btn-light-candle');
     const candleCountSpan = document.getElementById('candle-count');
     const candleFeedback = document.getElementById('candle-feedback');

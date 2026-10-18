@@ -31,6 +31,11 @@
             <span>🛡️</span> Duyệt Lời Chúc
           </a>
         {{/if}}
+        {{#if (or (eq currentUser.role "ADMIN") (eq currentUser.role "SUPER_ADMIN") (eq currentUser.role "ORG_ADMIN") (eq currentUser.role "FAMILY"))}}
+          <a href="/donations/moderation" class="transition-colors hover:text-slate-900 flex items-center gap-1.5 text-emerald-700 font-medium">
+            <span>💎</span> Duyệt Biên Lai
+          </a>
+        {{/if}}
       {{/if}}
       
       <a href="/#system-health" class="transition-colors hover:text-slate-900">Kiến trúc 3-Tier</a>

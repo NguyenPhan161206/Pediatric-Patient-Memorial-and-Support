@@ -11,6 +11,8 @@ const authRoutes = require('./modules/auth/auth.routes');
 const warriorRoutes = require('./modules/warriors/warrior.routes');
 const familyRoutes = require('./modules/family/family.routes');
 const tributeRoutes = require('./modules/tributes/tribute.routes');
+const donationRoutes = require('./modules/donations/donation.routes');
+const { viewCertificate } = require('./modules/donations/donation.viewcontroller');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,7 +34,11 @@ app.engine('.hbs', engine({
       if (!dateStr) return '';
       return new Date(dateStr).toLocaleDateString('vi-VN');
     },
-    lookup: (obj, field) => (obj && obj[field] !== undefined ? obj[field] : null)
+    lookup: (obj, field) => (obj && obj[field] !== undefined ? obj[field] : null),
+    formatMoney: (num) => {
+      if (num === null || num === undefined) return '0 đ';
+      return Number(num).toLocaleString('vi-VN') + ' đ';
+    }
   }
 }));
 
@@ -63,20 +69,26 @@ app.use((req, res, next) => {
   next();
 });
 
-// Trang chủ (Home Page)
+// Trang chủ (Home Page kèm Bản Đồ Hy Vọng)
 app.get('/', async (req, res) => {
   let healthData = {
     status: 'UNKNOWN',
     database: 'UNKNOWN',
     timestamp: new Date().toLocaleTimeString('vi-VN')
   };
+  let organizations = [];
 
   try {
-    const response = await apiClient.get('/health');
+    const [healthRes, orgsRes] = await Promise.all([
+      apiClient.get('/health'),
+      apiClient.get('/organizations').catch(() => ({ data: { organizations: [] } }))
+    ]);
+
     healthData = {
-      ...response,
-      timestamp: new Date(response.timestamp).toLocaleTimeString('vi-VN')
+      ...healthRes,
+      timestamp: new Date(healthRes.timestamp).toLocaleTimeString('vi-VN')
     };
+    organizations = orgsRes.data ? (orgsRes.data.organizations || []) : [];
   } catch (err) {
     console.warn('[FRONTEND -> BACKEND WARNING]: Không thể kết nối tới Backend API:', err.message);
     healthData.status = 'DISCONNECTED';
@@ -86,7 +98,9 @@ app.get('/', async (req, res) => {
   res.render('home/views/index', {
     title: 'Trang Chủ',
     description: 'Cổng ký ức, tri ân và vinh danh các chiến binh nhí mắc bệnh hiểm nghèo',
-    health: healthData
+    health: healthData,
+    organizations,
+    organizationsJson: JSON.stringify(organizations)
   });
 });
 
@@ -95,11 +109,15 @@ app.get('/login', (req, res) => res.redirect('/auth/login'));
 app.get('/register', (req, res) => res.redirect('/auth/register'));
 app.get('/logout', (req, res) => res.redirect('/auth/logout'));
 
+// Public Certificate Verification Route (Quét QR Code từ điện thoại)
+app.get('/verify/cert/:qrToken', viewCertificate);
+
 // Feature Routes
 app.use('/auth', authRoutes);
 app.use('/warriors', warriorRoutes);
 app.use('/family', familyRoutes);
 app.use('/tributes', tributeRoutes);
+app.use('/donations', donationRoutes);
 
 // 404 Handler
 app.use((req, res) => {

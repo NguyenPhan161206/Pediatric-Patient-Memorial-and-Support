@@ -11,6 +11,8 @@ const warriorRoutes = require('./features/warriors/warrior.routes');
 const tributeRoutes = require('./features/tributes/tribute.routes');
 const sponsorshipRoutes = require('./features/sponsorships/sponsorship.routes');
 const organizationRoutes = require('./features/organizations/organization.routes');
+const donationRoutes = require('./features/donations/donation.routes');
+const wishRoutes = require('./features/wishes/wish.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -72,6 +74,8 @@ app.use('/api/v1/warriors', warriorRoutes);
 app.use('/api/v1/tributes', tributeRoutes);
 app.use('/api/v1/sponsorships', sponsorshipRoutes);
 app.use('/api/v1/organizations', organizationRoutes);
+app.use('/api/v1/donations', donationRoutes);
+app.use('/api/v1/wishes', wishRoutes);
 
 // 404 Handler
 app.use((req, res) => {

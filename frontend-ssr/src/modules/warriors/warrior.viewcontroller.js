@@ -57,9 +57,17 @@ const listWarriors = async (req, res) => {
 const warriorDetail = async (req, res) => {
   try {
     const { slug } = req.params;
-    const response = await apiClient.get(`/warriors/${slug}`);
 
-    const { warrior, gallery, tributes, vietqrUrl } = response.data;
+    const [detailRes, wishesRes, donationsRes] = await Promise.all([
+      apiClient.get(`/warriors/${slug}`),
+      apiClient.get(`/wishes/warrior/${slug}`).catch(() => ({ data: { wishes: [] } })),
+      apiClient.get(`/donations/warrior/${slug}`).catch(() => ({ data: { donations: [], totalAmount: 0 } }))
+    ]);
+
+    const { warrior, gallery, tributes, vietqrUrl } = detailRes.data;
+    const wishes = wishesRes.data ? (wishesRes.data.wishes || []) : [];
+    const donations = donationsRes.data ? (donationsRes.data.donations || []) : [];
+    const totalDonated = donationsRes.data ? (donationsRes.data.totalAmount || 0) : 0;
 
     res.render('warriors/views/detail', {
       title: `${warrior.full_name} (${warrior.nickname || 'Chiến Binh Nhí'})`,
@@ -68,10 +76,17 @@ const warriorDetail = async (req, res) => {
       warrior,
       gallery,
       tributes,
+      wishes,
+      donations,
+      totalDonated,
       vietqrUrl,
-      successMessage: req.session.tributeSuccess || null
+      successMessage: req.session.tributeSuccess || null,
+      donationSuccess: req.session.donationSuccess || null,
+      wishSuccess: req.session.wishSuccess || null
     });
     delete req.session.tributeSuccess;
+    delete req.session.donationSuccess;
+    delete req.session.wishSuccess;
   } catch (error) {
     console.error('[FRONTEND WARRIOR DETAIL ERROR]', error);
     res.status(404).render('home/views/index', {
