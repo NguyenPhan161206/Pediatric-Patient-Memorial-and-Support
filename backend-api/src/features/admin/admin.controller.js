@@ -281,7 +281,13 @@ const provisionUser = async (req, res) => {
       });
     }
 
-    const validRoles = ['MEMBER', 'COORDINATOR', 'FAMILY', 'ADMIN', 'ORG_ADMIN', 'SUPER_ADMIN'];
+    const validRoles = ['MEMBER', 'COORDINATOR', 'ADMIN', 'ORG_ADMIN', 'SUPER_ADMIN'];
+    if (role === 'FAMILY') {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Quản trị viên hệ thống không được cấp tài khoản Hộ gia đình trực tiếp. Việc tiếp nhận và cấp tài khoản Gia đình thuộc thẩm quyền của Cán bộ Cơ sở Y tế (ORG_ADMIN) nơi bé điều trị theo Luật Trẻ em 2016.'
+      });
+    }
     if (!validRoles.includes(role)) {
       return res.status(400).json({
         status: 'fail',

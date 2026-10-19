@@ -55,7 +55,8 @@ const showPortal = async (req, res) => {
         } catch (e) {
           // fallback
         }
-        return { ...child, wishes, gallery };
+        const warriorDetail = (detailRes.data && detailRes.data.warrior) || {};
+        return { ...child, ...warriorDetail, wishes, gallery };
       })
     );
 
@@ -314,6 +315,35 @@ const updateFamilyProfile = async (req, res) => {
   res.redirect('/family/portal');
 };
 
+/**
+ * Nộp thông tin / ảnh mã QR viện phí của gia đình để Bệnh viện thẩm định
+ */
+const submitFamilyBankQRAction = async (req, res) => {
+  if (!req.session.user || !req.session.token) {
+    return res.redirect('/auth/login');
+  }
+
+  const { id } = req.params;
+  const { bank_code, bank_account_number, bank_account_name, qr_image_data, note } = req.body;
+
+  try {
+    const response = await apiClient.post(
+      `/warriors/${id}/family-bank`,
+      { bank_code, bank_account_number, bank_account_name, qr_image_data, note },
+      {
+        headers: { Authorization: `Bearer ${req.session.token}` }
+      }
+    );
+
+    req.session.flashMessage = response.data?.message || 'Đã gửi thông tin tài khoản và mã QR của gia đình thành công. Đang chờ Bệnh viện thẩm định theo Nghị định 93/2021/NĐ-CP.';
+  } catch (error) {
+    console.error('[SUBMIT FAMILY BANK QR ERROR]', error);
+    req.session.errorMessage = error.response?.data?.message || error.message || 'Lỗi khi gửi thông tin mã QR.';
+  }
+
+  res.redirect('/family/portal');
+};
+
 module.exports = {
   showPortal,
   unpublishChild,
@@ -322,5 +352,6 @@ module.exports = {
   addMediaItem,
   deleteMediaItem,
   sendFamilyVoiceNote,
-  updateFamilyProfile
+  updateFamilyProfile,
+  submitFamilyBankQRAction
 };

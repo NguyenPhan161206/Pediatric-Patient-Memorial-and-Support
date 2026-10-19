@@ -17,9 +17,13 @@ const ensureFamilyOwnership = async (req, res, next) => {
       });
     }
 
-    // Super Admin có toàn quyền hệ thống
+    // Quản trị viên hệ thống (Platform Admin) không có thẩm quyền can thiệp hồ sơ bệnh án
+    // theo Luật Trẻ Em 2016 và Nghị định 13/2023/NĐ-CP (PDPD)
     if (currentUser.role === 'ADMIN' || currentUser.role === 'SUPER_ADMIN') {
-      return next();
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Quản trị viên hệ thống không có thẩm quyền sửa đổi trực tiếp hồ sơ bệnh án của bệnh nhi theo Luật Trẻ em 2016 và Nghị định 13/2023/NĐ-CP. Thao tác này thuộc thẩm quyền của Cơ sở Y tế quản lý (ORG_ADMIN) hoặc Hộ gia đình (FAMILY).'
+      });
     }
 
     // Nếu là Admin Đơn Vị (ORG_ADMIN)

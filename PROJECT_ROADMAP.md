@@ -14,8 +14,9 @@
 - [Giai đoạn 4: Hoàn Thiện Giao Diện Người Dùng Frontend SSR](#giai-đoạn-4-hoàn-thiện-giao-diện-người-dùng-frontend-ssr) `[ĐÃ HOÀN THÀNH]`
 - [Giai đoạn 5: Nâng Cấp Không Gian Đa Đơn Vị (Multi-Tenancy) & Phân Quyền 6 Cấp `ORG_ADMIN`](#giai-đoạn-5-nâng-cấp-không-gian-đa-đơn-vị-multi-tenancy--phân-quyền-6-cấp-org_admin) `[ĐÃ HOÀN THÀNH]`
 - [Giai đoạn 6: Bộ Tứ Tính Năng Mũi Nhọn "Ăn Điểm Tuyệt Đối" (The 4 Showcase Dazzlers)](#giai-đoạn-6-bộ-tứ-tính-năng-mũi-nhọn-ăn-điểm-tuyệt-đối-the-4-showcase-dazzlers) `[ĐÃ HOÀN THÀNH]`
-- [Giai đoạn 7: Kiểm Thử Đầu Cuối (E2E), Tối Ưu Hiệu Năng & An Toàn Bảo Mật](#giai-đoạn-7-kiểm-thử-đầu-cuối-e2e-tối-ưu-hiệu-năng--an-toàn-bảo-mật) `[KẾ TIẾP]`
-- [Giai đoạn 8: Đóng Gói Báo Cáo Học Thuật, Slide & Kịch Bản Demo 5 Phút](#giai-đoạn-8-đóng-gói-báo-cáo-học-thuật-slide--kịch-bản-demo-5-phút) `[VỀ ĐÍCH]`
+- [Giai đoạn 7: Quản Trị Đa Cơ Sở Động, Phân Quyền Nghiêm Ngặt & Tải Mã QR Gia Đình (Family QR & Dynamic Tenancy)](#giai-đoạn-7-quản-trị-đa-cơ-sở-động-phân-quyền-nghiêm-ngặt--tải-mã-qr-gia-đình-family-qr--dynamic-tenancy) `[ĐÃ HOÀN THÀNH]`
+- [Giai đoạn 8: Kiểm Thử Đầu Cuối (E2E), Tối Ưu Hiệu Năng & An Toàn Bảo Mật](#giai-đoạn-8-kiểm-thử-đầu-cuối-e2e-tối-ưu-hiệu-năng--an-toàn-bảo-mật) `[KẾ TIẾP]`
+- [Giai đoạn 9: Đóng Gói Báo Cáo Học Thuật, Slide & Kịch Bản Demo 5 Phút](#giai-đoạn-9-đóng-gói-báo-cáo-học-thuật-slide--kịch-bản-demo-5-phút) `[VỀ ĐÍCH]`
 
 ---
 
@@ -89,17 +90,37 @@
 
 ---
 
-### Giai đoạn 7: Kiểm Thử Đầu Cuối (E2E), Tối Ưu Hiệu Năng & An Toàn Bảo Mật `[DỰ KIẾN]`
-- [ ] **7.1.** Viết kịch bản kiểm thử luồng tích hợp đầu cuối giữa 6 vai trò (`SUPER_ADMIN`, `ORG_ADMIN`, `COORDINATOR`, `FAMILY`, `DONOR`, `GUEST`).
-- [ ] **7.2.** Đo tải hiệu năng hệ thống bằng k6/Autocannon (kiểm chứng tải 50-100 req/s, phản hồi < 300ms theo chuẩn NFR).
-- [ ] **7.3.** Kiểm tra bảo mật ứng dụng: Chống SQL Injection, XSS, CSRF, cấu hình Helmet và Rate-limiting.
-- [ ] **7.4.** Tinh chỉnh giao diện hiển thị tối ưu trên thiết bị di động (Mobile Responsive UI).
+### Giai đoạn 7: Quản Trị Đa Cơ Sở Động, Phân Quyền Nghiêm Ngặt & Tải Mã QR Gia Đình (Family QR & Dynamic Tenancy) `[ĐÃ HOÀN THÀNH]`
+*Mục tiêu: Triệt để loại bỏ hardcode đơn vị y tế, phân lập quyền hạn nghiêm ngặt theo Least Privilege (Luật Trẻ Em 2016, NĐ 13/2023/NĐ-CP) và hỗ trợ thân nhân bệnh nhi tải mã QR quyên góp viện phí theo NĐ 93/2021/NĐ-CP.*
+- [x] **7.1. Database Migration mở rộng bảng `children`:**
+  - Tạo migration `20261019000004_add_family_bank_qr_to_children.js` bổ sung các trường: `family_bank_name`, `family_bank_code`, `family_bank_account_number`, `family_bank_account_name`, `family_qr_image_url`, `family_bank_note`, `family_bank_verified`, `family_bank_verified_at`, `family_bank_verified_by`.
+- [x] **7.2. Phân Quyền Nghiêm Ngặt (Least Privilege) & Bảo Vệ Dữ Liệu Bệnh Nhi:**
+  - Chặn `SUPER_ADMIN` và `ADMIN` không được phép can thiệp trực tiếp thêm, sửa, xóa hồ sơ bệnh nhi (`children`) hoặc tạo tài khoản Hộ gia đình (`FAMILY`).
+  - Giao toàn quyền tiếp nhận bệnh nhi, cấp tài khoản gia đình và thẩm định mã QR cho Cán bộ Đơn vị Y tế (`ORG_ADMIN`) nơi bé trực thuộc.
+- [x] **7.3. Dynamic Multi-Tenancy cho Quản Trị Viên Hệ Thống (`/admin/organizations`):**
+  - Màn hình quản lý Đơn vị Y tế động: Thêm mới bệnh viện kèm tên, mã code, tỉnh thành, địa chỉ, tọa độ GPS, thông tin tài khoản ngân hàng viện.
+  - Hỗ trợ cấp kèm ngay tài khoản `ORG_ADMIN` (học hàm, chức danh, khoa phòng) trong cùng transaction.
+  - Chức năng 1-click Bật/Tắt (Tạm khóa / Mở khóa) trạng thái hoạt động của cơ sở y tế.
+- [x] **7.4. Quy Trình Nộp & Thẩm Định Mã QR Quyên Góp Thân Nhân Bệnh Nhi:**
+  - Giao diện Phụ huynh (`/family/portal`): Cho phép gia đình điền thông tin ngân hàng thụ hưởng, ghi chú chứng từ và tải ảnh mã QR viện phí.
+  - Tiền kiểm duyệt tại Cổng Bệnh Viện (`/organizations/portal`): Bác sĩ / Cán bộ CTXH xem ảnh QR phóng to, đối chiếu chứng từ và 1-click [Phê Duyệt] hoặc [Từ Chối].
+  - Hiển thị công khai: Tự động tính toán và sinh mã VietQR Napas247 của gia đình trên trang chi tiết bé (`/warriors/:slug`) sau khi Bệnh viện đã thẩm định.
+- [x] **7.5. Bộ Kịch Bản Kiểm Thử Tự Động Đầu Cuối:**
+  - Tạo `tests/test_dynamic_tenancy_and_family_qr.js` đo kiểm 7 phân bước (21/21 assertions PASSED 100%).
 
 ---
 
-### Giai đoạn 8: Đóng Gói Báo Cáo Học Thuật, Slide & Kịch Bản Demo 5 Phút `[VỀ ĐÍCH]`
-- [ ] **8.1.** Hoàn thiện tài liệu báo cáo kỹ thuật tổng kết toàn diện dự án theo chuẩn môn học BIT208V1.
-- [ ] **8.2.** Đóng gói chương Báo cáo: "Kiến trúc sẵn sàng mở rộng cho Ứng dụng Di động Android Kotlin và Webhook Tự động".
-- [ ] **8.3.** Xây dựng kịch bản Demo trực tiếp 5 phút (3 trình duyệt phân vai) mượt mà trước hội đồng.
-- [ ] **8.4.** Soạn bộ câu hỏi phản biện tiềm năng của Giảng viên & câu trả lời chuẩn mực (Kiến trúc 3-Tier Multi-tenant, Luật Trẻ em 2016, NĐ 93/2021/NĐ-CP, NĐ 13/2023/NĐ-CP).
-- [ ] **8.5.** Đóng gói mã nguồn bản phát hành cuối cùng (Release Tag v1.0.0) và bàn giao nghiệm thu.
+### Giai đoạn 8: Kiểm Thử Đầu Cuối (E2E), Tối Ưu Hiệu Năng & An Toàn Bảo Mật `[DỰ KIẾN]`
+- [ ] **8.1.** Viết kịch bản kiểm thử luồng tích hợp đầu cuối giữa 6 vai trò (`SUPER_ADMIN`, `ORG_ADMIN`, `COORDINATOR`, `FAMILY`, `DONOR`, `GUEST`).
+- [ ] **8.2.** Đo tải hiệu năng hệ thống bằng k6/Autocannon (kiểm chứng tải 50-100 req/s, phản hồi < 300ms theo chuẩn NFR).
+- [ ] **8.3.** Kiểm tra bảo mật ứng dụng: Chống SQL Injection, XSS, CSRF, cấu hình Helmet và Rate-limiting.
+- [ ] **8.4.** Tinh chỉnh giao diện hiển thị tối ưu trên thiết bị di động (Mobile Responsive UI).
+
+---
+
+### Giai đoạn 9: Đóng Gói Báo Cáo Học Thuật, Slide & Kịch Bản Demo 5 Phút `[VỀ ĐÍCH]`
+- [ ] **9.1.** Hoàn thiện tài liệu báo cáo kỹ thuật tổng kết toàn diện dự án theo chuẩn môn học BIT208V1.
+- [ ] **9.2.** Đóng gói chương Báo cáo: "Kiến trúc sẵn sàng mở rộng cho Ứng dụng Di động Android Kotlin và Webhook Tự động".
+- [ ] **9.3.** Xây dựng kịch bản Demo trực tiếp 5 phút (3 trình duyệt phân vai) mượt mà trước hội đồng.
+- [ ] **9.4.** Soạn bộ câu hỏi phản biện tiềm năng của Giảng viên & câu trả lời chuẩn mực (Kiến trúc 3-Tier Multi-tenant, Luật Trẻ em 2016, NĐ 93/2021/NĐ-CP, NĐ 13/2023/NĐ-CP).
+- [ ] **9.5.** Đóng gói mã nguồn bản phát hành cuối cùng (Release Tag v1.0.0) và bàn giao nghiệm thu.

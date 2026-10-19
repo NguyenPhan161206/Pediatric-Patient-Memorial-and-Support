@@ -19,13 +19,44 @@ router.get(
 // 3. Lấy chi tiết Bệnh viện / Tổ chức theo ID hoặc Code (Public)
 router.get('/:identifier', organizationController.getOrganizationByIdOrCode);
 
-// 3. Cập nhật thông tin Bệnh viện (Yêu cầu đăng nhập, đúng ORG_ADMIN thuộc viện hoặc SUPER_ADMIN)
+// 4. Thêm mới Bệnh viện / Cơ sở động (Chỉ ADMIN, SUPER_ADMIN)
+router.post(
+  '/',
+  authenticateToken,
+  requireRoles('ADMIN', 'SUPER_ADMIN'),
+  organizationController.createOrganization
+);
+
+// 5. Cập nhật thông tin Bệnh viện (Yêu cầu đăng nhập, đúng ORG_ADMIN thuộc viện hoặc SUPER_ADMIN)
 router.put(
   '/:id',
   authenticateToken,
   requireRoles('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN'),
   ensureOrgScope((req) => req.params.id),
   organizationController.updateOrganization
+);
+
+// 6. Vô hiệu hóa hoặc kích hoạt lại Bệnh viện (Chỉ ADMIN, SUPER_ADMIN)
+router.patch(
+  '/:id/status',
+  authenticateToken,
+  requireRoles('ADMIN', 'SUPER_ADMIN'),
+  organizationController.toggleOrganizationStatus
+);
+
+router.delete(
+  '/:id',
+  authenticateToken,
+  requireRoles('ADMIN', 'SUPER_ADMIN'),
+  organizationController.toggleOrganizationStatus
+);
+
+// 7. Cấp tài khoản Hộ gia đình cho bệnh nhi trực thuộc viện (Dành cho ORG_ADMIN của viện)
+router.post(
+  '/family-user',
+  authenticateToken,
+  requireRoles('ORG_ADMIN'),
+  organizationController.createFamilyAccountForChild
 );
 
 module.exports = router;

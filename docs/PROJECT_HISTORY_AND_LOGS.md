@@ -3,7 +3,7 @@
 > **Mã môn học / Đề tài:** BIT208V1 - Đồ Án Chuyên Ngành Công Nghệ Thông Tin  
 > **Repository:** [https://github.com/NguyenPhan161206/Pediatric-Patient-Memorial-and-Support](https://github.com/NguyenPhan161206/Pediatric-Patient-Memorial-and-Support)  
 > **Kiến trúc:** 3-Tier Decoupled SSR (Node.js/Express, PostgreSQL 16, TailwindCSS shadcn/ui, Docker Compose)  
-> **Cập nhật lần cuối:** 19/10/2026 (Phiên bản v2.0 - Hoàn thiện toàn diện 6 Roles & Multimedia Web Audio)
+> **Cập nhật lần cuối:** 19/10/2026 (Phiên bản v2.1 - Dynamic Multi-Tenancy, Phân quyền Least Privilege & Tải Mã QR Gia Đình)
 
 ---
 
@@ -17,6 +17,7 @@
    - [Giai đoạn Tái Cấu Trúc UI (18/10/2026): Thanh Công Cụ Toolbar Bên Trái (Left Sidebar)](#34-giai-đoạn-tái-cấu-trúc-ui-18102026-thanh-công-cụ-toolbar-bên-trái-left-sidebar)
    - [Giai đoạn Khắc Phục 7 Thiếu Sót & Quy Tắc Git Mềm (18/10/2026)](#35-giai-đoạn-khắc-phục-7-thiếu-sót--quy-tắc-git-mềm-18102026)
    - [Giai đoạn Tối Ưu Hóa 6 Roles & Chuẩn Hóa Danh Tính Đa Thành Tố (19/10/2026)](#36-giai-đoạn-tối-ưu-hóa-6-roles--chuẩn-hóa-danh-tính-đa-thành-tố-19102026)
+   - [Giai đoạn Quản Trị Đa Cơ Sở Động, Phân Quyền Nghiêm Ngặt & Tải Mã QR Gia Đình (19/10/2026)](#micro-phase-6-quản-trị-đa-cơ-sở-động-phân-quyền-nghiêm-ngặt--tải-mã-qr-gia-đình-family-qr--dynamic-tenancy)
 4. [Bảng Ma Trận Nghiệm Thu 6/6 Roles](#4-bảng-ma-trận-nghiệm-thu-66-roles)
 5. [Lịch Sử Commit Trên Git Remote (origin/main)](#5-lịch-sử-commit-trên-git-remote-originmain)
 
@@ -175,6 +176,25 @@ Thực thi trọn vẹn 5 Micro-Phases theo hướng dẫn của người dùng:
 #### Micro-Phase 5: Đồng Bộ Giao Diện Toàn Cầu & Kiểm Thử Tự Động 6/6 Role
 * Đồng bộ `formatDisplayName currentUser` trên Header Navbar ([`navbar.hbs`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/shared/views/partials/navbar.hbs)) và Toolbar ([`sidebar.hbs`](file:///home/binhnguyen/Courageous-Little-Warriors-Memorial-and-Tribute-Hub/frontend-ssr/src/shared/views/partials/sidebar.hbs)).
 * **Commit:** `15be21a`.
+
+#### Micro-Phase 6: Quản Trị Đa Cơ Sở Động, Phân Quyền Nghiêm Ngặt & Tải Mã QR Gia Đình (Family QR & Dynamic Tenancy)
+* **Nguyên tắc cốt lõi:**
+  * Triệt để loại bỏ hardcode đơn vị y tế, chuyển sang cơ chế Dynamic Multi-Tenancy.
+  * Phân quyền theo nguyên tắc đặc quyền tối thiểu (Least Privilege): Quản trị viên hệ thống (`ADMIN`, `SUPER_ADMIN`) **tuyệt đối không được can thiệp** thêm, sửa, xóa hồ sơ bệnh nhi (`children`) hoặc tạo tài khoản Hộ gia đình (`FAMILY`) nhằm tuân thủ Luật Trẻ Em 2016 và Nghị định 13/2023/NĐ-CP (PDPD).
+  * Đơn vị phụ trách y tế (`ORG_ADMIN`) chịu trách nhiệm toàn diện với các thành tố trực thuộc: tiếp nhận bệnh nhi, cấp tài khoản Hộ gia đình, thẩm định mã QR quyên góp viện phí.
+* **Các thay đổi đã triển khai:**
+  1. **Database Migration:** Tạo `20261019000004_add_family_bank_qr_to_children.js` bổ sung các cột quản lý tài khoản ngân hàng gia đình, ảnh QR và trạng thái thẩm định `family_bank_verified`.
+  2. **Backend API:**
+     * `ensureFamilyOwnership.js`: Chặn `ADMIN`/`SUPER_ADMIN` sửa/xóa bệnh nhi, trả về HTTP 403 trích dẫn luật định.
+     * `warrior.controller.js` & `warrior.routes.js`: Chặn System Admin tạo bé; bổ sung endpoint `POST /api/v1/warriors/:id/family-bank` và `PATCH /api/v1/warriors/:id/family-bank/verify`; tự động sinh `familyVietqrUrl` chuẩn Napas247 khi đã duyệt.
+     * `organization.controller.js` & `organization.routes.js`: Bổ sung `POST /api/v1/organizations` (tạo viện + `ORG_ADMIN` trong atomic transaction), `PATCH /api/v1/organizations/:id/status` (khóa/mở cơ sở), `POST /api/v1/organizations/family-user` (viện cấp tài khoản gia đình).
+     * `admin.controller.js`: Chặn System Admin cấp quyền `FAMILY` trực tiếp.
+  3. **Frontend SSR:**
+     * `/admin/organizations`: Trang quản lý Bệnh viện động cho System Admin kèm modal thêm viện + cấp `ORG_ADMIN`.
+     * `/organizations/portal`: Bổ sung modal tiếp nhận bé trực thuộc viện, modal cấp tài khoản Hộ gia đình, danh mục và modal thẩm định/duyệt/từ chối QR viện phí.
+     * `/family/portal`: Cho phép phụ huynh gửi số tài khoản và tải ảnh mã QR viện phí với trạng thái thẩm định rõ ràng.
+     * `/warriors/:slug`: Hiển thị mã QR gia đình song song với mã Bệnh viện khi đã được viện thẩm định theo Nghị định 93/2021/NĐ-CP.
+  4. **Kiểm thử tự động:** Tạo script kiểm thử `tests/test_dynamic_tenancy_and_family_qr.js` xác thực 7 bước luồng nghiệp vụ (21/21 assertions PASSED 100%).
 
 ---
 

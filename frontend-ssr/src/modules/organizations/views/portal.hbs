@@ -80,35 +80,62 @@
         <p class="text-xs text-slate-500 mt-0.5">Hồ sơ bệnh án và nhật ký điều trị được xác nhận bởi Khoa Ung Bướu / CTXH</p>
       </div>
 
-      <a 
-        href="/warriors/new"
-        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.01]"
+      <button
+        type="button"
+        onclick="openCreateWarriorModal()"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.01] cursor-pointer"
       >
-        <span>➕</span> Thêm Bệnh Nhi Mới
-      </a>
+        <span>➕</span> Tiếp Nhận Bệnh Nhi Mới
+      </button>
     </div>
 
     {{#if warriors.length}}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {{#each warriors}}
-          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors flex items-start gap-3">
-            <a href="/warriors/{{this.slug}}" class="shrink-0">
-              <img src="{{this.avatar_url}}" alt="{{this.full_name}}" class="w-12 h-12 rounded-full object-cover border-2 border-slate-200" />
-            </a>
-            <div class="min-w-0 flex-1 text-xs">
-              <a href="/warriors/{{this.slug}}" class="font-bold text-slate-900 hover:text-rose-600 transition-colors block truncate">
-                {{this.full_name}} {{#if this.nickname}}<span class="text-slate-400 font-normal">({{this.nickname}})</span>{{/if}}
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors flex flex-col justify-between">
+            <div class="flex items-start gap-3">
+              <a href="/warriors/{{this.slug}}" class="shrink-0">
+                <img src="{{this.avatar_url}}" alt="{{this.full_name}}" class="w-12 h-12 rounded-full object-cover border-2 border-slate-200" />
               </a>
-              <p class="text-[11px] text-slate-500 truncate mt-0.5">{{this.category_name}} &bull; {{this.hometown}}</p>
-              
-              <div class="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-200/60">
-                <span class="font-semibold text-[10px] uppercase px-2 py-0.5 rounded-full {{#if (eq this.status 'FIGHTER')}}bg-amber-100 text-amber-800{{else if (eq this.status 'URGENT')}}bg-rose-100 text-rose-800{{else if (eq this.status 'RECOVERED')}}bg-emerald-100 text-emerald-800{{else}}bg-sky-100 text-sky-800{{/if}}">
-                  {{this.status}}
-                </span>
-                <a href="/warriors/{{this.slug}}" class="text-slate-600 hover:text-slate-900 font-semibold text-[11px]">
-                  Xem chi tiết &rarr;
+              <div class="min-w-0 flex-1 text-xs">
+                <a href="/warriors/{{this.slug}}" class="font-bold text-slate-900 hover:text-rose-600 transition-colors block truncate">
+                  {{this.full_name}} {{#if this.nickname}}<span class="text-slate-400 font-normal">({{this.nickname}})</span>{{/if}}
                 </a>
+                <p class="text-[11px] text-slate-500 truncate mt-0.5">{{this.category_name}} &bull; {{this.hometown}}</p>
+                
+                <div class="flex items-center justify-between gap-2 mt-2 pt-1 border-t border-slate-200/60">
+                  <span class="font-semibold text-[10px] uppercase px-2 py-0.5 rounded-full {{#if (eq this.status 'FIGHTER')}}bg-amber-100 text-amber-800{{else if (eq this.status 'URGENT')}}bg-rose-100 text-rose-800{{else if (eq this.status 'RECOVERED')}}bg-emerald-100 text-emerald-800{{else}}bg-sky-100 text-sky-800{{/if}}">
+                    {{this.status}}
+                  </span>
+                  <a href="/warriors/{{this.slug}}" class="text-slate-600 hover:text-slate-900 font-semibold text-[11px]">
+                    Xem chi tiết &rarr;
+                  </a>
+                </div>
               </div>
+            </div>
+
+            <!-- Trạng thái Hộ gia đình của bé -->
+            <div class="mt-3 pt-2 border-t border-slate-200/80 text-[11px]">
+              {{#if this.family_user_email}}
+                <div class="flex items-center justify-between bg-emerald-50/60 p-2 rounded-lg border border-emerald-100">
+                  <div class="truncate">
+                    <span class="font-bold text-emerald-900 block truncate">👨‍👩‍👧 {{this.family_user_name}}</span>
+                    <span class="text-[10px] text-emerald-700 font-mono block truncate">{{this.family_user_email}}</span>
+                  </div>
+                  <span class="text-[9px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Đã cấp TK</span>
+                </div>
+              {{else}}
+                <div class="flex items-center justify-between bg-amber-50/60 p-2 rounded-lg border border-amber-100">
+                  <span class="text-[10px] text-amber-800 font-medium italic">Chưa có TK Phụ huynh</span>
+                  <button
+                    type="button"
+                    onclick="openFamilyProvisionModal('{{this.id}}', '{{this.full_name}}')"
+                    class="px-2 py-0.5 rounded-md bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] cursor-pointer shadow-sm"
+                  >
+                    + Cấp TK
+                  </button>
+                </div>
+              {{/if}}
             </div>
           </div>
         {{/each}}
@@ -118,7 +145,109 @@
     {{/if}}
   </div>
 
-  <!-- Phần 2: Nhật ký Đối Soát Viện Phí Mới Nhất -->
+  <!-- Phần 2: Thẩm định Mã QR & Tài Khoản Viện Phí của Gia Đình (Nghị định 93/2021) -->
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+    <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100">
+      <div>
+        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+          <span>💳</span> Thẩm Định Mã QR & Tài Khoản Gia Đình (Nghị Định 93/2021/NĐ-CP)
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">Tiền kiểm tra CCCD, giấy viện phí và mã QR trước khi kích hoạt hiển thị công khai cho nhà hảo tâm</p>
+      </div>
+      <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800">
+        Bảo Vệ Người Thụ Hưởng
+      </span>
+    </div>
+
+    <div class="divide-y divide-slate-100 text-xs">
+      {{#each warriors}}
+        {{#if (or this.family_bank_account_number this.family_qr_image_url)}}
+          <div class="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 p-2 rounded-xl transition-colors">
+            
+            <div class="flex items-start gap-3 min-w-0">
+              <img src="{{this.avatar_url}}" class="w-10 h-10 rounded-full object-cover shrink-0 border border-slate-200" />
+              <div class="space-y-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <strong class="text-slate-900 text-xs">{{this.full_name}}</strong>
+                  <span class="text-slate-400">&bull;</span>
+                  <span class="text-slate-600">{{#if this.family_user_name}}Phụ huynh: <strong>{{this.family_user_name}}</strong>{{else}}Gia đình{{/if}}</span>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap text-[11px] text-slate-600">
+                  <span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-800 font-bold text-[10px]">{{this.family_bank_code}}</span>
+                  <span class="font-mono font-bold">{{this.family_bank_account_number}}</span>
+                  <span class="uppercase text-slate-500 font-semibold">({{this.family_bank_account_name}})</span>
+                </div>
+
+                {{#if this.family_bank_submitted_at}}
+                  <p class="text-[10px] text-slate-400">Gửi thẩm định lúc: {{formatDate this.family_bank_submitted_at}}</p>
+                {{/if}}
+
+                {{#if this.family_bank_reject_reason}}
+                  <p class="text-[10px] text-rose-600 font-semibold">Lý do từ chối: {{this.family_bank_reject_reason}}</p>
+                {{/if}}
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 shrink-0 self-end md:self-center">
+              {{#if this.family_qr_image_url}}
+                <button
+                  type="button"
+                  onclick="previewQRImage('{{this.family_qr_image_url}}', '{{this.full_name}}')"
+                  class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold cursor-pointer flex items-center gap-1 shadow-sm"
+                >
+                  <span>🖼️</span> Xem Ảnh QR
+                </button>
+              {{/if}}
+
+              {{#if this.family_bank_verified}}
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  <span>✓</span> Đã Kích Hoạt Hiển Thị
+                </span>
+                
+                <form action="/organizations/portal/warriors/{{this.id}}/verify-family-bank" method="POST" class="inline">
+                  <input type="hidden" name="approved" value="false" />
+                  <input type="hidden" name="reject_reason" value="Bệnh viện tạm dừng hiển thị để đối soát lại chứng từ" />
+                  <button
+                    type="submit"
+                    onclick="return confirm('Bạn có chắc muốn TẠM DỪNG hiển thị mã QR này?')"
+                    class="px-2 py-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 text-[10px] font-semibold transition-colors cursor-pointer"
+                  >
+                    Tạm dừng
+                  </button>
+                </form>
+              {{else}}
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                  <span>⏳</span> Chờ Bệnh Viện Thẩm Định
+                </span>
+
+                <form action="/organizations/portal/warriors/{{this.id}}/verify-family-bank" method="POST" class="inline">
+                  <input type="hidden" name="approved" value="true" />
+                  <button
+                    type="submit"
+                    class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-sm hover:bg-emerald-700 transition-colors cursor-pointer"
+                  >
+                    Duyệt & Kích Hoạt QR
+                  </button>
+                </form>
+
+                <button
+                  type="button"
+                  onclick="openRejectModal('{{this.id}}', '{{this.full_name}}')"
+                  class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold text-xs transition-colors cursor-pointer border border-rose-200"
+                >
+                  Từ Chối
+                </button>
+              {{/if}}
+            </div>
+
+          </div>
+        {{/if}}
+      {{/each}}
+    </div>
+  </div>
+
+  <!-- Phần 3: Nhật ký Đối Soát Viện Phí Mới Nhất -->
   <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
     <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100">
       <div>
@@ -325,3 +454,245 @@
     </form>
   </div>
 </div>
+
+<!-- MODAL 1: TIẾP NHẬN BỆNH NHI MỚI (DÀNH CHO BỆNH VIỆN) -->
+<div id="createWarriorModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-2xl w-full p-6 my-8 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div class="flex items-center gap-2.5">
+        <div class="h-10 w-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg font-bold">
+          👶
+        </div>
+        <div>
+          <h3 class="text-base font-black text-slate-900 tracking-tight">Tiếp Nhận Bệnh Nhi Mới Tại Viện</h3>
+          <p class="text-xs text-slate-500">Hồ sơ được xác nhận bởi Khoa Ung Bướu / CTXH Bệnh viện {{organization.name}}</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeCreateWarriorModal()" class="h-8 w-8 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-sm font-bold transition-colors cursor-pointer">✕</button>
+    </div>
+
+    <form action="/organizations/portal/warriors/create" method="POST" class="space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Họ và Tên Bé *</label>
+          <input type="text" name="full_name" required placeholder="VD: Nguyễn Văn Nam" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tên Thân Mật / Biệt Danh</label>
+          <input type="text" name="nickname" placeholder="VD: Bé Bắp, Cún Con" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Ngày Sinh (Năm/Tháng/Ngày)</label>
+          <input type="date" name="dob" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Quê Quán</label>
+          <input type="text" name="hometown" placeholder="VD: Thái Bình" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Mã Bệnh Nhân Viện</label>
+          <input type="text" name="hospital_patient_code" placeholder="VD: K-2026-091" class="w-full text-xs font-mono font-bold rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Trạng Thái Điều Trị</label>
+          <select name="status" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 font-bold">
+            <option value="FIGHTER" selected>FIGHTER - Đang Kiên Cường Điều Trị</option>
+            <option value="URGENT">URGENT - Cần Hỗ Trợ Khẩn Cấp</option>
+            <option value="RECOVERED">RECOVERED - Đã Thuyên Giảm / Xuất Viện</option>
+            <option value="ANGEL">ANGEL - Thiên Thần Nhỏ</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Link Ảnh Đại Diện (Avatar URL)</label>
+          <input type="text" name="avatar_url" placeholder="https://images.unsplash.com/..." class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Ước Mơ Của Bé (Tóm Tắt)</label>
+        <input type="text" name="dream_summary" placeholder="VD: Ước mơ trở thành họa sĩ vẽ tranh đại dương" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Câu Chuyện / Bệnh Án Rút Gọn *</label>
+        <textarea name="story_html" required rows="4" placeholder="Nhập tóm tắt chẩn đoán, phác đồ điều trị và hoàn cảnh gia đình của bé..." class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+        <button type="button" onclick="closeCreateWarriorModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 cursor-pointer">Hủy Bỏ</button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 text-white font-bold text-xs shadow-md shadow-rose-600/25 hover:bg-rose-700 cursor-pointer">Lưu & Tạo Hồ Sơ Bé</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL 2: CẤP TÀI KHOẢN PHỤ HUYNH (DÀNH CHO BỆNH VIỆN) -->
+<div id="provisionFamilyModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-lg w-full p-6 my-8 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div class="flex items-center gap-2.5">
+        <div class="h-10 w-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg font-bold">
+          👨‍👩‍👧
+        </div>
+        <div>
+          <h3 class="text-base font-black text-slate-900 tracking-tight">Cấp Tài Khoản Phụ Huynh</h3>
+          <p class="text-xs text-slate-500">Bé: <strong id="provisionChildName" class="text-slate-900"></strong></p>
+        </div>
+      </div>
+      <button type="button" onclick="closeFamilyProvisionModal()" class="h-8 w-8 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-sm font-bold transition-colors cursor-pointer">✕</button>
+    </div>
+
+    <form action="/organizations/portal/family-user/create" method="POST" class="space-y-4">
+      <input type="hidden" name="child_id" id="provisionChildId" />
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Email Phụ Huynh / Người Giám Hộ *</label>
+        <input type="email" name="email" required placeholder="VD: me.bebinh@gmail.com" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Họ & Tên Đệm *</label>
+          <input type="text" name="last_name" required placeholder="VD: Nguyễn Thị" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tên Chính *</label>
+          <input type="text" name="first_name" required placeholder="VD: Mai" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Quan Hệ Gia Đình *</label>
+          <select name="family_relation" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold">
+            <option value="Mẹ ruột" selected>Mẹ ruột</option>
+            <option value="Bố ruột">Bố ruột</option>
+            <option value="Bà nội">Bà nội</option>
+            <option value="Bà ngoại">Bà ngoại</option>
+            <option value="Ông nội / ngoại">Ông nội / ngoại</option>
+            <option value="Người giám hộ hợp pháp">Người giám hộ hợp pháp</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Số Điện Thoại</label>
+          <input type="tel" name="phone_number" placeholder="VD: 0987654321" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Mật Khẩu Khởi Tạo</label>
+        <input type="text" name="password" value="Password@2026" class="w-full text-xs font-mono rounded-xl border border-slate-200 px-3 py-2 text-slate-900 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        <span class="text-[10px] text-slate-400 mt-0.5 block">Phụ huynh có thể đổi mật khẩu sau khi đăng nhập</span>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+        <button type="button" onclick="closeFamilyProvisionModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 cursor-pointer">Hủy Bỏ</button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 text-white font-bold text-xs shadow-md shadow-amber-500/25 hover:bg-amber-600 cursor-pointer">Cấp & Gán Tài Khoản</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL 3: TỪ CHỐI MÃ QR GIA ĐÌNH -->
+<div id="rejectQRModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <h3 class="text-sm font-black text-rose-700 flex items-center gap-2">
+        <span>⚠️</span> Từ Chối Mã QR / Tài Khoản Gia Đình
+      </h3>
+      <button type="button" onclick="closeRejectModal()" class="text-slate-400 hover:text-slate-600 text-sm font-bold">✕</button>
+    </div>
+
+    <form id="rejectQRForm" method="POST" class="space-y-3">
+      <input type="hidden" name="approved" value="false" />
+      <p class="text-xs text-slate-600">Bé: <strong id="rejectChildName"></strong></p>
+      
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Lý do từ chối (hiển thị cho phụ huynh) *</label>
+        <textarea name="reject_reason" required rows="3" class="w-full text-xs rounded-xl border border-slate-200 p-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="VD: Tên chủ tài khoản không khớp với giấy tờ hộ tịch hoặc ảnh chụp mã QR bị mờ..."></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <button type="button" onclick="closeRejectModal()" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs">Hủy</button>
+        <button type="submit" class="px-4 py-1.5 rounded-xl bg-rose-600 text-white font-bold text-xs shadow-sm hover:bg-rose-700">Xác Nhận Từ Chối</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL 4: XEM ẢNH QR PHÓNG TO -->
+<div id="qrPreviewModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4" onclick="closeQRPreview()">
+  <div class="bg-white rounded-3xl border border-slate-200 p-6 max-w-sm w-full text-center space-y-3" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between">
+      <h4 class="text-xs font-bold text-slate-800" id="qrPreviewTitle">Ảnh Mã QR Của Gia Đình</h4>
+      <button type="button" onclick="closeQRPreview()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
+    </div>
+    <div class="p-3 bg-slate-50 rounded-2xl flex items-center justify-center">
+      <img id="qrPreviewImg" src="" alt="Mã QR" class="max-h-80 w-auto rounded-xl object-contain shadow-sm" />
+    </div>
+    <p class="text-[11px] text-slate-400">Kiểm tra thông tin tài khoản thụ hưởng trước khi bấm phê duyệt</p>
+  </div>
+</div>
+
+<script>
+  function openCreateWarriorModal() {
+    const modal = document.getElementById('createWarriorModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeCreateWarriorModal() {
+    const modal = document.getElementById('createWarriorModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function openFamilyProvisionModal(childId, childName) {
+    document.getElementById('provisionChildId').value = childId;
+    document.getElementById('provisionChildName').textContent = childName;
+    const modal = document.getElementById('provisionFamilyModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeFamilyProvisionModal() {
+    const modal = document.getElementById('provisionFamilyModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function openRejectModal(childId, childName) {
+    document.getElementById('rejectChildName').textContent = childName;
+    document.getElementById('rejectQRForm').action = '/organizations/portal/warriors/' + childId + '/verify-family-bank';
+    const modal = document.getElementById('rejectQRModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeRejectModal() {
+    const modal = document.getElementById('rejectQRModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function previewQRImage(src, name) {
+    document.getElementById('qrPreviewImg').src = src;
+    document.getElementById('qrPreviewTitle').textContent = 'Ảnh Mã QR - Bé ' + name;
+    const modal = document.getElementById('qrPreviewModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeQRPreview() {
+    const modal = document.getElementById('qrPreviewModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+</script>
+

@@ -188,13 +188,24 @@ const getWarriorBySlug = async (req, res) => {
       vietqrUrl = `https://img.vietqr.io/image/${bankCode}-${accountNo}-compact2.png?amount=0&addInfo=${addInfo}&accountName=${accountName}`;
     }
 
+    // Link mã VietQR của gia đình (chỉ khi đã được Bệnh viện thẩm định)
+    let familyVietqrUrl = null;
+    if (warrior.family_bank_verified && warrior.family_bank_code && warrior.family_bank_account_number) {
+      const fBankCode = warrior.family_bank_code.trim();
+      const fAccountNo = warrior.family_bank_account_number.trim();
+      const fAccountName = encodeURIComponent(warrior.family_bank_account_name || '');
+      const fAddInfo = encodeURIComponent(`TiepSuc ${warrior.slug}`);
+      familyVietqrUrl = `https://img.vietqr.io/image/${fBankCode}-${fAccountNo}-compact2.png?amount=0&addInfo=${fAddInfo}&accountName=${fAccountName}`;
+    }
+
     return res.status(200).json({
       status: 'success',
       data: {
         warrior,
         gallery,
         tributes,
-        vietqrUrl
+        vietqrUrl,
+        familyVietqrUrl
       }
     });
   } catch (error) {
@@ -207,10 +218,26 @@ const getWarriorBySlug = async (req, res) => {
 };
 
 /**
- * Tạo mới hồ sơ Chiến binh nhí (Chỉ Admin hoặc Coordinator)
+ * Tạo mới hồ sơ Chiến binh nhí (Chỉ dành cho ORG_ADMIN thuộc bệnh viện hoặc COORDINATOR)
+ * System Admin (ADMIN, SUPER_ADMIN) không có thẩm quyền tạo theo Luật Trẻ em 2016
  */
 const createWarrior = async (req, res) => {
   try {
+    if (req.user.role === 'ADMIN' || req.user.role === 'SUPER_ADMIN') {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Quản trị viên hệ thống không có thẩm quyền tạo hồ sơ bệnh án trực tiếp theo Luật Trẻ em 2016. Thao tác này thuộc thẩm quyền của Cán bộ Đơn vị Y tế (ORG_ADMIN).'
+      });
+    }
+
+    const assignedOrgId = req.user.org_id || req.body.organization_id;
+    if (!assignedOrgId) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Hồ sơ bệnh nhi bắt buộc phải thuộc một Đơn vị / Cơ sở Y tế quản lý.'
+      });
+    }
+
     const {
       full_name,
       nickname,
@@ -255,9 +282,9 @@ const createWarrior = async (req, res) => {
       bank_account_number: bank_account_number ? bank_account_number.trim() : null,
       bank_account_name: bank_account_name ? bank_account_name.toUpperCase().trim() : null,
       bank_verified: false, // Mặc định chưa thẩm định
-      is_published: true,   // Cho phép hiển thị nếu Admin/Coordinator tạo
+      is_published: true,   // Cho phép hiển thị sau khi viện tạo
       created_by: req.user.id,
-      organization_id: req.user.org_id || req.body.organization_id || null
+      organization_id: assignedOrgId
     }).returning('*');
 
     await logAudit({
@@ -559,6 +586,169 @@ const deleteGalleryItem = async (req, res) => {
   }
 };
 
+/**
+ * Người nhà nộp thông tin tài khoản ngân hàng hoặc tải ảnh mã QR cá nhân (Role FAMILY)
+ */
+const submitFamilyBankQR = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      bank_code,
+      bank_account_number,
+      bank_account_name,
+      qr_image_data,
+      note
+    } = req.body;
+
+    const child = await db('children').where({ id }).first();
+    if (!child) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Không tìm thấy hồ sơ của bé.'
+      });
+    }
+
+    let qrImageUrl = child.family_qr_image_url;
+
+    // Nếu gửi ảnh base64
+    if (qr_image_data && qr_image_data.startsWith('data:image')) {
+      const fs = require('fs');
+      const path = require('path');
+      const matches = qr_image_data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        const ext = matches[1].includes('jpeg') || matches[1].includes('jpg') ? 'jpg' : 'png';
+        const buffer = Buffer.from(matches[2], 'base64');
+        const uploadDir = path.join(__dirname, '../../../uploads/family_qrs');
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        const fileName = `family_qr_${child.id}_${Date.now()}.${ext}`;
+        const filePath = path.join(uploadDir, fileName);
+        fs.writeFileSync(filePath, buffer);
+        qrImageUrl = `/uploads/family_qrs/${fileName}`;
+      }
+    } else if (qr_image_data && (qr_image_data.startsWith('http') || qr_image_data.startsWith('/uploads'))) {
+      qrImageUrl = qr_image_data;
+    }
+
+    const updateData = {
+      family_bank_code: bank_code ? bank_code.trim().toUpperCase() : child.family_bank_code,
+      family_bank_account_number: bank_account_number ? bank_account_number.trim() : child.family_bank_account_number,
+      family_bank_account_name: bank_account_name ? bank_account_name.trim().toUpperCase() : child.family_bank_account_name,
+      family_qr_image_url: qrImageUrl,
+      family_bank_verified: false, // Bắt buộc false để bệnh viện thẩm định
+      family_bank_submitted_at: new Date(),
+      family_bank_reject_reason: null,
+      updated_at: new Date()
+    };
+
+    const [updatedChild] = await db('children')
+      .where({ id })
+      .update(updateData)
+      .returning('*');
+
+    await logAudit({
+      userId: req.user.id,
+      action: 'SUBMIT_FAMILY_BANK_QR',
+      resourceType: 'CHILDREN',
+      resourceId: id,
+      metadata: {
+        childName: child.full_name,
+        bankCode: updateData.family_bank_code,
+        accountNo: updateData.family_bank_account_number,
+        note: note || 'Người nhà nộp thông tin/ảnh QR viện phí'
+      },
+      ipAddress: req.ip
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Đã gửi thông tin mã QR/tài khoản viện phí thành công. Đang chờ Bệnh viện thẩm định theo Nghị định 93/2021/NĐ-CP.',
+      data: {
+        childId: id,
+        familyBankVerified: false,
+        submittedAt: updateData.family_bank_submitted_at
+      }
+    });
+  } catch (error) {
+    console.error('[SUBMIT FAMILY QR ERROR]', error);
+    return res.status(500).json({
+      status: 'error',
+      message: error.message || 'Lỗi gửi thông tin mã QR.'
+    });
+  }
+};
+
+/**
+ * Thẩm định và duyệt mã QR/tài khoản do gia đình nộp (Chỉ dành cho ORG_ADMIN viện quản lý)
+ */
+const verifyFamilyBankQR = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { approved, reject_reason } = req.body;
+
+    const child = await db('children').where({ id }).first();
+    if (!child) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Không tìm thấy hồ sơ của bé.'
+      });
+    }
+
+    if (req.user.role === 'ORG_ADMIN' && child.organization_id !== req.user.org_id) {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Bạn chỉ có quyền thẩm định thông tin cho bệnh nhi điều trị tại đơn vị của mình.'
+      });
+    }
+
+    const isApproved = approved === true || approved === 'true';
+
+    const updateData = {
+      family_bank_verified: isApproved,
+      family_bank_verified_at: isApproved ? new Date() : null,
+      family_bank_reject_reason: isApproved ? null : (reject_reason || 'Thông tin chưa hợp lệ theo đối soát của bệnh viện'),
+      updated_at: new Date()
+    };
+
+    const [updatedChild] = await db('children')
+      .where({ id })
+      .update(updateData)
+      .returning('*');
+
+    await logAudit({
+      userId: req.user.id,
+      action: isApproved ? 'APPROVE_FAMILY_BANK_QR' : 'REJECT_FAMILY_BANK_QR',
+      resourceType: 'CHILDREN',
+      resourceId: id,
+      metadata: {
+        childName: child.full_name,
+        isApproved,
+        rejectReason: updateData.family_bank_reject_reason
+      },
+      ipAddress: req.ip
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      message: isApproved
+        ? 'Đã thẩm định và kích hoạt hiển thị mã QR của gia đình thành công.'
+        : 'Đã từ chối mã QR của gia đình.',
+      data: {
+        childId: id,
+        familyBankVerified: isApproved,
+        rejectReason: updateData.family_bank_reject_reason
+      }
+    });
+  } catch (error) {
+    console.error('[VERIFY FAMILY QR ERROR]', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Lỗi thẩm định mã QR gia đình.'
+    });
+  }
+};
+
 module.exports = {
   getWarriors,
   getWarriorBySlug,
@@ -567,5 +757,7 @@ module.exports = {
   unpublishWarrior,
   getCategories,
   addGalleryItem,
-  deleteGalleryItem
+  deleteGalleryItem,
+  submitFamilyBankQR,
+  verifyFamilyBankQR
 };

@@ -38,6 +38,26 @@ const getVietQRInfo = async (req, res) => {
 
     const vietqrUrl = `https://img.vietqr.io/image/${bankCode}-${accountNo}-compact2.png?amount=0&addInfo=${addInfo}&accountName=${accountName}`;
 
+    let familyQR = null;
+    if (child.family_bank_verified) {
+      let familyVietqrUrl = null;
+      if (child.family_bank_code && child.family_bank_account_number) {
+        const fBankCode = child.family_bank_code.trim();
+        const fAccountNo = child.family_bank_account_number.trim();
+        const fAccountName = encodeURIComponent(child.family_bank_account_name || '');
+        const fAddInfo = encodeURIComponent(`GiaDinh ${child.slug}`);
+        familyVietqrUrl = `https://img.vietqr.io/image/${fBankCode}-${fAccountNo}-compact2.png?amount=0&addInfo=${fAddInfo}&accountName=${fAccountName}`;
+      }
+      familyQR = {
+        verified: true,
+        bankCode: child.family_bank_code,
+        bankAccountNumber: child.family_bank_account_number,
+        bankAccountName: child.family_bank_account_name,
+        qrImageUrl: child.family_qr_image_url,
+        vietqrUrl: familyVietqrUrl
+      };
+    }
+
     return res.status(200).json({
       status: 'success',
       data: {
@@ -48,6 +68,7 @@ const getVietQRInfo = async (req, res) => {
         bankAccountNumber: child.bank_account_number,
         bankAccountName: child.bank_account_name,
         vietqrUrl,
+        familyQR,
         disclaimer: 'Cổng Chiến Binh Nhí hoạt động phi lợi nhuận theo Nghị định 93/2021/NĐ-CP. Tiền ủng hộ được chuyển trực tiếp 100% đến người thụ hưởng. Nền tảng không thu phí và không giữ tiền trung gian.'
       }
     });

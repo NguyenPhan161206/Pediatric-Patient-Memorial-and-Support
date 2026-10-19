@@ -224,10 +224,108 @@ const handleResetPassword = async (req, res) => {
   return res.redirect('/admin/users');
 };
 
+/**
+ * Hiển thị Quản Lý Đơn Vị & Cơ Sở Y Tế Phụ Trách (/admin/organizations)
+ */
+const renderOrganizations = async (req, res) => {
+  if (!req.session.user || (req.session.user.role !== 'ADMIN' && req.session.user.role !== 'SUPER_ADMIN')) {
+    req.session.errorMsg = 'Bạn không có quyền truy cập vào danh mục cơ sở y tế.';
+    return res.redirect('/auth/login');
+  }
+
+  try {
+    const token = req.session.token;
+    const response = await apiClient.get('/organizations');
+    const orgs = (response.data && response.data.organizations) || [];
+
+    const totalOrgs = orgs.length;
+    const activeOrgs = orgs.filter(o => o.is_active !== false).length;
+    const totalWarriors = orgs.reduce((sum, o) => sum + (parseInt(o.warriors_count, 10) || 0), 0);
+
+    return res.render('admin/views/organizations', {
+      title: 'Quản Lý Đơn Vị & Cơ Sở Y Tế Phụ Trách',
+      user: req.session.user,
+      organizations: orgs,
+      stats: {
+        totalOrgs,
+        activeOrgs,
+        totalWarriors
+      },
+      successMsg: req.session.successMsg,
+      errorMsg: req.session.errorMsg
+    });
+  } catch (error) {
+    console.error('[ADMIN RENDER ORGS ERROR]', error);
+    return res.render('admin/views/organizations', {
+      title: 'Quản Lý Đơn Vị & Cơ Sở Y Tế Phụ Trách',
+      user: req.session.user,
+      organizations: [],
+      stats: { totalOrgs: 0, activeOrgs: 0, totalWarriors: 0 },
+      errorMsg: 'Không thể tải danh sách đơn vị: ' + (error.message || 'Lỗi kết nối')
+    });
+  } finally {
+    delete req.session.successMsg;
+    delete req.session.errorMsg;
+  }
+};
+
+/**
+ * Thêm mới Đơn vị & Cơ sở Y tế động
+ */
+const handleCreateOrganization = async (req, res) => {
+  if (!req.session.user || (req.session.user.role !== 'ADMIN' && req.session.user.role !== 'SUPER_ADMIN')) {
+    return res.redirect('/auth/login');
+  }
+
+  try {
+    const token = req.session.token;
+    const payload = req.body;
+
+    const response = await apiClient.post('/organizations', payload, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    req.session.successMsg = response.message || 'Đã thêm mới cơ sở y tế thành công.';
+  } catch (error) {
+    console.error('[ADMIN CREATE ORG ERROR]', error);
+    req.session.errorMsg = error.response?.data?.message || error.message || 'Lỗi thêm mới cơ sở y tế.';
+  }
+
+  return res.redirect('/admin/organizations');
+};
+
+/**
+ * Vô hiệu hóa hoặc kích hoạt lại Đơn vị
+ */
+const handleToggleOrganizationStatus = async (req, res) => {
+  if (!req.session.user || (req.session.user.role !== 'ADMIN' && req.session.user.role !== 'SUPER_ADMIN')) {
+    return res.redirect('/auth/login');
+  }
+
+  try {
+    const token = req.session.token;
+    const { id } = req.params;
+
+    const response = await apiClient.patch(`/organizations/${id}/status`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    req.session.successMsg = response.message || 'Đã cập nhật trạng thái đơn vị thành công.';
+  } catch (error) {
+    console.error('[ADMIN TOGGLE ORG ERROR]', error);
+    req.session.errorMsg = error.response?.data?.message || error.message || 'Lỗi cập nhật trạng thái đơn vị.';
+  }
+
+  return res.redirect('/admin/organizations');
+};
+
 module.exports = {
   renderDashboard,
   renderUsers,
   handleCreateUser,
   handleToggleStatus,
-  handleResetPassword
+  handleResetPassword,
+  renderOrganizations,
+  handleCreateOrganization,
+  handleToggleOrganizationStatus
 };

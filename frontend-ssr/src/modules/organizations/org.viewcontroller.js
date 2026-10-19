@@ -97,7 +97,85 @@ const updateHospitalInfo = async (req, res) => {
   res.redirect('/organizations/portal');
 };
 
+/**
+ * Thêm mới bệnh nhi thuộc Bệnh viện (Dành cho ORG_ADMIN)
+ */
+const handleCreateWarrior = async (req, res) => {
+  if (!req.session.user || !req.session.token) {
+    return res.redirect('/auth/login');
+  }
+
+  try {
+    const payload = req.body;
+    await apiClient.post('/warriors', payload, {
+      headers: { Authorization: `Bearer ${req.session.token}` }
+    });
+
+    req.session.flashMessage = `Đã thêm mới hồ sơ bệnh nhi "${payload.full_name}" thành công vào đơn vị!`;
+  } catch (error) {
+    console.error('[HOSPITAL CREATE WARRIOR ERROR]', error);
+    req.session.errorMessage = error.response?.data?.message || error.message || 'Lỗi khi tạo hồ sơ bệnh nhi.';
+  }
+
+  res.redirect('/organizations/portal');
+};
+
+/**
+ * Cấp tài khoản Hộ gia đình cho bệnh nhi (Dành cho ORG_ADMIN)
+ */
+const handleProvisionFamily = async (req, res) => {
+  if (!req.session.user || !req.session.token) {
+    return res.redirect('/auth/login');
+  }
+
+  try {
+    const payload = req.body;
+    const response = await apiClient.post('/organizations/family-user', payload, {
+      headers: { Authorization: `Bearer ${req.session.token}` }
+    });
+
+    req.session.flashMessage = response.data?.message || 'Đã cấp và gán tài khoản Hộ gia đình thành công!';
+  } catch (error) {
+    console.error('[HOSPITAL PROVISION FAMILY ERROR]', error);
+    req.session.errorMessage = error.response?.data?.message || error.message || 'Lỗi cấp tài khoản gia đình.';
+  }
+
+  res.redirect('/organizations/portal');
+};
+
+/**
+ * Thẩm định và duyệt mã QR / tài khoản do gia đình nộp (Dành cho ORG_ADMIN)
+ */
+const handleVerifyFamilyBank = async (req, res) => {
+  if (!req.session.user || !req.session.token) {
+    return res.redirect('/auth/login');
+  }
+
+  const { id } = req.params;
+  const { approved, reject_reason } = req.body;
+
+  try {
+    const response = await apiClient.patch(
+      `/warriors/${id}/family-bank/verify`,
+      { approved: approved === 'true' || approved === true, reject_reason },
+      {
+        headers: { Authorization: `Bearer ${req.session.token}` }
+      }
+    );
+
+    req.session.flashMessage = response.data?.message || 'Đã cập nhật kết quả thẩm định mã QR gia đình thành công!';
+  } catch (error) {
+    console.error('[HOSPITAL VERIFY FAMILY BANK ERROR]', error);
+    req.session.errorMessage = error.response?.data?.message || error.message || 'Lỗi thẩm định mã QR gia đình.';
+  }
+
+  res.redirect('/organizations/portal');
+};
+
 module.exports = {
   showHospitalPortal,
-  updateHospitalInfo
+  updateHospitalInfo,
+  handleCreateWarrior,
+  handleProvisionFamily,
+  handleVerifyFamilyBank
 };

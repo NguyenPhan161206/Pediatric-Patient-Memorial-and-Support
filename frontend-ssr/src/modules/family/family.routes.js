@@ -27,4 +27,7 @@ router.post('/tributes/voice', familyViewController.sendFamilyVoiceNote);
 // Cập nhật thông tin danh xưng phụ huynh
 router.post('/profile/update', familyViewController.updateFamilyProfile);
 
+// Nộp thông tin tài khoản / mã QR viện phí của gia đình
+router.post('/warriors/:id/bank-qr', familyViewController.submitFamilyBankQRAction);
+
 module.exports = router;

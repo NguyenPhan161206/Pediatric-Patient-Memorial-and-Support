@@ -11,12 +11,28 @@ router.get('/', warriorController.getWarriors);
 router.get('/categories/all', warriorController.getCategories);
 router.get('/:slug', warriorController.getWarriorBySlug);
 
-// Protected routes (Admin / Coordinator / Org Admin)
+// Protected routes (Chỉ ORG_ADMIN thuộc bệnh viện hoặc COORDINATOR)
 router.post(
   '/',
   authenticateToken,
-  requireRoles('ADMIN', 'SUPER_ADMIN', 'COORDINATOR', 'ORG_ADMIN'),
+  requireRoles('ORG_ADMIN', 'COORDINATOR'),
   warriorController.createWarrior
+);
+
+// Nộp thông tin / ảnh mã QR viện phí của người nhà (Chỉ vai trò FAMILY sở hữu bé)
+router.post(
+  '/:id/family-bank',
+  authenticateToken,
+  ensureFamilyOwnership,
+  warriorController.submitFamilyBankQR
+);
+
+// Thẩm định và duyệt mã QR viện phí của người nhà (Chỉ ORG_ADMIN của bệnh viện)
+router.patch(
+  '/:id/family-bank/verify',
+  authenticateToken,
+  requireRoles('ORG_ADMIN'),
+  warriorController.verifyFamilyBankQR
 );
 
 // Protected routes (Admin hoặc Gia đình sở hữu bé này)

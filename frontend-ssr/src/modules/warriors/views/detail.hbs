@@ -570,6 +570,47 @@
             {{/if}}
           </div>
 
+          <!-- QR CỦA GIA ĐÌNH (ĐÃ ĐƯỢC BỆNH VIỆN THẨM ĐỊNH) -->
+          {{#if warrior.family_bank_verified}}
+            <div class="mb-4 pt-3 border-t border-slate-200">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-1.5 text-blue-900 font-bold text-xs uppercase tracking-wider">
+                  <span>👨‍👩‍👧</span> Tiếp Sức Cho Gia Đình & Bố Mẹ
+                </div>
+                <span class="text-[10px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
+                  ✓ Đã Thẩm Định NĐ 93/2021
+                </span>
+              </div>
+
+              <div class="bg-blue-50/60 p-3.5 rounded-xl border border-blue-100 space-y-2.5">
+                {{#if warrior.family_qr_image_url}}
+                  <div class="flex items-center justify-center p-2 bg-white rounded-lg border border-blue-100">
+                    <img
+                      src="{{warrior.family_qr_image_url}}"
+                      alt="Mã QR Của Gia Đình"
+                      class="w-full max-w-[200px] h-auto object-contain rounded shadow-sm"
+                    />
+                  </div>
+                {{else if familyVietqrUrl}}
+                  <div class="flex items-center justify-center p-2 bg-white rounded-lg border border-blue-100">
+                    <img
+                      src="{{familyVietqrUrl}}"
+                      alt="Mã VietQR Của Gia Đình"
+                      class="w-full max-w-[200px] h-auto object-contain rounded shadow-sm"
+                    />
+                  </div>
+                {{/if}}
+
+                <div class="text-xs space-y-1 text-slate-700">
+                  <div>Ngân hàng thụ hưởng: <strong>{{warrior.family_bank_code}}</strong></div>
+                  <div>Số tài khoản: <strong class="font-mono text-blue-700 text-sm tracking-wider">{{warrior.family_bank_account_number}}</strong></div>
+                  <div>Chủ tài khoản: <strong class="uppercase text-slate-900">{{warrior.family_bank_account_name}}</strong></div>
+                  <p class="text-[10px] text-slate-500 italic pt-1">Khoản ủng hộ sinh hoạt phí và chăm sóc bé sẽ chuyển trực tiếp tới cha mẹ ruột.</p>
+                </div>
+              </div>
+            </div>
+          {{/if}}
+
           <!-- Zero-Touch Cashflow Legal Disclaimer -->
           <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5 leading-relaxed mb-5">
             <div class="font-bold text-slate-800 flex items-center gap-1">
