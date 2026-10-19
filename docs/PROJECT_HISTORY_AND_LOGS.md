@@ -218,7 +218,8 @@ Hệ thống đã trải qua quy trình kiểm thử tự động toàn diện q
 Toàn bộ chuỗi commit nguyên tử đã được đẩy thành công lên nhánh chính:
 
 ```text
-15be21a (HEAD -> main, origin/main) feat(ui): apply unified multi-attribute name display across header and sidebar
+7802eae (HEAD -> main, origin/main) feat(tenancy): implement dynamic multi-tenancy, strict least-privilege rbac, and family qr upload workflow
+15be21a feat(ui): apply unified multi-attribute name display across header and sidebar
 e1acb30 feat(moderation): add voice tribute audio player to moderation queue and enhance hospital reports
 91b8b99 feat(family): implement memorial media vault with photo, video, and HTML5 web audio voice recording
 8639d15 feat(admin): implement unified admin dashboard and central user management with role provisioning
