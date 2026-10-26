@@ -1,0 +1,523 @@
+<div class="space-y-6">
+  
+  <!-- 1. Header & Actions -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200">
+          <span class="h-1.5 w-1.5 rounded-full bg-purple-600 animate-pulse"></span> Multi-Tenancy Engine
+        </span>
+        <span class="text-xs text-slate-400">|</span>
+        <span class="text-xs font-semibold text-slate-500">Quản Lý Đơn Vị Động & Không Hardcode</span>
+      </div>
+      <h1 class="text-2xl font-black tracking-tight text-slate-900">Quản Lý Đơn Vị & Cơ Sở Y Tế Phụ Trách</h1>
+      <p class="text-xs text-slate-500 mt-1">Cấu hình danh mục Bệnh viện, định vị Bản Đồ Hy Vọng và phân cấp Quản trị viên Đơn vị (ORG_ADMIN)</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2.5">
+      <button
+        type="button"
+        onclick="openCreateOrgModal()"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold shadow-md shadow-purple-600/20 hover:bg-purple-700 transition-all hover:scale-[1.01] cursor-pointer"
+      >
+        <span>🏥</span>
+        <span>+ Thêm Cơ Sở / Bệnh Viện Mới</span>
+      </button>
+
+      <a
+        href="/#map"
+        target="_blank"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold shadow-sm hover:bg-slate-50 transition-all"
+      >
+        <span>🗺️</span>
+        <span>Xem Bản Đồ Hy Vọng</span>
+      </a>
+
+      <a
+        href="/admin/dashboard"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold shadow-sm hover:bg-slate-50 transition-all"
+      >
+        <span>📊</span>
+        <span>Dashboard</span>
+      </a>
+    </div>
+  </div>
+
+  {{#if successMsg}}
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+      <span>✅</span>
+      <span>{{successMsg}}</span>
+    </div>
+  {{/if}}
+
+  {{#if errorMsg}}
+    <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-800 flex items-center gap-2">
+      <span>⚠️</span>
+      <span>{{errorMsg}}</span>
+    </div>
+  {{/if}}
+
+  <!-- 2. Thống kê nhanh Đơn Vị Liên Viện -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-2">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Tổng Số Cơ Sở</span>
+        <div class="h-8 w-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-sm font-bold">
+          🏥
+        </div>
+      </div>
+      <div class="text-2xl font-black text-slate-900">{{stats.totalOrgs}}</div>
+      <p class="text-[11px] text-slate-400">Các bệnh viện và quỹ bảo trợ trong hệ sinh thái</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-2">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Đang Tiếp Nhận</span>
+        <div class="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">
+          🟢
+        </div>
+      </div>
+      <div class="text-2xl font-black text-emerald-600">{{stats.activeOrgs}}</div>
+      <p class="text-[11px] text-slate-400">Cơ sở đang hoạt động và hiển thị trên Bản Đồ Hy Vọng</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-2">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Bệnh Nhi Trực Thuộc</span>
+        <div class="h-8 w-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm font-bold">
+          👶
+        </div>
+      </div>
+      <div class="text-2xl font-black text-rose-600">{{stats.totalWarriors}}</div>
+      <p class="text-[11px] text-slate-400">Tổng số hồ sơ chiến binh nhí đang điều trị liên viện</p>
+    </div>
+  </div>
+
+  <!-- 3. Bảng Danh Sách Đơn Vị Động -->
+  <div class="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div>
+        <h2 class="text-sm font-black text-slate-900 uppercase tracking-wider">Danh Sách Cơ Sở Y Tế & Quỹ Bảo Trợ</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Dữ liệu được truy vấn động trực tiếp từ CSDL PostgreSQL, hoàn toàn không hardcode</p>
+      </div>
+      <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-200 text-slate-700">
+        {{organizations.length}} đơn vị
+      </span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+          <tr>
+            <th class="py-3 px-4">Đơn Vị / Cơ Sở</th>
+            <th class="py-3 px-4">Tỉnh / Thành Phố</th>
+            <th class="py-3 px-4">Tọa Độ Bản Đồ</th>
+            <th class="py-3 px-4">Tài Khoản Viện Phí VietQR</th>
+            <th class="py-3 px-4 text-center">Bệnh Nhi</th>
+            <th class="py-3 px-4 text-center">Trạng Thái</th>
+            <th class="py-3 px-4 text-right">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {{#each organizations}}
+            <tr class="hover:bg-slate-50/70 transition-colors {{#unless is_active}}opacity-60 bg-slate-50/40{{/unless}}">
+              
+              <!-- Đơn Vị -->
+              <td class="py-3.5 px-4">
+                <div class="flex items-center gap-3">
+                  <div class="h-9 w-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-black text-sm shrink-0 border border-purple-200">
+                    🏥
+                  </div>
+                  <div>
+                    <strong class="font-bold text-slate-900 block text-xs">{{name}}</strong>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span class="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">
+                        {{code}}
+                      </span>
+                      {{#if contact_person}}
+                        <span class="text-[11px] text-slate-400">PT: {{contact_person}}</span>
+                      {{/if}}
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Tỉnh / Thành -->
+              <td class="py-3.5 px-4 text-slate-700">
+                <div class="font-bold text-slate-800">{{province}}</div>
+                <div class="text-[11px] text-slate-400 truncate max-w-[200px]" title="{{address}}">{{address}}</div>
+              </td>
+
+              <!-- Tọa độ -->
+              <td class="py-3.5 px-4 font-mono text-[11px] text-slate-600">
+                {{#if lat}}
+                  <div class="flex items-center gap-1">
+                    <span class="text-purple-600">📍</span>
+                    <span>{{lat}}, {{lng}}</span>
+                  </div>
+                {{else}}
+                  <span class="text-slate-400 italic">Chưa gán</span>
+                {{/if}}
+              </td>
+
+              <!-- Tài Khoản Viện Phí -->
+              <td class="py-3.5 px-4">
+                <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                  <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-bold">{{bank_code}}</span>
+                  <span class="font-mono text-xs">{{bank_account_number}}</span>
+                </div>
+                <div class="text-[11px] text-slate-400 uppercase font-semibold mt-0.5">{{bank_account_name}}</div>
+              </td>
+
+              <!-- Bệnh Nhi -->
+              <td class="py-3.5 px-4 text-center">
+                <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-700 border border-rose-200">
+                  {{warriors_count}} bé
+                </span>
+              </td>
+
+              <!-- Trạng Thái -->
+              <td class="py-3.5 px-4 text-center">
+                {{#if is_active}}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-600"></span> Đang hoạt động
+                  </span>
+                {{else}}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span> Đã tạm khóa
+                  </span>
+                {{/if}}
+              </td>
+
+              <!-- Thao Tác -->
+              <td class="py-3.5 px-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <a
+                    href="/organizations/portal?org_id={{id}}"
+                    class="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors font-bold text-xs"
+                    title="Xem Cổng Bệnh Viện"
+                  >
+                    <span>Cổng Viện ↗</span>
+                  </a>
+
+                  <form action="/admin/organizations/{{id}}/toggle-status" method="POST" class="inline">
+                    {{#if is_active}}
+                      <button
+                        type="submit"
+                        onclick="return confirm('Bạn có chắc chắn muốn TẠM KHÓA cơ sở này? Các hồ sơ của viện sẽ tạm ẩn khỏi bản đồ.')"
+                        class="p-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors font-bold text-xs cursor-pointer"
+                        title="Tạm khóa đơn vị"
+                      >
+                        Khóa
+                      </button>
+                    {{else}}
+                      <button
+                        type="submit"
+                        class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-bold text-xs cursor-pointer"
+                        title="Kích hoạt lại"
+                      >
+                        Kích hoạt
+                      </button>
+                    {{/if}}
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL THÊM CƠ SỞ / BỆNH VIỆN MỚI -->
+<div
+  id="createOrgModal"
+  class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto"
+>
+  <div class="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-2xl w-full p-6 my-8 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div class="flex items-center gap-2.5">
+        <div class="h-10 w-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg font-bold">
+          🏥
+        </div>
+        <div>
+          <h3 class="text-base font-black text-slate-900 tracking-tight">Thêm Mới Cơ Sở / Bệnh Viện Động</h3>
+          <p class="text-xs text-slate-500">Thông tin sẽ hiển thị trên Bản Đồ Hy Vọng và tiếp nhận viện phí theo NĐ 93/2021</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onclick="closeCreateOrgModal()"
+        class="h-8 w-8 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-sm font-bold transition-colors cursor-pointer"
+      >
+        ✕
+      </button>
+    </div>
+
+    <form action="/admin/organizations/create" method="POST" class="space-y-4">
+      
+      <!-- PHẦN 1: THÔNG TIN CƠ SỞ -->
+      <div class="space-y-3">
+        <h4 class="text-xs font-black uppercase tracking-wider text-purple-700 flex items-center gap-1.5">
+          <span>1. Thông Tin Nhận Diện Cơ Sở</span>
+        </h4>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Tên Đơn Vị / Bệnh Viện *</label>
+            <input
+              type="text"
+              name="name"
+              id="orgNameInput"
+              required
+              placeholder="VD: Bệnh viện Nhi Đồng 1"
+              oninput="autoGenerateOrgCode(this.value)"
+              class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Mã Định Danh (Code) *</label>
+            <input
+              type="text"
+              name="code"
+              id="orgCodeInput"
+              required
+              placeholder="VD: BV_NHI_DONG_1"
+              class="w-full text-xs font-mono font-bold uppercase rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Tỉnh / Thành Phố *</label>
+            <input
+              type="text"
+              name="province"
+              id="orgProvinceInput"
+              required
+              placeholder="VD: TP. Hồ Chí Minh"
+              class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Địa Chỉ Chi Tiết</label>
+            <input
+              type="text"
+              name="address"
+              placeholder="VD: 341 Sư Vạn Hạnh, Phường 10, Quận 10"
+              class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+        </div>
+
+        <!-- Tọa độ bản đồ Leaflet -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-purple-50/50 p-3 rounded-2xl border border-purple-100">
+          <div>
+            <label class="block text-[11px] font-bold text-purple-900 mb-1">Vĩ Độ (Latitude - Leaflet)</label>
+            <input
+              type="number"
+              step="any"
+              name="lat"
+              id="orgLatInput"
+              placeholder="VD: 10.768689"
+              class="w-full text-xs rounded-xl border border-slate-200 px-3 py-1.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-purple-900 mb-1">Kinh Độ (Longitude - Leaflet)</label>
+            <input
+              type="number"
+              step="any"
+              name="lng"
+              id="orgLngInput"
+              placeholder="VD: 106.669891"
+              class="w-full text-xs rounded-xl border border-slate-200 px-3 py-1.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div class="sm:col-span-2 flex items-center gap-1.5 flex-wrap pt-1">
+            <span class="text-[10px] font-bold text-slate-500">Gợi ý nhanh tọa độ:</span>
+            <button type="button" onclick="setCoordinates(21.0315, 105.8117, 'Hà Nội')" class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-700 hover:bg-slate-50">Hà Nội</button>
+            <button type="button" onclick="setCoordinates(10.7686, 106.6698, 'TP. Hồ Chí Minh')" class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-700 hover:bg-slate-50">TP.HCM</button>
+            <button type="button" onclick="setCoordinates(16.0544, 108.2022, 'Đà Nẵng')" class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-700 hover:bg-slate-50">Đà Nẵng</button>
+            <button type="button" onclick="setCoordinates(16.4637, 107.5908, 'Thừa Thiên Huế')" class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-700 hover:bg-slate-50">Huế</button>
+            <button type="button" onclick="setCoordinates(10.0452, 105.7469, 'Cần Thơ')" class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-700 hover:bg-slate-50">Cần Thơ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHẦN 2: TÀI KHOẢN TIẾP NHẬN VIỆN PHÍ VIETQR -->
+      <div class="space-y-3 pt-2 border-t border-slate-100">
+        <h4 class="text-xs font-black uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
+          <span>2. Tài Khoản Tiếp Nhận Viện Phí VietQR (Napas247)</span>
+        </h4>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Mã Ngân Hàng (VietQR) *</label>
+            <select
+              name="bank_code"
+              id="bankCodeSelect"
+              onchange="syncBankName(this)"
+              required
+              class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="BIDV" data-name="Ngân hàng TMCP Đầu tư và Phát triển Việt Nam">BIDV - Ngân hàng Đầu tư & Phát triển</option>
+              <option value="VCB" data-name="Ngân hàng TMCP Ngoại thương Việt Nam">VCB - Vietcombank</option>
+              <option value="CTG" data-name="Ngân hàng TMCP Công thương Việt Nam">CTG - VietinBank</option>
+              <option value="MB" data-name="Ngân hàng TMCP Quân đội">MB - MBBank</option>
+              <option value="TCB" data-name="Ngân hàng TMCP Kỹ thương Việt Nam">TCB - Techcombank</option>
+              <option value="AGR" data-name="Ngân hàng Nông nghiệp và Phát triển Nông thôn">AGR - Agribank</option>
+              <option value="VPB" data-name="Ngân hàng TMCP Việt Nam Thịnh Vượng">VPB - VPBank</option>
+              <option value="ACB" data-name="Ngân hàng TMCP Á Châu">ACB - Á Châu</option>
+            </select>
+            <input type="hidden" name="bank_name" id="bankNameHidden" value="Ngân hàng TMCP Đầu tư và Phát triển Việt Nam" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Số Tài Khoản Viện Phí *</label>
+            <input
+              type="text"
+              name="bank_account_number"
+              required
+              placeholder="VD: 12210000889988"
+              class="w-full text-xs font-mono font-bold rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tên Chủ Tài Khoản (In hoa không dấu) *</label>
+          <input
+            type="text"
+            name="bank_account_name"
+            required
+            placeholder="VD: BENH VIEN NHI DONG 1 TP HCM"
+            class="w-full text-xs font-bold uppercase rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+
+      <!-- PHẦN 3: CẤP NGAY TÀI KHOẢN ORG_ADMIN -->
+      <div class="space-y-3 pt-2 border-t border-slate-100 bg-slate-50/70 p-3.5 rounded-2xl border border-slate-200">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+            <span>👤 3. Cấp Tài Khoản Quản Trị Viên Đơn Vị (ORG_ADMIN)</span>
+          </h4>
+          <span class="text-[10px] font-bold text-slate-400">Tùy chọn tạo ngay</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Email Cán Bộ / Bác Sĩ</label>
+            <input
+              type="email"
+              name="admin_email"
+              placeholder="VD: orgadmin.nhidong1@warriorhub.vn"
+              class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Mật Khẩu Ban Đầu</label>
+            <input
+              type="text"
+              name="admin_password"
+              value="Password@2026"
+              class="w-full text-xs font-mono rounded-xl border border-slate-200 px-3 py-2 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Học hàm / Xưng hô</label>
+            <select
+              name="admin_title_prefix"
+              class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="BS.">BS. (Bác sĩ)</option>
+              <option value="ThS.">ThS. (Thạc sĩ)</option>
+              <option value="TS.">TS. (Tiến sĩ)</option>
+              <option value="CN.">CN. (Cử nhân)</option>
+              <option value="ĐD.">ĐD. (Điều dưỡng)</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Họ và Tên Cán Bộ Phụ Trách</label>
+            <input
+              type="text"
+              name="admin_full_name"
+              placeholder="VD: Nguyễn Văn An"
+              class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+        <button
+          type="button"
+          onclick="closeCreateOrgModal()"
+          class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition-colors cursor-pointer"
+        >
+          Hủy Bỏ
+        </button>
+
+        <button
+          type="submit"
+          class="px-5 py-2 rounded-xl bg-purple-600 text-white font-bold text-xs shadow-md shadow-purple-600/25 hover:bg-purple-700 transition-all hover:scale-[1.01] cursor-pointer"
+        >
+          Lưu & Khởi Tạo Đơn Vị
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  function openCreateOrgModal() {
+    const modal = document.getElementById('createOrgModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeCreateOrgModal() {
+    const modal = document.getElementById('createOrgModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function autoGenerateOrgCode(name) {
+    if (!name) return;
+    const clean = name.normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '_')
+      .toUpperCase()
+      .substring(0, 25);
+    document.getElementById('orgCodeInput').value = clean;
+  }
+
+  function syncBankName(selectEl) {
+    const selectedOption = selectEl.options[selectEl.selectedIndex];
+    const bankName = selectedOption.getAttribute('data-name');
+    document.getElementById('bankNameHidden').value = bankName || selectedOption.text;
+  }
+
+  function setCoordinates(lat, lng, province) {
+    document.getElementById('orgLatInput').value = lat;
+    document.getElementById('orgLngInput').value = lng;
+    if (province) {
+      document.getElementById('orgProvinceInput').value = province;
+    }
+  }
+</script>

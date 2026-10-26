@@ -1,0 +1,177 @@
+<div class="py-12 bg-slate-100 min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+  {{#if isValid}}
+    <div class="max-w-3xl w-full">
+      <!-- Certificate Actions (Screen only) -->
+      <div class="mb-4 flex items-center justify-between print:hidden">
+        <a href="/warriors/{{cert.child_slug}}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Quay lại hồ sơ bé {{cert.child_name}}
+        </a>
+
+        <div class="flex items-center gap-2">
+          <button
+            onclick="window.print()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-sm transition-all cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            In / Lưu PDF Chứng Nhận
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Certificate Paper -->
+      <div id="printable-certificate" class="relative bg-[#FFFDF9] rounded-3xl border-8 border-double border-amber-500/80 shadow-2xl p-8 sm:p-14 overflow-hidden text-center text-slate-800">
+        <!-- Corner Ornaments (CSS Vector) -->
+        <div class="absolute top-3 left-3 w-12 h-12 border-t-2 border-l-2 border-amber-600/60 pointer-events-none"></div>
+        <div class="absolute top-3 right-3 w-12 h-12 border-t-2 border-r-2 border-amber-600/60 pointer-events-none"></div>
+        <div class="absolute bottom-3 left-3 w-12 h-12 border-b-2 border-l-2 border-amber-600/60 pointer-events-none"></div>
+        <div class="absolute bottom-3 right-3 w-12 h-12 border-b-2 border-r-2 border-amber-600/60 pointer-events-none"></div>
+
+        <!-- Subtle Emblem Background Watermark -->
+        <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none text-[320px]">
+          🕊️
+        </div>
+
+        <!-- Header -->
+        <div class="relative z-10 mb-6">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100/80 border border-amber-300 text-amber-900 text-[11px] font-bold uppercase tracking-widest mb-3">
+            <span>✨</span> Quỹ Chiến Binh Nhí Dũng Cảm <span>✨</span>
+          </div>
+          <h3 class="text-xs sm:text-sm font-semibold tracking-wider text-slate-500 uppercase">
+            {{cert.organization_name}}
+          </h3>
+          <div class="w-16 h-0.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto mt-2"></div>
+        </div>
+
+        <!-- Title -->
+        <div class="relative z-10 mb-6">
+          <h1 class="text-3xl sm:text-5xl font-black font-serif text-amber-950 tracking-tight leading-tight">
+            CHỨNG NHẬN TRI ÂN
+          </h1>
+          <p class="text-sm sm:text-base font-serif italic text-amber-800/90 mt-1">
+            Tấm Lòng Vàng Đồng Hành Cùng Thiên Thần Nhỏ
+          </p>
+        </div>
+
+        <!-- Certificate Body -->
+        <div class="relative z-10 max-w-xl mx-auto space-y-4 my-8">
+          <p class="text-xs sm:text-sm text-slate-600 font-medium">
+            Trân trọng vinh danh và khắc ghi nghĩa cử nhân ái cao đẹp của:
+          </p>
+
+          <div class="py-2">
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-amber-900 font-serif tracking-normal underline decoration-amber-300 decoration-wavy underline-offset-8">
+              {{cert.donor_name}}
+            </h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed pt-2">
+            Đã dành trọn tình yêu thương và sự sẻ chia tiếp sức cho chiến binh nhí:
+          </p>
+
+          <div class="inline-block px-5 py-2 rounded-2xl bg-amber-50 border border-amber-200">
+            <span class="text-base sm:text-lg font-bold text-rose-700">
+              Bé {{cert.child_name}}
+            </span>
+          </div>
+
+          {{#if cert.transfer_message}}
+            <div class="p-3.5 rounded-xl bg-white/80 border border-amber-200/60 shadow-inner max-w-lg mx-auto">
+              <span class="text-[11px] text-slate-400 block mb-0.5 italic">Lời nhắn yêu thương:</span>
+              <p class="text-xs sm:text-sm italic text-slate-700">
+                "{{cert.transfer_message}}"
+              </p>
+            </div>
+          {{/if}}
+
+          <div class="pt-2 flex items-center justify-center gap-2 text-xs text-slate-600">
+            <span>Khoản bảo trợ trực tiếp:</span>
+            <strong class="text-base font-extrabold text-emerald-700 font-mono">
+              {{formatMoney cert.amount}}
+            </strong>
+          </div>
+        </div>
+
+        <!-- Certificate Footer (Signatures, QR Code & Seal) -->
+        <div class="relative z-10 pt-6 border-t border-amber-200/80 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center text-center">
+          
+          <!-- Left: Verification QR Code -->
+          <div class="flex flex-col items-center sm:items-start order-2 sm:order-1">
+            <div class="p-2 bg-white rounded-xl border border-amber-300 shadow-sm inline-block">
+              <img
+                src="{{cert.certificate_qr_data}}"
+                alt="Mã QR Xác Thực Chứng Nhận"
+                class="w-24 h-24 object-contain"
+              />
+            </div>
+            <span class="text-[10px] text-slate-500 mt-1.5 font-mono">
+              {{cert.certificate_code}}
+            </span>
+            <span class="text-[9px] text-slate-400">
+              Quét QR để xác thực gốc
+            </span>
+          </div>
+
+          <!-- Middle: Official Trust Badge -->
+          <div class="flex flex-col items-center justify-center order-1 sm:order-2">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center shadow-lg border-2 border-white">
+              <span class="text-2xl">🎖️</span>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-900 mt-2">
+              ĐÃ XÁC THỰC
+            </span>
+            <span class="text-[9px] text-slate-500">
+              Nghị định 93/2021/NĐ-CP
+            </span>
+          </div>
+
+          <!-- Right: Issuance Date & Unit -->
+          <div class="flex flex-col items-center sm:items-end order-3">
+            <span class="text-[11px] text-slate-500 italic">
+              Hà Nội, ngày {{formatDate cert.verified_at}}
+            </span>
+            <span class="text-xs font-bold text-slate-800 mt-1">
+              Đại Diện Cơ Sở Tiếp Nhận
+            </span>
+            <div class="h-12 flex items-center justify-center">
+              <span class="font-serif italic text-rose-700 text-sm font-semibold">
+                Đã Ký Số Điện Tử
+              </span>
+            </div>
+            <span class="text-[11px] font-medium text-slate-600">
+              {{cert.organization_name}}
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Legal Trust Footnote -->
+      <div class="mt-4 text-center text-slate-500 text-[11px] print:hidden">
+        Hệ thống chứng nhận điện tử tuân thủ quy định bảo mật & minh bạch không trung gian (Zero-touch Cashflow).
+      </div>
+    </div>
+  {{else}}
+    <!-- Invalid Certificate View -->
+    <div class="max-w-md w-full bg-white rounded-3xl border border-slate-200 p-8 text-center shadow-lg">
+      <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-2xl">
+        ⚠️
+      </div>
+      <h2 class="text-xl font-extrabold text-slate-900 mb-2">Chứng Nhận Không Hợp Lệ</h2>
+      <p class="text-xs text-slate-600 mb-6 leading-relaxed">
+        {{errorMsg}}
+      </p>
+      <a
+        href="/warriors"
+        class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-bold text-xs bg-slate-900 text-white hover:bg-slate-800 transition-all"
+      >
+        Trở về danh sách chiến binh
+      </a>
+    </div>
+  {{/if}}
+</div>

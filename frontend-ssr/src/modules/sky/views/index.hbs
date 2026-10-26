@@ -1,0 +1,761 @@
+<!-- Không gian Bầu Trời Ngàn Sao 3D (Three.js Virtual Memorial Sky) -->
+<div class="relative w-full h-[calc(100vh-4rem)] bg-[#050813] overflow-hidden select-none">
+  
+  <!-- Three.js Canvas Container -->
+  <div id="three-canvas-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+
+  <!-- 🌌 Top Floating HUD Header & Search -->
+  <div class="absolute top-4 inset-x-4 sm:inset-x-8 flex flex-col md:flex-row md:items-center justify-between gap-3 pointer-events-none z-20">
+    <!-- Tiêu đề & Thông điệp nhân văn -->
+    <div class="pointer-events-auto bg-slate-900/80 backdrop-blur-md border border-slate-700/60 rounded-2xl px-4 py-3 text-white shadow-xl max-w-md">
+      <div class="flex items-center gap-2">
+        <span class="text-xl animate-pulse">🌌</span>
+        <h1 class="text-sm sm:text-base font-extrabold tracking-tight bg-gradient-to-r from-amber-200 via-rose-200 to-sky-300 bg-clip-text text-transparent">
+          Bầu Trời Ngàn Sao Tưởng Niệm 3D
+        </h1>
+      </div>
+      <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+        Mỗi vì sao là một linh hồn nhỏ kiên cường hoặc thiên thần soi sáng. Click vào vì sao để lắng nghe ước mơ của bé.
+      </p>
+      
+      <!-- Thống kê nhanh số sao & nến -->
+      <div class="flex items-center gap-3 mt-2.5 pt-2 border-t border-slate-800 text-[11px] font-semibold text-slate-300">
+        <span class="flex items-center gap-1 text-amber-300">
+          <span>🕯️</span> {{stats.totalCandlesAll}} ngọn nến
+        </span>
+        <span class="text-slate-600">•</span>
+        <span class="flex items-center gap-1 text-sky-300">
+          <span>🕊️</span> {{stats.angelCount}} thiên thần
+        </span>
+        <span class="text-slate-600">•</span>
+        <span class="flex items-center gap-1 text-amber-400">
+          <span>⭐</span> {{stats.fighterCount}} chiến binh
+        </span>
+      </div>
+    </div>
+
+    <!-- Bộ Lọc Trực Quan & Ô Tìm Kiếm -->
+    <div class="pointer-events-auto flex flex-wrap items-center gap-2 bg-slate-900/80 backdrop-blur-md border border-slate-700/60 p-2 rounded-2xl shadow-xl">
+      <!-- Search Input -->
+      <div class="relative">
+        <input
+          type="text"
+          id="star-search-input"
+          placeholder="Tìm tên bé hoặc biệt danh..."
+          class="w-48 sm:w-60 bg-slate-800/90 text-xs text-white placeholder-slate-400 px-3 py-2 pl-8 rounded-xl border border-slate-700 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
+        />
+        <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+
+      <!-- Filter Pills -->
+      <button
+        type="button"
+        onclick="filterStars('ALL')"
+        id="btn-filter-all"
+        class="star-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-amber-500/20 text-amber-300 border border-amber-500/40"
+      >
+        Tất Cả ({{stats.total}})
+      </button>
+      <button
+        type="button"
+        onclick="filterStars('FIGHTER')"
+        id="btn-filter-fighter"
+        class="star-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 border border-transparent transition-all"
+      >
+        ⭐ Chiến Binh
+      </button>
+      <button
+        type="button"
+        onclick="filterStars('ANGEL')"
+        id="btn-filter-angel"
+        class="star-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 border border-transparent transition-all"
+      >
+        🕊️ Thiên Thần
+      </button>
+    </div>
+  </div>
+
+  <!-- 🎮 Bottom Floating Control Bar -->
+  <div class="absolute bottom-5 inset-x-4 sm:inset-x-8 flex items-center justify-between pointer-events-none z-20">
+    <!-- Hướng dẫn điều khiển tương tác chuột / chạm -->
+    <div class="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-slate-900/70 backdrop-blur-md border border-slate-800 text-[11px] text-slate-400 pointer-events-auto">
+      <span>🖱️ Kéo để xoay</span>
+      <span>•</span>
+      <span>Cuộn chuột để phóng to/thu nhỏ</span>
+      <span>•</span>
+      <span>Nhấp vào vì sao để mở hồ sơ</span>
+    </div>
+
+    <!-- Nút tiện ích: Xoay tự động, Chuông gió, Đặt lại góc nhìn, Fullscreen -->
+    <div class="flex items-center gap-2 pointer-events-auto ml-auto">
+      <!-- Nút Âm Thanh Chuông Ngân Thiên Hà (Web Audio API) -->
+      <button
+        type="button"
+        id="btn-chime-toggle"
+        onclick="toggleChimeAudio()"
+        class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/60 backdrop-blur-md text-xs font-bold transition-all active:scale-95 shadow-lg"
+        title="Bật/Tắt chuông thanh âm an lành"
+      >
+        <span id="chime-icon">🔇</span>
+        <span class="hidden sm:inline" id="chime-label">Âm Thanh An Lành</span>
+      </button>
+
+      <!-- Nút Tự Động Xoay (Auto-Rotate) -->
+      <button
+        type="button"
+        id="btn-autorotate-toggle"
+        onclick="toggleAutoRotate()"
+        class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-amber-300 border border-amber-500/30 backdrop-blur-md text-xs font-bold transition-all active:scale-95 shadow-lg"
+        title="Tự động quay bầu trời"
+      >
+        <span>🔄</span>
+        <span class="hidden sm:inline">Tự Động Xoay</span>
+      </button>
+
+      <!-- Nút Đặt Lại Góc Nhìn -->
+      <button
+        type="button"
+        onclick="resetCameraView()"
+        class="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/60 backdrop-blur-md transition-all active:scale-95 shadow-lg"
+        title="Trở về góc nhìn ban đầu"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      </button>
+
+      <!-- Nút Fullscreen -->
+      <button
+        type="button"
+        onclick="toggleFullscreen()"
+        class="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/60 backdrop-blur-md transition-all active:scale-95 shadow-lg"
+        title="Toàn màn hình"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 🏷️ Floating Hover Tooltip (Bám theo con trỏ chuột) -->
+  <div
+    id="star-hover-tooltip"
+    class="fixed pointer-events-none z-30 hidden transform -translate-x-1/2 -translate-y-full mb-3 px-3 py-1.5 rounded-xl bg-slate-900/95 border border-amber-400/50 text-white shadow-2xl backdrop-blur-md text-xs transition-opacity duration-150"
+  >
+    <div class="flex items-center gap-2">
+      <span id="tooltip-status-badge" class="h-2 w-2 rounded-full bg-amber-400 animate-ping"></span>
+      <strong id="tooltip-name" class="font-bold text-amber-200"></strong>
+      <span id="tooltip-candles" class="text-[10px] text-slate-300"></span>
+    </div>
+  </div>
+
+  <!-- 💎 Glassmorphism Warrior Modal (Hộp thông tin chi tiết khi click vào vì sao) -->
+  <div
+    id="warrior-star-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md hidden transition-all duration-300"
+  >
+    <div class="relative w-full max-w-lg bg-gradient-to-b from-slate-900/95 via-slate-900/90 to-slate-950/95 border border-slate-700/70 rounded-3xl p-6 shadow-2xl shadow-rose-950/30 text-white transform transition-all scale-95 opacity-0 duration-200" id="modal-card">
+      
+      <!-- Close button -->
+      <button
+        type="button"
+        onclick="closeWarriorModal()"
+        class="absolute top-4 right-4 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Modal Body -->
+      <div class="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+        <!-- Avatar Bé với vòng hào quang -->
+        <div class="relative shrink-0">
+          <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden ring-4 ring-amber-400/40 shadow-xl bg-slate-800">
+            <img id="modal-avatar" src="" alt="Chiến binh nhí" class="w-full h-full object-cover" />
+          </div>
+          <div id="modal-glow-badge" class="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase shadow-md bg-amber-500 text-slate-950">
+            FIGHTER
+          </div>
+        </div>
+
+        <!-- Thông tin cơ bản -->
+        <div class="flex-1 text-center sm:text-left">
+          <div class="flex items-center justify-center sm:justify-start gap-2">
+            <h2 id="modal-fullname" class="text-xl font-black tracking-tight text-white"></h2>
+            <span id="modal-nickname" class="text-xs text-amber-300 font-bold bg-amber-500/20 px-2 py-0.5 rounded-full"></span>
+          </div>
+          
+          <p id="modal-org" class="text-xs text-slate-400 mt-1 flex items-center justify-center sm:justify-start gap-1">
+            <span>🏥</span> <span id="modal-org-text">Bệnh Viện Nhi</span>
+          </p>
+          
+          <p id="modal-category" class="text-xs text-rose-300 font-medium mt-0.5">
+            Chẩn đoán: <span id="modal-category-text"></span>
+          </p>
+
+          <!-- Chỉ số nến và tương tác -->
+          <div class="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">
+            <span class="animate-bounce">🕯️</span>
+            <span id="modal-candles-count">0</span> ngọn nến đã thắp sáng
+          </div>
+        </div>
+      </div>
+
+      <!-- Ước mơ / Trích đoạn câu chuyện -->
+      <div class="mt-5 p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-xs leading-relaxed text-slate-300">
+        <strong class="text-amber-200 block mb-1 font-bold flex items-center gap-1.5">
+          <span>✨</span> Điều ước thiêng liêng của bé:
+        </strong>
+        <p id="modal-dream" class="italic text-slate-200">
+          "Con ước mơ mau khỏi bệnh để được về nhà ăn cơm với ông bà..."
+        </p>
+      </div>
+
+      <!-- Nút hành động chuyển tiếp -->
+      <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
+        <a
+          id="modal-detail-link"
+          href="#"
+          class="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-bold text-xs text-center shadow-lg shadow-rose-500/20 transition-all active:scale-95"
+        >
+          📖 Xem Toàn Bộ Hồ Sơ Bé
+        </a>
+        <a
+          id="modal-tribute-link"
+          href="#"
+          class="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-400/40 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+        >
+          <span>🕯️</span> Thắp Nến Tri Ân
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Three.js + OrbitControls Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+  // Dữ liệu danh sách chiến binh nhí được nhúng từ Backend SSR
+  const WARRIORS_DATA = {{{warriorsJson}}};
+  
+  // Three.js State Variables
+  let scene, camera, renderer, controls;
+  let starParticles, warriorMeshes = [];
+  let raycaster, mouse;
+  let hoveredStar = null;
+  let isAutoRotating = true;
+  let targetCameraPos = null;
+  let activeFilter = 'ALL';
+
+  // Khởi tạo Canvas & Không Gian 3D
+  function initThreeSky() {
+    const container = document.getElementById('three-canvas-container');
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    // 1. Scene & Subtle Fog
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x050813, 0.0012);
+
+    // 2. Camera
+    camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 2000);
+    camera.position.set(0, 40, 260);
+
+    // 3. WebGL Renderer
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x050813, 1);
+    container.appendChild(renderer.domElement);
+
+    // 4. OrbitControls
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed = 0.6;
+    controls.minDistance = 40;
+    controls.maxDistance = 600;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.5;
+
+    // 5. Lighting
+    const ambientLight = new THREE.AmbientLight(0x4466aa, 1.2);
+    scene.add(ambientLight);
+
+    const centerPointLight = new THREE.PointLight(0xffeedd, 1.5, 400);
+    scene.add(centerPointLight);
+
+    // 6. Xây dựng Starfield nền (3000 ngôi sao lấp lánh)
+    createBackgroundStarfield();
+
+    // 7. Tạo các ngôi sao đại diện cho từng Chiến Binh Nhí
+    createWarriorStars();
+
+    // 8. Raycaster & Tương tác chuột
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2(-999, -999);
+
+    window.addEventListener('resize', onWindowResize);
+    container.addEventListener('mousemove', onMouseMove);
+    container.addEventListener('click', onStarClick);
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+
+    // 9. Lắng nghe ô tìm kiếm
+    setupSearchListener();
+
+    // Bắt đầu vòng lặp render
+    animate();
+  }
+
+  // Tạo kết cấu hào quang phát sáng (Procedural Glowing Star Texture)
+  function createGlowTexture(colorHex) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+
+    const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gradient.addColorStop(0, '#ffffff');
+    gradient.addColorStop(0.2, colorHex);
+    gradient.addColorStop(0.5, colorHex + '55');
+    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 128, 128);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+  }
+
+  // 1. Hệ thống hạt sao nền (Background Starfield)
+  function createBackgroundStarfield() {
+    const starCount = 3500;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(starCount * 3);
+    const colors = new Float32Array(starCount * 3);
+
+    const colorOptions = [
+      new THREE.Color(0xffffff),
+      new THREE.Color(0xdbeafe),
+      new THREE.Color(0xfef08a),
+      new THREE.Color(0xfbcfe8),
+      new THREE.Color(0x93c5fd)
+    ];
+
+    for (let i = 0; i < starCount; i++) {
+      // Tán xạ hình cầu xung quanh không gian
+      const radius = 200 + Math.random() * 600;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos((Math.random() * 2) - 1);
+
+      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = radius * Math.cos(phi);
+
+      const c = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+      colors[i * 3] = c.r;
+      colors[i * 3 + 1] = c.g;
+      colors[i * 3 + 2] = c.b;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: 1.8,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.85
+    });
+
+    starParticles = new THREE.Points(geometry, material);
+    scene.add(starParticles);
+  }
+
+  // 2. Tạo Ngôi Sao Đại Diện Cho Từng Bé
+  function createWarriorStars() {
+    const count = WARRIORS_DATA.length;
+    warriorMeshes = [];
+
+    // Phân bố các vì sao theo quỹ đạo xoắn ốc Fibonacci để đẹp mắt và không bị đè lên nhau
+    const phiAngle = Math.PI * (3 - Math.sqrt(5)); // Golden ratio
+
+    WARRIORS_DATA.forEach((warrior, idx) => {
+      const y = 1 - (idx / (count - 1 || 1)) * 2; // từ 1 đến -1
+      const radiusAtY = Math.sqrt(1 - y * y);
+      const theta = phiAngle * idx;
+
+      const sphereRadius = 110 + (idx % 3) * 35; // Khoảng cách từ tâm
+      const x = Math.cos(theta) * radiusAtY * sphereRadius;
+      const z = Math.sin(theta) * radiusAtY * sphereRadius;
+      const posY = y * sphereRadius * 0.7;
+
+      const isAngel = warrior.status === 'ANGEL';
+      const baseColor = isAngel ? 0x7dd3fc : 0xfbbf24; // Thiên thần: Xanh lam pha lê | Chiến binh: Vàng hổ phách
+      const glowHex = isAngel ? '#38bdf8' : '#f59e0b';
+
+      // Lõi cầu phát sáng (Core Sphere)
+      const coreSize = 2.8 + Math.min((warrior.total_candles || 0) / 100, 2.5);
+      const coreGeo = new THREE.SphereGeometry(coreSize, 16, 16);
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: baseColor
+      });
+      const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+      coreMesh.position.set(x, posY, z);
+
+      // Quầng sáng Sprite Halo (Bao quanh lõi)
+      const spriteMat = new THREE.SpriteMaterial({
+        map: createGlowTexture(glowHex),
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        opacity: 0.95
+      });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(coreSize * 6.5, coreSize * 6.5, 1);
+      coreMesh.add(sprite);
+
+      // Điểm sáng nhẹ (Point Light)
+      const starLight = new THREE.PointLight(baseColor, 0.8, 40);
+      coreMesh.add(starLight);
+
+      // Lưu trữ dữ liệu hồ sơ vào UserData để truy xuất khi click
+      coreMesh.userData = {
+        warrior,
+        originalScale: 1,
+        baseColor,
+        isAngel,
+        glowSprite: sprite
+      };
+
+      scene.add(coreMesh);
+      warriorMeshes.push(coreMesh);
+    });
+  }
+
+  // Lắng nghe sự kiện di chuyển chuột
+  function onMouseMove(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    // Cập nhật vị trí tooltip theo con trỏ chuột
+    const tooltip = document.getElementById('star-hover-tooltip');
+    tooltip.style.left = event.clientX + 'px';
+    tooltip.style.top = event.clientY + 'px';
+  }
+
+  function onTouchStart(event) {
+    if (event.touches.length === 1) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.touches[0].clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.touches[0].clientY - rect.top) / rect.height) * 2 + 1;
+      checkHoverAndSelect();
+    }
+  }
+
+  // Click vào vì sao để mở Modal & Di chuyển Camera
+  function onStarClick(event) {
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(warriorMeshes);
+
+    if (intersects.length > 0) {
+      const selectedMesh = intersects[0].object;
+      focusOnStar(selectedMesh);
+    }
+  }
+
+  // Tập trung camera vào ngôi sao và mở Modal
+  function focusOnStar(mesh) {
+    const warrior = mesh.userData.warrior;
+    
+    // Tạm dừng tự động xoay để người dùng tương tác
+    controls.autoRotate = false;
+    document.getElementById('btn-autorotate-toggle').classList.replace('text-amber-300', 'text-slate-400');
+
+    // Camera lượn mượt mà về phía ngôi sao
+    const starWorldPos = new THREE.Vector3();
+    mesh.getWorldPosition(starWorldPos);
+
+    targetCameraPos = starWorldPos.clone().add(new THREE.Vector3(0, 5, 45));
+    controls.target.copy(starWorldPos);
+
+    // Mở Modal thông tin bé
+    openWarriorModal(warrior);
+  }
+
+  // Kiểm tra hover và hiển thị Tooltip nổi
+  function checkHoverAndSelect() {
+    raycaster.setFromCamera(mouse, camera);
+    const visibleStars = warriorMeshes.filter(m => m.visible);
+    const intersects = raycaster.intersectObjects(visibleStars);
+    const tooltip = document.getElementById('star-hover-tooltip');
+
+    if (intersects.length > 0) {
+      const hitMesh = intersects[0].object;
+      if (hoveredStar !== hitMesh) {
+        // Khôi phục scale sao cũ
+        if (hoveredStar) hoveredStar.scale.set(1, 1, 1);
+
+        hoveredStar = hitMesh;
+        hoveredStar.scale.set(1.4, 1.4, 1.4);
+        document.body.style.cursor = 'pointer';
+
+        // Hiển thị nội dung Tooltip
+        const w = hoveredStar.userData.warrior;
+        document.getElementById('tooltip-name').innerText = w.full_name + (w.nickname ? ` (${w.nickname})` : '');
+        document.getElementById('tooltip-candles').innerText = `• 🕯️ ${w.total_candles || 0} nến`;
+        
+        const badge = document.getElementById('tooltip-status-badge');
+        badge.className = w.status === 'ANGEL' ? 'h-2 w-2 rounded-full bg-sky-400 animate-ping' : 'h-2 w-2 rounded-full bg-amber-400 animate-ping';
+
+        tooltip.classList.remove('hidden');
+      }
+    } else {
+      if (hoveredStar) {
+        hoveredStar.scale.set(1, 1, 1);
+        hoveredStar = null;
+        document.body.style.cursor = 'default';
+        tooltip.classList.add('hidden');
+      }
+    }
+  }
+
+  // Mở Popup Modal thông tin bé
+  function openWarriorModal(warrior) {
+    const modal = document.getElementById('warrior-star-modal');
+    const card = document.getElementById('modal-card');
+
+    document.getElementById('modal-avatar').src = warrior.avatar_url || '/images/default-child.png';
+    document.getElementById('modal-fullname').innerText = warrior.full_name;
+    document.getElementById('modal-nickname').innerText = warrior.nickname || 'Chiến Binh Nhí';
+    document.getElementById('modal-org-text').innerText = warrior.organization_name || 'Bệnh Viện Nhi';
+    document.getElementById('modal-category-text').innerText = warrior.category_name || 'Đang cập nhật';
+    document.getElementById('modal-candles-count').innerText = warrior.total_candles || 0;
+    document.getElementById('modal-dream').innerText = `"${warrior.dream_summary || 'Ước mong một ngày mai khỏe mạnh và được cắp sách tới trường.'}"`;
+
+    const glowBadge = document.getElementById('modal-glow-badge');
+    if (warrior.status === 'ANGEL') {
+      glowBadge.innerText = '🕊️ THIÊN THẦN';
+      glowBadge.className = 'absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase shadow-md bg-sky-400 text-slate-950';
+    } else {
+      glowBadge.innerText = '⭐ CHIẾN BINH';
+      glowBadge.className = 'absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase shadow-md bg-amber-500 text-slate-950';
+    }
+
+    document.getElementById('modal-detail-link').href = `/warriors/${warrior.slug}`;
+    document.getElementById('modal-tribute-link').href = `/warriors/${warrior.slug}#tribute-form`;
+
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      card.classList.remove('scale-95', 'opacity-0');
+      card.classList.add('scale-100', 'opacity-100');
+    }, 10);
+  }
+
+  // Đóng Popup Modal
+  function closeWarriorModal() {
+    const modal = document.getElementById('warrior-star-modal');
+    const card = document.getElementById('modal-card');
+
+    card.classList.remove('scale-100', 'opacity-100');
+    card.classList.add('scale-95', 'opacity-0');
+
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 200);
+  }
+
+  // Bộ lọc vì sao theo nhóm (ALL, FIGHTER, ANGEL)
+  function filterStars(type) {
+    activeFilter = type;
+
+    // Cập nhật style nút filter
+    document.querySelectorAll('.star-filter-btn').forEach(btn => {
+      btn.className = 'star-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 border border-transparent transition-all';
+    });
+
+    if (type === 'ALL') {
+      document.getElementById('btn-filter-all').className = 'star-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-amber-500/20 text-amber-300 border border-amber-500/40';
+    } else if (type === 'FIGHTER') {
+      document.getElementById('btn-filter-fighter').className = 'star-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-amber-500/20 text-amber-300 border border-amber-500/40';
+    } else if (type === 'ANGEL') {
+      document.getElementById('btn-filter-angel').className = 'star-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-sky-500/20 text-sky-300 border border-sky-500/40';
+    }
+
+    warriorMeshes.forEach(mesh => {
+      const w = mesh.userData.warrior;
+      if (type === 'ALL' || w.status === type) {
+        mesh.visible = true;
+      } else {
+        mesh.visible = false;
+      }
+    });
+  }
+
+  // Tìm kiếm tức thì trong 3D
+  function setupSearchListener() {
+    const input = document.getElementById('star-search-input');
+    input.addEventListener('input', (e) => {
+      const keyword = e.target.value.trim().toLowerCase();
+      if (!keyword) {
+        filterStars(activeFilter);
+        return;
+      }
+
+      let firstMatch = null;
+      warriorMeshes.forEach(mesh => {
+        const w = mesh.userData.warrior;
+        const matchName = (w.full_name || '').toLowerCase().includes(keyword);
+        const matchNick = (w.nickname || '').toLowerCase().includes(keyword);
+        if (matchName || matchNick) {
+          mesh.visible = true;
+          if (!firstMatch) firstMatch = mesh;
+        } else {
+          mesh.visible = false;
+        }
+      });
+
+      if (firstMatch && keyword.length >= 3) {
+        focusOnStar(firstMatch);
+      }
+    });
+  }
+
+  // Bật / Tắt Tự động xoay
+  function toggleAutoRotate() {
+    isAutoRotating = !isAutoRotating;
+    controls.autoRotate = isAutoRotating;
+
+    const btn = document.getElementById('btn-autorotate-toggle');
+    if (isAutoRotating) {
+      btn.classList.replace('text-slate-400', 'text-amber-300');
+    } else {
+      btn.classList.replace('text-amber-300', 'text-slate-400');
+    }
+  }
+
+  // Đặt lại góc nhìn ban đầu
+  function resetCameraView() {
+    targetCameraPos = new THREE.Vector3(0, 40, 260);
+    controls.target.set(0, 0, 0);
+  }
+
+  // Toàn màn hình
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => console.log(err));
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }
+
+  // Web Audio API: Thanh âm chuông gió thiên hà (Không cần tải file ngoài)
+  let audioCtx = null;
+  let chimeInterval = null;
+  let isChimePlaying = false;
+
+  function playPeacefulChime() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    // Tần số nốt nhạc êm dịu (Pentatonic scale: C5, D5, E5, G5, A5, C6)
+    const notes = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+    const freq = notes[Math.floor(Math.random() * notes.length)];
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    // Fade in nhẹ rồi ngân dài dần
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.5);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 3.6);
+  }
+
+  function toggleChimeAudio() {
+    isChimePlaying = !isChimePlaying;
+    const icon = document.getElementById('chime-icon');
+    const label = document.getElementById('chime-label');
+
+    if (isChimePlaying) {
+      icon.innerText = '🔔';
+      label.innerText = 'Đang Phát Chuông';
+      playPeacefulChime();
+      chimeInterval = setInterval(playPeacefulChime, 3000);
+    } else {
+      icon.innerText = '🔇';
+      label.innerText = 'Âm Thanh An Lành';
+      clearInterval(chimeInterval);
+    }
+  }
+
+  // Resize window
+  function onWindowResize() {
+    const container = document.getElementById('three-canvas-container');
+    if (!container) return;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+  }
+
+  // Animation Loop
+  function animate() {
+    requestAnimationFrame(animate);
+
+    // Chuyển động nhẹ của bụi sao nền
+    if (starParticles) {
+      starParticles.rotation.y += 0.0003;
+      starParticles.rotation.x += 0.0001;
+    }
+
+    // Hiệu ứng nhấp nháy (Twinkle / Pulse) cho từng vì sao chiến binh
+    const time = Date.now() * 0.002;
+    warriorMeshes.forEach((mesh, index) => {
+      const pulse = 1 + Math.sin(time + index) * 0.12;
+      const sprite = mesh.userData.glowSprite;
+      if (sprite) {
+        sprite.material.opacity = 0.75 + Math.sin(time * 1.5 + index) * 0.25;
+      }
+    });
+
+    // Camera bay mượt về đích (Smooth Fly-to Lerp)
+    if (targetCameraPos) {
+      camera.position.lerp(targetCameraPos, 0.05);
+      if (camera.position.distanceTo(targetCameraPos) < 1) {
+        targetCameraPos = null;
+      }
+    }
+
+    checkHoverAndSelect();
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  // Chạy khi trang sẵn sàng
+  document.addEventListener('DOMContentLoaded', initThreeSky);
+</script>
