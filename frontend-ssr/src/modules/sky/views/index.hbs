@@ -21,7 +21,7 @@
       <!-- Thống kê nhanh số sao & nến -->
       <div class="flex items-center gap-3 mt-2.5 pt-2 border-t border-slate-800 text-[11px] font-semibold text-slate-300">
         <span class="flex items-center gap-1 text-amber-300">
-          <span>🕯️</span> {{stats.totalCandlesAll}} ngọn nến
+          <span>🕯️</span> <span id="hud-total-candles">{{stats.totalCandlesAll}}</span> ngọn nến
         </span>
         <span class="text-slate-600">•</span>
         <span class="flex items-center gap-1 text-sky-300">
@@ -215,22 +215,30 @@
         </p>
       </div>
 
-      <!-- Nút hành động chuyển tiếp -->
+      <!-- Nút hành động trực tiếp (Thắp nến tại chỗ, không reload hay chuyển trang) -->
       <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
         <a
           id="modal-detail-link"
           href="#"
-          class="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-bold text-xs text-center shadow-lg shadow-rose-500/20 transition-all active:scale-95"
+          class="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs text-center transition-all active:scale-95"
         >
-          📖 Xem Toàn Bộ Hồ Sơ Bé
+          📖 Xem Hồ Sơ Chi Tiết
         </a>
-        <a
-          id="modal-tribute-link"
-          href="#"
-          class="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-400/40 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+        <button
+          type="button"
+          id="btn-modal-light-candle"
+          onclick="lightCandleInSkyModal()"
+          class="w-full sm:w-auto py-2.5 px-5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-amber-600 hover:from-amber-600 hover:to-rose-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-rose-500/25 active:scale-95 transition-all cursor-pointer"
         >
-          <span>🕯️</span> Thắp Nến Tri Ân
-        </a>
+          <span class="text-sm animate-pulse">🕯️</span>
+          <span id="btn-modal-candle-text">Thắp Một Ngọn Nến</span>
+        </button>
+      </div>
+
+      <!-- Thông báo feedback tức thì sau khi thắp nến -->
+      <div id="modal-candle-feedback" class="mt-2.5 text-center text-xs font-bold text-amber-300 hidden transition-all animate-pulse flex items-center justify-center gap-1.5">
+        <span>✨</span>
+        <span>Đã thắp thêm một ngọn nến hy vọng cho bé!</span>
       </div>
 
     </div>
@@ -472,9 +480,13 @@
     }
   }
 
+  let currentActiveWarrior = null;
+  let currentActiveMesh = null;
+
   // Tập trung camera vào ngôi sao và mở Modal
   function focusOnStar(mesh) {
     const warrior = mesh.userData.warrior;
+    currentActiveMesh = mesh;
     
     // Tạm dừng tự động xoay để người dùng tương tác
     controls.autoRotate = false;
@@ -488,7 +500,7 @@
     controls.target.copy(starWorldPos);
 
     // Mở Modal thông tin bé
-    openWarriorModal(warrior);
+    openWarriorModal(warrior, mesh);
   }
 
   // Kiểm tra hover và hiển thị Tooltip nổi
@@ -529,9 +541,22 @@
   }
 
   // Mở Popup Modal thông tin bé
-  function openWarriorModal(warrior) {
+  function openWarriorModal(warrior, mesh) {
+    currentActiveWarrior = warrior;
+    if (mesh) currentActiveMesh = mesh;
+
     const modal = document.getElementById('warrior-star-modal');
     const card = document.getElementById('modal-card');
+    const feedback = document.getElementById('modal-candle-feedback');
+    const btn = document.getElementById('btn-modal-light-candle');
+    const btnText = document.getElementById('btn-modal-candle-text');
+
+    if (feedback) feedback.classList.add('hidden');
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('opacity-75', 'cursor-not-allowed');
+    }
+    if (btnText) btnText.innerText = 'Thắp Một Ngọn Nến';
 
     document.getElementById('modal-avatar').src = warrior.avatar_url || '/images/default-child.png';
     document.getElementById('modal-fullname').innerText = warrior.full_name;
@@ -551,13 +576,71 @@
     }
 
     document.getElementById('modal-detail-link').href = `/warriors/${warrior.slug}`;
-    document.getElementById('modal-tribute-link').href = `/warriors/${warrior.slug}#tribute-form`;
 
     modal.classList.remove('hidden');
     setTimeout(() => {
       card.classList.remove('scale-95', 'opacity-0');
       card.classList.add('scale-100', 'opacity-100');
     }, 10);
+  }
+
+  // Thắp nến trực tiếp tại không gian 3D (Tăng nến ngay tại chỗ, không reload hay chuyển trang)
+  async function lightCandleInSkyModal() {
+    if (!currentActiveWarrior) return;
+
+    const btn = document.getElementById('btn-modal-light-candle');
+    const btnText = document.getElementById('btn-modal-candle-text');
+    const countSpan = document.getElementById('modal-candles-count');
+    const feedback = document.getElementById('modal-candle-feedback');
+    const hudTotal = document.getElementById('hud-total-candles');
+
+    btn.disabled = true;
+    btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+    // 1. Tăng số nến tại chỗ ngay lập tức (Optimistic Update)
+    currentActiveWarrior.total_candles = (Number(currentActiveWarrior.total_candles) || 0) + 1;
+    if (countSpan) countSpan.innerText = currentActiveWarrior.total_candles;
+
+    // 2. Tăng số nến tổng trên thanh HUD
+    if (hudTotal) {
+      hudTotal.innerText = (Number(hudTotal.innerText) || 0) + 1;
+    }
+
+    // 3. Hiệu ứng vì sao trong 3D: bừng sáng, phóng to nhẹ
+    if (currentActiveMesh) {
+      currentActiveMesh.scale.set(2.4, 2.4, 2.4);
+      if (currentActiveMesh.userData.glowSprite) {
+        currentActiveMesh.userData.glowSprite.material.opacity = 1.0;
+      }
+    }
+
+    // 4. Phát chuông an lành (Web Audio API)
+    playPeacefulChime();
+
+    // 5. Hiển thị thông báo đã thắp nến thành công
+    if (feedback) feedback.classList.remove('hidden');
+    if (btnText) btnText.innerText = 'Đã Thắp Nến ✨';
+
+    // 6. Gửi request AJAX chạy ngầm lên server (không chuyển trang, không reload)
+    try {
+      await fetch(`/warriors/${currentActiveWarrior.id}/candle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+    } catch (err) {
+      console.log('[CLIENT CANDLE] Đã cập nhật số nến tại chỗ:', err);
+    }
+
+    // Cho phép thắp tiếp sau 1.5 giây
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('opacity-75', 'cursor-not-allowed');
+      if (btnText) btnText.innerText = 'Thắp Thêm Nến 🕯️';
+      if (feedback) feedback.classList.add('hidden');
+    }, 2000);
   }
 
   // Đóng Popup Modal

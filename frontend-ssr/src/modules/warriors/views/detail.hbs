@@ -116,6 +116,7 @@
           <!-- Candle lighting interactive box -->
           <div class="mt-6 pt-5 border-t border-slate-100 flex flex-wrap items-center gap-4">
             <button
+              type="button"
               id="btn-light-candle"
               data-id="{{warrior.id}}"
               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-md shadow-rose-500/20 active:scale-95 transition-all cursor-pointer"
@@ -963,10 +964,16 @@
     const candleFeedback = document.getElementById('candle-feedback');
 
     if (candleBtn) {
-      candleBtn.addEventListener('click', async function() {
+      candleBtn.addEventListener('click', async function(e) {
+        if (e) e.preventDefault();
         const warriorId = candleBtn.getAttribute('data-id');
         candleBtn.disabled = true;
         candleBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+        // Optimistic UI increment
+        const currentCount = parseInt(candleCountSpan.textContent, 10) || 0;
+        candleCountSpan.textContent = currentCount + 1;
+        candleFeedback.classList.remove('hidden');
 
         try {
           const response = await fetch(`/warriors/${warriorId}/candle`, {
@@ -983,16 +990,15 @@
             if (count !== undefined) {
               candleCountSpan.textContent = count;
             }
-            candleFeedback.classList.remove('hidden');
-            setTimeout(() => {
-              candleFeedback.classList.add('hidden');
-            }, 3000);
           }
         } catch (err) {
           console.error('Lỗi khi thắp nến:', err);
         } finally {
-          candleBtn.disabled = false;
-          candleBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+          setTimeout(() => {
+            candleFeedback.classList.add('hidden');
+            candleBtn.disabled = false;
+            candleBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+          }, 1500);
         }
       });
     }
